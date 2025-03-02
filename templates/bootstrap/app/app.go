@@ -9,8 +9,8 @@ import (
 	runtimeBases "github.com/tuxounet/k2-sdk/bases"	
 	runtimeTypes "github.com/tuxounet/k2-sdk/types"
 	"github.com/tuxounet/k2-sdk/samples/standalone/ui"
-	{{range $componentList := .}}
-	{{ . }} "{{ $module }}/components/{{ . }}"
+	{{range $componentList := $i}}
+	{{ $i }} "{{ $module }}/components/{{ $i }}"
 	{{ end }}
 )
 
