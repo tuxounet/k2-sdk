@@ -1,0 +1,18 @@
+k2:
+  metadata:
+    id: k2.sdk.templates.bootstrap
+    kind: "template"
+  body:
+    name: "bootstrao"
+    parameters:
+      name: "KNewApp"
+      description: "Name of the new app"
+      module: "my.git.host/my.app"
+      version: "v0.0.1"
+      components:
+        site:
+    scripts:
+      bootstrap:
+        - echo "template boot"
+      post:
+        - echo "template fin"
