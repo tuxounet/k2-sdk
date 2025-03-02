@@ -1,7 +1,6 @@
 package site
 
 import (
-	"craft.f.krux/git/runtimes/k-app-runtime.git/types"
 	runtimeBases "github.com/tuxounet/k2-sdk/bases"
 	runtimeTypes "github.com/tuxounet/k2-sdk/types"
 	"{{ .module }}/site/health"
@@ -16,7 +15,7 @@ func NewComponent(app runtimeTypes.IApp) runtimeTypes.IAppComponent {
 		nil,
 		nil,
 		runtimeTypes.AccessPolicyPublic,
-		[]types.AppControllerCtor{
+		[]runtimeTypes.AppControllerCtor{
 			health.NewController,
 		},
 	)

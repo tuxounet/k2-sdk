@@ -1,4 +1,5 @@
 {{ $componentList := split "," .components }}
+{{ $module := .module }}
 package app
 
 
@@ -9,7 +10,7 @@ import (
 	runtimeTypes "github.com/tuxounet/k2-sdk/types"
 	"github.com/tuxounet/k2-sdk/samples/standalone/ui"
 	{{range $componentList := .}}
-	{{ . }} "{{ .module }}/components/{{ . }}"
+	{{ . }} "{{ $module }}/components/{{ . }}"
 	{{ end }}
 )
 
