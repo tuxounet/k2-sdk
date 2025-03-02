@@ -15,4 +15,6 @@ k2:
       bootstrap:
         - echo "template boot"
       post:
-        - echo "template fin"
+        - go mod init $module
+        - go get -v github.com/tuxounet/k2-sdk
+        - go mod tidy
