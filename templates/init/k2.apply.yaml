@@ -12,6 +12,6 @@ k2:
     vars:
       name: KNewApp
       description: Une application qui vérifie que tout marche bien
-      module: my.git.host/my.app
+      module: my.git.host/my-app
       version: "v0.0.1"
-      components: site,api
+      components: site
