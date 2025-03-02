@@ -2,8 +2,8 @@ package health
 
 import (
 	"github.com/gin-gonic/gin"
-	runtimeBases "github.com/tuxounet/k2-sdk/bases"
-	runtimeTypes "github.com/tuxounet/k2-sdk/types"
+	runtimeBases "{{ .sdk_module }}/bases"
+	runtimeTypes "{{ .sdk_module }}/types"
 )
 
 type HealthController struct {

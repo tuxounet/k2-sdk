@@ -1,9 +1,9 @@
 package site
 
 import (
-	runtimeBases "github.com/tuxounet/k2-sdk/bases"
-	runtimeTypes "github.com/tuxounet/k2-sdk/types"
 	"{{ .module }}/site/health"
+	runtimeBases "{{ .sdk_module }}/bases"
+	runtimeTypes "{{ .sdk_module }}/types"
 )
 
 func NewComponent(app runtimeTypes.IApp) runtimeTypes.IAppComponent {

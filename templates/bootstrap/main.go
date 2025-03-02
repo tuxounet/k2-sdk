@@ -1,7 +1,7 @@
 package main
 
 import (
-	runtime "github.com/tuxounet/k2-sdk"
+	runtime "{{ .sdk_module }}"
 
 	app "{{ .module }}/app"
 )

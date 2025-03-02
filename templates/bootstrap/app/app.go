@@ -1,7 +1,7 @@
-{{ $componentList := splitList  "," .components }}
-{{ $module := .module }}
 package app
 
+{{ $componentList := splitList  "," .components }}
+{{ $module := .module }}
 
 import (
 	"embed"

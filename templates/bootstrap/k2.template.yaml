@@ -10,11 +10,13 @@ k2:
       module: "my.git.host/my-app"
       version: "v0.0.1"
       components: site
+      sdk_module: "github.com/tuxounet/k2-sdk"
+      sdk_version: "v0.9.1"
 
     scripts:
       bootstrap:
         - echo "template boot"
       post:
         - go mod init $module
-        - go get -v github.com/tuxounet/k2-sdk@v0.9.1
+        - go get -v {{ .sdk_module }}@{{ .sdk_version }}
         - go mod tidy
