@@ -1,4 +1,4 @@
-{{ $componentList := split "," .components }}
+{{ $componentList := splitList  "," .components }}
 {{ $module := .module }}
 package app
 
@@ -9,7 +9,7 @@ import (
 	runtimeBases "github.com/tuxounet/k2-sdk/bases"	
 	runtimeTypes "github.com/tuxounet/k2-sdk/types"
 	"github.com/tuxounet/k2-sdk/samples/standalone/ui"
-	{{range $componentList := $i}}
+	{{range $i := $componentList}}
 	{{ $i }} "{{ $module }}/components/{{ $i }}"
 	{{ end }}
 )
@@ -25,8 +25,8 @@ func NewApp() runtimeTypes.IApp {
 		&ui.Dist,
 		&conf,
 		[]runtimeTypes.AppComponentCtor{
-			{{range $componentList := .}}
-			{{ . }}.NewComponent,
+			{{range $i := $componentList}}
+			{{ $i }}.NewComponent,
 			{{ end }}
 		},
 	)
