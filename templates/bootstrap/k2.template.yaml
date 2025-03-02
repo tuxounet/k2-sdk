@@ -16,5 +16,5 @@ k2:
         - echo "template boot"
       post:
         - go mod init $module
-        - go get -v github.com/tuxounet/k2-sdk
+        - go get -v github.com/tuxounet/k2-sdk@v0.9.1
         - go mod tidy
