@@ -1,0 +1,38 @@
+package docs
+
+import (
+	_ "embed"
+
+	"github.com/gin-gonic/gin"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/swaggo/swag"
+	"github.com/tuxounet/k2-sdk/types"
+)
+
+func Register(service types.IKernelService, component types.IAppComponent, router *gin.RouterGroup) error {
+
+	appDoc := component.GetDocs()
+	log := service.GetLogger().CreateSubLogger("docs")
+
+	baseRoute := router.BasePath()
+
+	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerfiles.Handler,
+		ginSwagger.URL(baseRoute+"/openapi.json")),
+	)
+
+	router.GET("/openapi.json", func(c *gin.Context) {
+		swagger := swag.GetSwagger(appDoc.InfoInstanceName)
+		if swagger == nil {
+			log.ErrorF("Error parsing template for %s", appDoc.InfoInstanceName)
+			c.String(500, "Error parsing template")
+			return
+		}
+
+		body := swagger.ReadDoc()
+		c.Data(200, "application/json", []byte(body))
+	})
+
+	return nil
+
+}

@@ -1,0 +1,17 @@
+site:
+  tls:
+    paths:
+      secrets: "{{ run_dir }}/etc/pki"
+    ingress:
+      domain: s.sample.local
+      expiration: "+365d"
+      key:
+        type: RSA
+        size: 4096
+        cipher: auto
+      info:
+        organization: sample.local
+        organization_unit: "A member of sample federation"
+        country: FR
+        state: Ile-de-France
+        email: "admin@sample.local"

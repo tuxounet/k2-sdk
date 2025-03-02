@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Connexion</title>
+    <link rel="stylesheet" href="{{ .rootUrl }}/cdn/bulma@1.0.2/css/bulma.min.css" />
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="panel">
+            <div class="panel-block">
+                <div class="hero">
+
+                    <h1 class="title">Identification</h1>
+                    <p class="subtitle">Veuillez vous connecter pour accéder à l'application.</p>
+                </div>
+            </div>
+            <div class="panel-block">
+                <form action="/auth/login" method="post">
+                    <div class="field">
+                        <label class="label">Nom d'utilisateur</label>
+                        <div class="control">
+                            <input class="input" type="text" autocapitalize="off" name="username"
+                                placeholder="ex. alex@example.com" required autocomplete="username" />
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Mot de passe</label>
+                        <div class="control">
+                            <input class="input" type="password" name="password" placeholder="********" required
+                                autocomplete="current-password" />
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="redirect" value="{{ .redirect }}" />
+
+                    <div class="field">
+                        <div class="control">
+                            <button class="button is-primary" type="submit">Connexion</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            {{ if .errorMessage }}
+            <script>
+                function closeErrorMessage() {
+                    document.getElementById('error-message').style.display = 'none';
+                }
+            </script>
+
+            <div class="notification is-danger" id="error-message">
+                <button class="delete" onclick="javascript:closeErrorMessage()"></button>
+                {{ .errorMessage }}
+            </div>
+
+            {{ end }}
+        </div>
+    </div>
+</body>
+
+</html>

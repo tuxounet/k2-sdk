@@ -1,0 +1,19 @@
+host:
+  address: 127.0.0.1
+  ingress:
+    address: 127.0.0.1
+    port: 8080
+    rootUrl: http://127.0.0.1:8080
+    # tls:
+    #   port: 8443
+    #   cert: "etc/pki/ssl/s.sample.local.crt"
+    #   key: "etc/pki/ssl/s.sample.local.key"
+    auth:
+      defaultAccess: "public"
+      loginUrl: "/auth/login"
+      verifyUrl: "/auth/verify"
+      redirectParam: "redirect"
+  compute:
+    port:
+      start: 59000
+      end: 59999
