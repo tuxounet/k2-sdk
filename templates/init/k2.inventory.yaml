@@ -1,0 +1,13 @@
+k2:
+  metadata:
+    id: k2.sdk.bootstrap.test
+    kind: inventory
+  body:
+    folders:
+      ignore: []
+      templates: []
+      applies:
+        - "k2.apply.yaml"
+
+    vars:
+      title: k2 cli samples and tests

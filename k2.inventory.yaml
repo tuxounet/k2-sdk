@@ -1,0 +1,15 @@
+k2:
+  metadata:
+    id: k2.cli.sample.inventory
+    kind: inventory
+  body:
+    folders:
+      ignore: []
+      templates:
+        - templates/**/k2.*.yaml
+        - templates/**/k2.*.yml
+      applies:
+        - services/**/k2.apply.yaml
+        - services/**/k2.apply.yml
+    vars:
+      title: k2 cli samples and tests

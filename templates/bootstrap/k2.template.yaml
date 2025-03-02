@@ -9,8 +9,8 @@ k2:
       description: "Name of the new app"
       module: "my.git.host/my.app"
       version: "v0.0.1"
-      components:
-        site:
+      components: site
+
     scripts:
       bootstrap:
         - echo "template boot"

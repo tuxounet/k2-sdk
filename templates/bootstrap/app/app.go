@@ -1,4 +1,6 @@
+{{ $componentList := split "," .components }}
 package app
+
 
 import (
 	"embed"
@@ -6,7 +8,7 @@ import (
 	runtimeBases "github.com/tuxounet/k2-sdk/bases"	
 	runtimeTypes "github.com/tuxounet/k2-sdk/types"
 	"github.com/tuxounet/k2-sdk/samples/standalone/ui"
-	{{ for k, v := range .components }}	
+	{{ for k, v := range $componentList }}	
 	{{ .k }} "{{ .module }}/components/{{ .k }}"
 	{{ end }}
 )
@@ -22,7 +24,7 @@ func NewApp() runtimeTypes.IApp {
 		&ui.Dist,
 		&conf,
 		[]runtimeTypes.AppComponentCtor{
-			{{ for k, v := range .components }}
+			{{ for k, v := range $componentList }}
 			{{ .k }}.NewComponent,
 			{{ end }}
 		},
