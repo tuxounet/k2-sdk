@@ -10,7 +10,7 @@ init:  install
 	go get -v
 
 install: 
-	go install github.com/tuxounet/k2@v0.9.1
+	go install github.com/tuxounet/k2@v0.9.2
 
 plan:
 	${GOPATH}/bin/k2 plan  --inventory ./k2.inventory.yaml

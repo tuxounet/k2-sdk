@@ -11,7 +11,7 @@ k2:
         path: templates/bootstrap/k2.template.yaml
     vars:
       name: "KNewApp"
-      description: "Name of the new app"
+      description: Une application qui vérifie que tout marche bien
       module: "my.git.host/my.app"
       version: "v0.0.1"
       components: site

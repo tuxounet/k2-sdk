@@ -1,4 +1,4 @@
-module github.com/tuxounet/k2-sdk
+module {{ .module }}
 
 go 1.24.0
 
