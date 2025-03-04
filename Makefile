@@ -15,6 +15,7 @@ test: init
 	go test ./...
 
 build: write-version
+	mkdir -p ./.out
 	go build  -o ./.out/k2-sdk ./main.go
 
 	

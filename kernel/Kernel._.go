@@ -29,7 +29,7 @@ type KernelRuntime struct {
 	services    []types.KernelServiceContextKey
 }
 
-func NewKernelRuntime(hostedApp types.IApp) *KernelRuntime {
+func NewKernelRuntime(hostedApp types.IApp, hostVersion string) *KernelRuntime {
 
 	cwd, err := os.Getwd()
 	if err != nil {
@@ -49,7 +49,7 @@ func NewKernelRuntime(hostedApp types.IApp) *KernelRuntime {
 
 	kernel := &KernelRuntime{
 		hostName:    hostedApp.GetName(),
-		hostVersion: hostedApp.GetVersion(),
+		hostVersion: hostVersion,
 		rootContext: rootContext,
 		app:         hostedApp,
 		runDir:      runDir,

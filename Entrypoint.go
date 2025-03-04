@@ -1,13 +1,18 @@
 package k
 
 import (
+	_ "embed"
+
 	"github.com/tuxounet/k2-sdk/kernel"
 	"github.com/tuxounet/k2-sdk/types"
 )
 
+//go:embed version.txt
+var RuntimeVersion string
+
 func HostApp(app types.IApp) {
 
-	kernelRuntime := kernel.NewKernelRuntime(app)
+	kernelRuntime := kernel.NewKernelRuntime(app, RuntimeVersion)
 	err := kernelRuntime.Init()
 	if err != nil {
 		kernelRuntime.GetLogger().PanicF("kernel init failed: %s", err.Error())
