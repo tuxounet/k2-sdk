@@ -36,3 +36,7 @@ prepare: init write-version
 	
 run: prepare
 	go run ./main.go
+
+bump-patch: build 
+	echo "Bumping version patch"
+	@bash ./tools/bump-patch.sh
