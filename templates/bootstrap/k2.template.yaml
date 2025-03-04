@@ -15,8 +15,6 @@ k2:
 
     scripts:
       bootstrap:
-        - echo "template boot"
-      post:
         - go mod init {{ .module }}
         - go get -v {{ .sdk_module }}@{{ .sdk_version }}
         - go mod tidy
