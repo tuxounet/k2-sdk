@@ -15,3 +15,8 @@ k2:
       module: my-app
       version: v0.0.1
       components: site
+    scripts:
+      bootstrap:
+        - go mod init {{ .module }}
+        - go get -v {{ .sdk_module }}@{{ .sdk_version }}
+        - go mod tidy

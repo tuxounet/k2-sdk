@@ -12,9 +12,3 @@ k2:
       components: site
       sdk_module: "github.com/tuxounet/k2-sdk"
       sdk_version: "v0.9.1"
-
-    scripts:
-      bootstrap:
-        - go mod init {{ .module }}
-        - go get -v {{ .sdk_module }}@{{ .sdk_version }}
-        - go mod tidy
