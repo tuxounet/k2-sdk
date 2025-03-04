@@ -16,7 +16,7 @@ test: init
 
 build: write-version
 	mkdir -p ./.out
-	go build  -o ./.out/k2-sdk ./main.go
+	go build  -o ./.out/k2-sdk ./Entrypoint.go
 
 	
 bump-patch: build 
