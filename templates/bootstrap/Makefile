@@ -12,8 +12,7 @@ init:
 
 
 update-k2:	
-	@go install github.com/tuxounet/k2@${K2_LATEST_VERSION}
-	${GOPATH}/bin/k2 apply
+	go install github.com/tuxounet/k2@${K2_LATEST_VERSION}
 
 plan:
 	${GOPATH}/bin/k2 plan  --inventory ./k2.inventory.yaml
