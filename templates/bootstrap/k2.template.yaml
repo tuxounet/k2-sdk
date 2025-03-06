@@ -17,3 +17,5 @@ k2:
         - go mod init {{ .module }}
         - go get -v {{ .sdk_module }}@{{ .sdk_version }}
         - go mod tidy
+      post:
+        - make prepare
