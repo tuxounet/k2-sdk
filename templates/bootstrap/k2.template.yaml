@@ -18,3 +18,5 @@ k2:
         - "go get -v {{ .sdk_module }}@{{ .sdk_version }}"
       pre:
         - "go mod tidy"
+      nuke:
+        - "rm -rf go.mod go.sum"
