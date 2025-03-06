@@ -11,9 +11,10 @@ k2:
       version: "v0.0.1"
       components: site
       sdk_module: "github.com/tuxounet/k2-sdk"
-      sdk_version: "v0.9.1"
+      sdk_version: "v0.9.4"
     scripts:
-      pre:
+      bootstrap:
         - "[ ! -f go.mod ] && go mod init {{ .module }}"
-        - "go get -v {{ .sdk_module }}@{{ .sdk_version }}"
+        - "[ ! -f go.mod ] && go get -v {{ .sdk_module }}@{{ .sdk_version }}"
+      pre:
         - "go mod tidy"
