@@ -14,7 +14,7 @@ k2:
       sdk_version: "v0.9.4"
     scripts:
       bootstrap:
-        - "[ ! -f go.mod ] && go mod init {{ .module }}"
-        - "[ ! -f go.mod ] && go get -v {{ .sdk_module }}@{{ .sdk_version }}"
+        - "go mod init {{ .module }}"
+        - "go get -v {{ .sdk_module }}@{{ .sdk_version }}"
       pre:
         - "go mod tidy"
