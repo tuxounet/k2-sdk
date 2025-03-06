@@ -45,3 +45,7 @@ run: prepare
 bump-patch: build 
 	echo "Bumping version patch"
 	@bash ./tools/bump-patch.sh
+
+
+build: prepare
+	go build -o ./.out/${APP_NAME}-${VERSION} ./main.go
