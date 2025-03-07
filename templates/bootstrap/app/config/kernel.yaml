@@ -3,7 +3,7 @@ host:
   ingress:
     address: 127.0.0.1
     port: 8080
-    rootUrl: https://localhost:8080
+    rootUrl: http://localhost:8080
     # tls:
     #   port: 28443
     #   cert: "etc/pki/ssl/s.sample.local.crt"
