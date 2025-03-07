@@ -10,9 +10,9 @@ import (
 	runtimeTypes "github.com/tuxounet/k2-sdk/types"
 	"{{ $module }}/ui"
 	"{{ $module }}/docs"
-		
+
 	{{range $i := $componentList}}
-	{{ $i }} "{{ $module }}/{{ $i }}"
+	{{ $i }} "{{ $module }}/components/{{ $i }}"
 	{{ end }}
 )
 
