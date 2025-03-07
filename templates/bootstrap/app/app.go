@@ -9,6 +9,8 @@ import (
 	runtimeBases "github.com/tuxounet/k2-sdk/bases"	
 	runtimeTypes "github.com/tuxounet/k2-sdk/types"
 	"{{ $module }}/ui"
+	"{{ $module }}/docs"
+		
 	{{range $i := $componentList}}
 	{{ $i }} "{{ $module }}/{{ $i }}"
 	{{ end }}
@@ -21,7 +23,7 @@ func NewApp() runtimeTypes.IApp {
 	return runtimeBases.NewBaseApp(
 		AppName,
 		AppVersion,
-		nil,
+		docs.SwaggerInfoApp,
 		&ui.Dist,
 		&conf,
 		[]runtimeTypes.AppComponentCtor{
