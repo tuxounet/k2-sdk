@@ -1,4 +1,4 @@
 __debug_bin*
-out/
+.out/
 .data/
 refs/
