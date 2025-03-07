@@ -9,10 +9,10 @@ import (
 	"github.com/tuxounet/k2-sdk/types"
 )
 
-func RegisterApp(app types.IApp, rootUri *url.URL, baseUri string, router *gin.RouterGroup) error {
+func RegisterApp(app types.IApp, rootUri *url.URL, router *gin.RouterGroup) error {
 
 	log := app.GetLogger().CreateSubLogger("ui")
-
+	baseUri := router.BasePath()
 	fs := app.GetUI()
 	if fs == nil {
 		log.Warn("No UI folder found for app")

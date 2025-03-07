@@ -87,7 +87,7 @@ func (s *Service) Register() error {
 			return err
 		}
 
-		err = ui.RegisterApp(app, rootUri, router.BasePath(), router)
+		err = ui.RegisterApp(app, rootUri, router)
 		if err != nil {
 			s.GetLogger().ErrorF("Failed to register ui for app %s: %s", app.GetName(), err.Error())
 			return err

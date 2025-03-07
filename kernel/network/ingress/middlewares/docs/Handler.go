@@ -15,12 +15,12 @@ func Register(service types.IKernelService, docs *swag.Spec, router *gin.RouterG
 	log := service.GetLogger().CreateSubLogger("docs")
 
 	baseRoute := router.BasePath()
-
-	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerfiles.Handler,
-		ginSwagger.URL(baseRoute+"/openapi.json")),
+	docsPathSuffix := "docs/"
+	router.GET(docsPathSuffix+"*any", ginSwagger.WrapHandler(swaggerfiles.Handler,
+		ginSwagger.URL(baseRoute+docsPathSuffix+"openapi.json")),
 	)
 
-	router.GET("/openapi.json", func(c *gin.Context) {
+	router.GET(docsPathSuffix+"ppenapi.json", func(c *gin.Context) {
 		swagger := swag.GetSwagger(docs.InfoInstanceName)
 		if swagger == nil {
 			log.ErrorF("Error parsing template for %s", docs.InfoInstanceName)
