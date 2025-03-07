@@ -10,9 +10,8 @@ import (
 	"github.com/tuxounet/k2-sdk/types"
 )
 
-func Register(service types.IKernelService, component types.IAppComponent, router *gin.RouterGroup) error {
+func Register(service types.IKernelService, docs *swag.Spec, router *gin.RouterGroup) error {
 
-	appDoc := component.GetDocs()
 	log := service.GetLogger().CreateSubLogger("docs")
 
 	baseRoute := router.BasePath()
@@ -22,9 +21,9 @@ func Register(service types.IKernelService, component types.IAppComponent, route
 	)
 
 	router.GET("/openapi.json", func(c *gin.Context) {
-		swagger := swag.GetSwagger(appDoc.InfoInstanceName)
+		swagger := swag.GetSwagger(docs.InfoInstanceName)
 		if swagger == nil {
-			log.ErrorF("Error parsing template for %s", appDoc.InfoInstanceName)
+			log.ErrorF("Error parsing template for %s", docs.InfoInstanceName)
 			c.String(500, "Error parsing template")
 			return
 		}

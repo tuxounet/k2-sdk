@@ -95,6 +95,15 @@ func (s *Service) Register() error {
 
 	}
 
+	appDocs := app.GetDocs()
+	if appDocs != nil {
+		err := docs.Register(s, appDocs, router)
+		if err != nil {
+			s.GetLogger().ErrorF("Failed to register docs for app %s: %s", app.GetName(), err.Error())
+			return err
+		}
+	}
+
 	for _, component := range components {
 		componentRouter := router.Group(component.GetName())
 
@@ -109,7 +118,7 @@ func (s *Service) Register() error {
 
 		componentDocs := component.GetDocs()
 		if componentDocs != nil {
-			err := docs.Register(s, component, componentRouter)
+			err := docs.Register(s, componentDocs, componentRouter)
 			if err != nil {
 				s.GetLogger().ErrorF("Failed to register docs for component %s: %s", component.GetName(), err.Error())
 				return err
