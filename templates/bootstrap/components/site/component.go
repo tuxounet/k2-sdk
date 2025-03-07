@@ -1,7 +1,7 @@
 package site
 
 import (
-	"{{ .module }}/site/health"
+	"{{ .module }}/components/site/health"
 	runtimeBases "{{ .sdk_module }}/bases"
 	runtimeTypes "{{ .sdk_module }}/types"
 )
