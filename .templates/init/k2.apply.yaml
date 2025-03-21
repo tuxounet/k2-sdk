@@ -8,7 +8,7 @@ k2:
       params:
         repository: https://github.com/tuxounet/k2-sdk.git
         branch: 0.9
-        path: templates/bootstrap/k2.template.yaml
+        path: .templates/bootstrap/k2.template.yaml
     vars:
       name: KNewApp
       description: Une application qui vérifie que tout marche bien
