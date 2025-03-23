@@ -24,12 +24,12 @@ func (h *HealthController) Register(r *gin.RouterGroup) error {
 }
 
 // api_health godoc
-// @Summary  Hello, world!
+// @Summary  Health check
 // @Schemes
-// @Tags hello
+// @Tags system
 // @Produce json
 // @Success 200  {string} string "OK"
-// @Router /sayHello [get]
+// @Router /site/health [get]
 func (h *HealthController) api_health() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		ctx.JSON(200, "OK")
