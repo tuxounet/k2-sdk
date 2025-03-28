@@ -25,7 +25,7 @@ func (s *Service) getRootStore() (*storeTypes.Store, error) {
 }
 
 func (s *Service) isEnabled() (bool, error) {
-	enabled, err := s.getConfigService().GetAsBool("compute.enabled")
+	enabled, err := s.getConfigService().GetAsBool("host.compute.enabled")
 	if err != nil {
 		return false, err
 	}
