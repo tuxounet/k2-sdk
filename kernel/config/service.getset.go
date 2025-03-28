@@ -48,6 +48,15 @@ func (c *Service) GetAsInt(key string) (int, error) {
 	return value.(int), nil
 }
 
+func (c *Service) GetAsBool(key string) (bool, error) {
+	value := c.Get(key)
+	if value == nil {
+		return false, fmt.Errorf("key %s not found", key)
+	}
+
+	return value.(bool), nil
+}
+
 func (c *Service) GetAsStringOrDefault(key string, def string) (string, error) {
 	value := c.Get(key)
 	if value == nil {

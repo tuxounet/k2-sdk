@@ -14,6 +14,7 @@ host:
       verifyUrl: "/auth/verify"
       redirectParam: "redirect"
   compute:
+    enabled: true
     port:
       start: 59000
       end: 59999
