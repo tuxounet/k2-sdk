@@ -25,22 +25,21 @@ type BaseApp struct {
 
 func NewBaseApp(name string, version string, docs *swag.Spec, ui *embed.FS, config *embed.FS, componentsCtors []runtimeTypes.AppComponentCtor) runtimeTypes.IApp {
 
-	if docs == nil {
+	if docs != nil {
 		docs = &swag.Spec{}
-	}
 
-	if name != "" {
-		docs.Title = name
+		if name != "" {
+			docs.Title = name
+		}
+		if version != "" {
+			docs.Version = version
+		}
+		docs.BasePath = "/"
 	}
-	if version != "" {
-		docs.Version = version
-	}
-
-	docs.BasePath = "/"
 
 	base := BaseApp{
-		name:            docs.Title,
-		version:         docs.Version,
+		name:            name,
+		version:         version,
 		docs:            docs,
 		ui:              ui,
 		config:          config,
