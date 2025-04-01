@@ -24,14 +24,9 @@ func (s *Service) Init() error {
 func (s *Service) Register() error {
 	configService := s.getConfigService()
 
-	hostAddr, err := configService.GetAsString("host.ingress.address")
-	if err != nil {
-		return err
-	}
-
 	server := gin.New()
-	trustedProxies := []string{hostAddr}
-	server.SetTrustedProxies(trustedProxies)
+
+	server.SetTrustedProxies(nil)
 
 	server.Use(cors.New(cors.Config{
 		AllowMethods:  []string{"HEAD", "GET", "POST", "PUT", "PATCH", "DELETE"},
@@ -41,9 +36,10 @@ func (s *Service) Register() error {
 			return true
 		},
 	}))
+
 	s.setServer(server)
 
-	err = logger.Register(s, server)
+	err := logger.Register(s, server)
 	if err != nil {
 		return err
 	}
