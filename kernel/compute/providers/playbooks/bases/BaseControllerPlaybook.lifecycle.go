@@ -1,8 +1,6 @@
 package bases
 
-import "github.com/gin-gonic/gin"
-
-func (b *BaseControllerPlaybook) Register(r *gin.RouterGroup) error {
+func (b *BaseControllerPlaybook) Init() error {
 
 	provider := b.getComputePlaybooksProvider()
 
@@ -10,7 +8,7 @@ func (b *BaseControllerPlaybook) Register(r *gin.RouterGroup) error {
 	err := provider.RegisterDefinition(*definition)
 
 	if err != nil {
-		b.GetLogger().ErrorF("Failed to register container defintion inside provider: %s", err)
+		b.GetLogger().ErrorF("Failed to Init container defintion inside provider: %s", err)
 		return err
 	}
 

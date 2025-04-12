@@ -14,4 +14,5 @@ site:
         organization_unit: "A member of sample federation"
         country: FR
         state: Ile-de-France
+        locality: Paris
         email: "admin@sample.local"

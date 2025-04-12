@@ -9,22 +9,23 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (b *BaseControllerContainer) Register(r *gin.RouterGroup) error {
-
+func (b *BaseControllerContainer) Init() error {
 	provider := b.getComputeContainersProviders()
+
 	definition := b.GetDefinition()
 	err := provider.RegisterDefinition(*definition)
 
 	if err != nil {
-		b.GetLogger().ErrorF("Failed to register container defintion inside provider: %s", err)
+		b.GetLogger().ErrorF("Failed to Init container defintion inside provider: %s", err)
 		return err
 	}
 
-	if definition == nil || definition.Ingresses == nil || len(definition.Ingresses) == 0 {
-		b.GetLogger().TraceF("No ingress defined for container %s, skipping register", b.GetName())
-		return nil
-	}
+	return nil
+}
 
+func (b *BaseControllerContainer) Register(r *gin.RouterGroup) error {
+
+	definition := b.GetDefinition()
 	ingresses := definition.Ingresses
 
 	config := b.getConfigService()

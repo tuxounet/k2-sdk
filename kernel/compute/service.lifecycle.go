@@ -9,8 +9,7 @@ import (
 	"github.com/tuxounet/k2-sdk/kernel/compute/types"
 )
 
-func (s *Service) Register() error {
-
+func (s *Service) Init() error {
 	enabled, err := s.isEnabled()
 	if err != nil {
 		return fmt.Errorf("unable to check compute service enabled status: %s", err.Error())
@@ -19,7 +18,7 @@ func (s *Service) Register() error {
 		s.GetLogger().DebugF("compute service is disabled")
 		return nil
 	}
-	s.GetLogger().TraceF("begin register")
+	s.GetLogger().TraceF("begin init")
 	providers := []types.IBasePlateformProvider{
 		containers.NewProvider(s),
 		playbooks.NewProvider(s),
@@ -52,7 +51,22 @@ func (s *Service) Register() error {
 		return fmt.Errorf("unable ot reset runners collection : %s", err.Error())
 	}
 
+	return nil
+}
+
+func (s *Service) Register() error {
+
+	enabled, err := s.isEnabled()
+	if err != nil {
+		return fmt.Errorf("unable to check compute service enabled status: %s", err.Error())
+	}
+	if !enabled {
+		s.GetLogger().DebugF("compute service is disabled")
+		return nil
+	}
+
 	allRunners := make([]types.RunnerDefinition, 0)
+	providers := s.getProviders()
 	for _, p := range providers {
 		runners, err := p.Render()
 
