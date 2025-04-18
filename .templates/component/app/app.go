@@ -1,19 +1,14 @@
 package app
 
-{{ $componentList := splitList  "," .components }}
+ 
 {{ $module := .module }}
 
 import (
 	"embed"
 
 	runtimeBases "github.com/tuxounet/k2-sdk/bases"	
-	runtimeTypes "github.com/tuxounet/k2-sdk/types"
-	"{{ $module }}/ui"
-	"{{ $module }}/docs"
-
-	{{range $i := $componentList}}
-	{{ $i }} "{{ $module }}/components/{{ $i }}"
-	{{ end }}
+	runtimeTypes "github.com/tuxounet/k2-sdk/types"	 
+	component "{{ $module }}/components/component"
 )
 
 //go:embed config/*.yaml
@@ -23,13 +18,11 @@ func NewApp() runtimeTypes.IApp {
 	return runtimeBases.NewBaseApp(
 		AppName,
 		AppVersion,
-		docs.SwaggerInfoApp,
-		&ui.Dist,
+		nil,
+		nil,
 		&conf,
 		[]runtimeTypes.AppComponentCtor{
-			{{range $i := $componentList}}
-			{{ $i }}.NewComponent,
-			{{ end }}
+			component.NewComponent,
 		},
 	)
 }
