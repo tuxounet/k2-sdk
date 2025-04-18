@@ -2,6 +2,7 @@ package bases
 
 import (
 	"embed"
+	"strings"
 
 	"github.com/swaggo/swag"
 	runtimeTypes "github.com/tuxounet/k2-sdk/types"
@@ -24,6 +25,9 @@ type BaseApp struct {
 }
 
 func NewBaseApp(name string, version string, docs *swag.Spec, ui *embed.FS, config *embed.FS, componentsCtors []runtimeTypes.AppComponentCtor) runtimeTypes.IApp {
+
+	name = strings.TrimSpace(name)
+	version = strings.TrimSpace(version)
 
 	if docs != nil {
 		docs = &swag.Spec{}
