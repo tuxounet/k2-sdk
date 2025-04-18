@@ -8,7 +8,7 @@ import (
 
 	runtimeBases "github.com/tuxounet/k2-sdk/bases"	
 	runtimeTypes "github.com/tuxounet/k2-sdk/types"	 
-	component "{{ $module }}/components/component"
+	component "{{ $module }}/component"
 )
 
 //go:embed config/*.yaml
