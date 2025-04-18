@@ -16,4 +16,3 @@ k2:
       version: v0.0.1
       components: site
       sdk_module: "github.com/tuxounet/k2-sdk"
-      sdk_version: "v0.9.4"

@@ -1,17 +1,16 @@
 package auth
 
 import (
-	"crypto/tls"
 	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
-	"time"
 
 	"slices"
 
 	"github.com/gin-gonic/gin"
 	"github.com/tuxounet/k2-sdk/kernel/config"
+	"github.com/tuxounet/k2-sdk/kernel/network/ingress/middlewares/auth/levels"
 	"github.com/tuxounet/k2-sdk/types"
 )
 
@@ -26,6 +25,8 @@ func Register(service types.IKernelService, router *gin.RouterGroup) error {
 		log.ErrorF("Failed to get defaultAccess: %s", err.Error())
 		return err
 	}
+	defaut_policy := types.IAccessPolicy(default_access)
+
 	login_url, err := configService.GetAsString("host.ingress.auth.loginUrl")
 	if err != nil {
 		log.ErrorF("Failed to get loginUrl: %s", err.Error())
@@ -61,15 +62,19 @@ func Register(service types.IKernelService, router *gin.RouterGroup) error {
 
 	router.Use(func(c *gin.Context) {
 
-		accessLevel := accessLevelEvaluation(service, c.Request, default_access, log)
+		accessLevel := accessLevelEvaluation(service, c.Request, defaut_policy, log)
 		switch accessLevel {
-		case "public":
-			if accessLevelPublic(c.Request, log) {
+		case types.AccessPolicyPublic:
+			if levels.AllowAccessLevelPublic(c.Request, log) {
 				c.Next()
 				return
+			} else {
+				levels.BlockAccessLevelPublic(c.Request, log, c)
+				return
 			}
-		case "authenticated":
-			if accessLevelAuthenticated(c.Request, log, verify_url, redirect_param) {
+
+		case types.AccessPolicyAuthenticated:
+			if levels.AllowAccessLevelAuthenticated(c.Request, log, verify_url, redirect_param) {
 				c.Next()
 				return
 			} else {
@@ -79,6 +84,11 @@ func Register(service types.IKernelService, router *gin.RouterGroup) error {
 
 				c.Redirect(http.StatusTemporaryRedirect, loginUrl.String())
 				c.Abort()
+				return
+			}
+		case types.AccessPolicyAdmin:
+			if levels.AllowAccessLevelAdmin(c.Request, log) {
+				c.Next()
 				return
 			}
 
@@ -93,7 +103,7 @@ func Register(service types.IKernelService, router *gin.RouterGroup) error {
 	return nil
 }
 
-func accessLevelEvaluation(service types.IKernelService, request *http.Request, default_access string, log types.ILogger) string {
+func accessLevelEvaluation(service types.IKernelService, request *http.Request, default_access types.IAccessPolicy, log types.ILogger) types.IAccessPolicy {
 	requestPath := request.URL.Path
 
 	cleanSegments := make([]string, 0)
@@ -121,59 +131,9 @@ func accessLevelEvaluation(service types.IKernelService, request *http.Request, 
 		if component.GetName() == first {
 			policy := component.GetAccessPolicy()
 			log.DebugF("Access level for %s is %s", requestPath, policy)
-			return string(policy)
+			return policy
 		}
 	}
 
 	return default_access
-}
-
-func accessLevelPublic(_ *http.Request, _ types.ILogger) bool {
-	return true
-}
-
-func accessLevelAuthenticated(req *http.Request, log types.ILogger, verifyUrl string, redirectParam string) bool {
-
-	requestUrl := req.URL.Path
-	requestQuery := req.URL.RawQuery
-
-	urlVerifyUrl, err := url.Parse(verifyUrl)
-	if err != nil {
-		log.ErrorF("Failed to parse verifyUrl: %s", err.Error())
-		return false
-	}
-
-	urlVerifyQuery := urlVerifyUrl.Query()
-	urlVerifyQuery.Add(redirectParam, requestUrl)
-	urlVerifyQuery.Add("query", requestQuery)
-	urlVerifyUrl.RawQuery = urlVerifyQuery.Encode()
-
-	client := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
-		},
-		Timeout: 5 * time.Second,
-	}
-
-	verifyReq, err := http.NewRequest("GET", urlVerifyUrl.String(), nil)
-	if err != nil {
-		log.ErrorF("Failed to create request: %s", err.Error())
-		return false
-	}
-	for key, value := range req.Header {
-		verifyReq.Header.Add(key, value[0])
-	}
-
-	verifyResp, err := client.Do(verifyReq)
-	if err != nil {
-		log.ErrorF("Failed to execute request: %s", err.Error())
-		return false
-	}
-	if verifyResp.StatusCode == http.StatusOK {
-		return true
-	}
-
-	return false
 }

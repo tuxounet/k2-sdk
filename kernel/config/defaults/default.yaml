@@ -10,9 +10,18 @@ host:
     #   key: "etc/pki/ssl/s.sample.local.key"
     auth:
       defaultAccess: "public"
-      loginUrl: "/auth/login"
-      verifyUrl: "/auth/verify"
-      redirectParam: "redirect"
+      public:
+        enabled: true
+      authenticated:
+        enabled: true
+        loginUrl: "/auth/login"
+        verifyUrl: "/auth/verify"
+        redirectParam: "redirect"
+      admin:
+        enabled: true
+        loginUrl: "/admin/login"
+        verifyUrl: "/admin/verify"
+        redirectParam: "redirect"
   compute:
     enabled: true
     port:
