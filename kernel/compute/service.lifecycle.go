@@ -26,6 +26,21 @@ func (s *Service) Init() error {
 
 	s.setProviders(providers)
 
+	return nil
+}
+
+func (s *Service) Register() error {
+
+	enabled, err := s.isEnabled()
+	if err != nil {
+		return fmt.Errorf("unable to check compute service enabled status: %s", err.Error())
+	}
+	if !enabled {
+		s.GetLogger().DebugF("compute service is disabled")
+		return nil
+	}
+
+	providers := s.getProviders()
 	for _, p := range providers {
 		err := p.Nuke()
 		if err != nil {
@@ -51,22 +66,7 @@ func (s *Service) Init() error {
 		return fmt.Errorf("unable ot reset runners collection : %s", err.Error())
 	}
 
-	return nil
-}
-
-func (s *Service) Register() error {
-
-	enabled, err := s.isEnabled()
-	if err != nil {
-		return fmt.Errorf("unable to check compute service enabled status: %s", err.Error())
-	}
-	if !enabled {
-		s.GetLogger().DebugF("compute service is disabled")
-		return nil
-	}
-
 	allRunners := make([]types.RunnerDefinition, 0)
-	providers := s.getProviders()
 	for _, p := range providers {
 		runners, err := p.Render()
 
