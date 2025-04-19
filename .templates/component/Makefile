@@ -15,7 +15,7 @@ update-k2:
 	go install github.com/tuxounet/k2@${K2_LATEST_VERSION}
 
 update-sdk:
-	go get -u github.com/tuxounet/k2-sdk
+	go get -v github.com/tuxounet/k2-sdk
 	
 plan:
 	${GOPATH}/bin/k2 plan  --inventory ./k2.inventory.yaml
@@ -38,6 +38,9 @@ write-version:
 prepare: init write-version	
 	go get -v
 	go mod tidy
+	if [ -f "./component/Makefile" ]; then \
+		$(MAKE) -C ./component prepare; \
+	fi
 	
 run: prepare
 	go run ./main.go
