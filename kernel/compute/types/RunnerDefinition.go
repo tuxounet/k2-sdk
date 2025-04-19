@@ -11,7 +11,7 @@ const (
 
 type RunnerDefinition struct {
 	Order     int    `json:"order"`
-	Plateform string `json:"plateform"`
+	Provider  string `json:"plateform"`
 	Name      string `json:"name"`
 	Provision string `json:"provision"`
 	Teardown  string `json:"teardown"`

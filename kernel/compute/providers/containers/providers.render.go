@@ -19,7 +19,7 @@ func (p *Provider) Render() ([]computeTypes.RunnerDefinition, error) {
 		newRunnerDefinition := computeTypes.RunnerDefinition{
 			Name:      definition.Name,
 			Order:     definition.Order,
-			Plateform: ProviderKey,
+			Provider:  ProviderKey,
 			Provision: "",
 			Start:     "",
 			Stop:      "",
