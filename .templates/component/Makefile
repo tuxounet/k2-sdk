@@ -38,9 +38,6 @@ write-version:
 prepare: init write-version	
 	go get -v
 	go mod tidy
-	go install github.com/swaggo/swag/cmd/swag@v1.16.4
-	${GO_PATH}/bin/swag init --instanceName App --parseInternal --parseDepth 1 --exclude "refs/"
-	${GO_PATH}/bin/swag fmt --exclude "refs/"
 	
 run: prepare
 	go run ./main.go
