@@ -1,6 +1,5 @@
 package app
 
- 
 {{ $module := .module }}
 
 import (
@@ -9,6 +8,7 @@ import (
 	runtimeBases "github.com/tuxounet/k2-sdk/bases"	
 	runtimeTypes "github.com/tuxounet/k2-sdk/types"	 
 	component "{{ $module }}/component"
+	"{{ $module }}/ui"
 )
 
 //go:embed config/*.yaml
@@ -19,7 +19,7 @@ func NewApp() runtimeTypes.IApp {
 		AppName,
 		AppVersion,
 		nil,
-		nil,
+		&ui.Dist,
 		&conf,
 		[]runtimeTypes.AppComponentCtor{
 			component.NewComponent,
