@@ -51,4 +51,7 @@ bump-patch: build
 
 
 build: prepare
+	if [ -f "./component/Makefile" ]; then \
+		$(MAKE) -C ./component build; \
+	fi
 	go build -o ./.out/${APP_NAME}-${VERSION} ./main.go
