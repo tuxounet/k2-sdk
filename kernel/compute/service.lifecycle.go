@@ -147,6 +147,13 @@ func (s *Service) Start() error {
 		s.GetLogger().DebugF("compute service is disabled")
 		return nil
 	}
+
+	runners := s.getRunners()
+	if len(runners) == 0 {
+		s.GetLogger().DebugF("no runners found")
+		return nil
+	}
+
 	err = s.execPlaybook(types.RunnerVerbProvision)
 	if err != nil {
 		return fmt.Errorf("provision phase failed: %s", err.Error())
@@ -168,6 +175,13 @@ func (s *Service) Stop() error {
 		s.GetLogger().DebugF("compute service is disabled")
 		return nil
 	}
+
+	runners := s.getRunners()
+	if len(runners) == 0 {
+		s.GetLogger().DebugF("no runners found")
+		return nil
+	}
+
 	s.GetLogger().TraceF("begin stop")
 	err = s.execPlaybook(types.RunnerVerbStop)
 	if err != nil {
