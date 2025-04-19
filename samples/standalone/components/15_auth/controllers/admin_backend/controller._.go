@@ -1,4 +1,4 @@
-package auth_backend
+package admin_backend
 
 import (
 	"embed"
@@ -15,7 +15,7 @@ type Controller struct {
 }
 
 func NewController(component types.IAppComponent) types.IAppController {
-	base := bases.NewBaseAppController(component, "auth_backend", 1, &conf)
+	base := bases.NewBaseAppController(component, "admin_backend", 20, &conf)
 	return &Controller{
 		base,
 	}

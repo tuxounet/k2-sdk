@@ -2,26 +2,64 @@ package levels
 
 import (
 	"crypto/tls"
+	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
+	"github.com/gin-gonic/gin"
+	"github.com/tuxounet/k2-sdk/kernel/config"
 	"github.com/tuxounet/k2-sdk/types"
 )
 
-func AllowAccessLevelAuthenticated(req *http.Request, log types.ILogger, verifyUrl string, redirectParam string) bool {
+func isAuthenticatedEnabled(configService *config.Service) bool {
+	authenticated_enabled, err := configService.GetAsBool("host.ingress.auth.authenticated.enabled")
+	if err != nil {
+		return false
+	}
+	return authenticated_enabled
+}
+
+func AllowAccessLevelAuthenticated(req *http.Request, log types.ILogger, configService *config.Service) bool {
 
 	requestUrl := req.URL.Path
 	requestQuery := req.URL.RawQuery
 
-	urlVerifyUrl, err := url.Parse(verifyUrl)
+	if !isAuthenticatedEnabled(configService) {
+		log.InfoF("Authenticated access is disabled for path: %s", requestUrl)
+		return false
+	}
+
+	verify_url, err := configService.GetAsString("host.ingress.auth.authenticated.verifyUrl")
+	if err != nil {
+		log.ErrorF("Failed to get verifyUrl: %s", err.Error())
+		return false
+	}
+	redirect_param, err := configService.GetAsString("host.ingress.auth.authenticated.redirectParam")
+	if err != nil {
+		log.ErrorF("Failed to get redirectParam: %s", err.Error())
+		return false
+	}
+
+	if !strings.HasPrefix(verify_url, "http") {
+		rootUrl, err := configService.GetAsString("host.ingress.rootUrl")
+		if err != nil {
+			log.ErrorF("Failed to get rootUrl: %s", err.Error())
+			return false
+		}
+		verify_url = fmt.Sprintf("%s%s", rootUrl, verify_url)
+
+	}
+
+	urlVerifyUrl, err := url.Parse(verify_url)
 	if err != nil {
 		log.ErrorF("Failed to parse verifyUrl: %s", err.Error())
 		return false
 	}
 
 	urlVerifyQuery := urlVerifyUrl.Query()
-	urlVerifyQuery.Add(redirectParam, requestUrl)
+	urlVerifyQuery.Add(redirect_param, requestUrl)
 	urlVerifyQuery.Add("query", requestQuery)
 	urlVerifyUrl.RawQuery = urlVerifyQuery.Encode()
 
@@ -55,23 +93,43 @@ func AllowAccessLevelAuthenticated(req *http.Request, log types.ILogger, verifyU
 	return false
 }
 
-func RedirectAccessLevelAuthenticatedLogin(req *http.Request, log types.ILogger, loginUrl string, redirectParam string) bool {
-
+func RedirectAccessLevelAuthenticatedLogin(req *http.Request, log types.ILogger, configService *config.Service, ctx *gin.Context) {
 	requestUrl := req.URL.Path
 	requestQuery := req.URL.RawQuery
 
-	urlLoginUrl, err := url.Parse(loginUrl)
-	if err != nil {
-		log.ErrorF("Failed to parse loginUrl: %s", err.Error())
-		return false
+	if !isAuthenticatedEnabled(configService) {
+		log.InfoF("Authenticated access is disabled for path: %s", requestUrl)
+		ctx.AbortWithStatus(http.StatusUnauthorized)
 	}
 
-	urlLoginQuery := urlLoginUrl.Query()
-	urlLoginQuery.Add(redirectParam, requestUrl)
-	urlLoginQuery.Add("query", requestQuery)
-	urlLoginUrl.RawQuery = urlLoginQuery.Encode()
+	login_url, err := configService.GetAsString("host.ingress.auth.authenticated.loginUrl")
+	if err != nil {
+		log.ErrorF("Failed to get loginUrl: %s", err.Error())
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
 
-	log.InfoF("Redirecting to login: %s", urlLoginUrl.String())
-	req.URL.Path = urlLoginUrl.String()
-	return true
+	loginUrl, err := url.Parse(login_url)
+	if err != nil {
+		log.ErrorF("Failed to parse loginUrl: %s", err.Error())
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	redirect_param, err := configService.GetAsString("host.ingress.auth.authenticated.redirectParam")
+	if err != nil {
+		log.ErrorF("Failed to get redirectParam: %s", err.Error())
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	urlLoginQuery := loginUrl.Query()
+	urlLoginQuery.Add(redirect_param, requestUrl)
+	urlLoginQuery.Add("query", requestQuery)
+	loginUrl.RawQuery = urlLoginQuery.Encode()
+
+	log.InfoF("Redirecting to login: %s", loginUrl.String())
+	req.URL.Path = loginUrl.String()
+	ctx.Redirect(http.StatusFound, loginUrl.String())
+
 }

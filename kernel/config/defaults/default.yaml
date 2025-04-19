@@ -13,15 +13,9 @@ host:
       public:
         enabled: true
       authenticated:
-        enabled: true
-        loginUrl: "/auth/login"
-        verifyUrl: "/auth/verify"
-        redirectParam: "redirect"
+        enabled: false
       admin:
-        enabled: true
-        loginUrl: "/admin/login"
-        verifyUrl: "/admin/verify"
-        redirectParam: "redirect"
+        enabled: false
   compute:
     enabled: true
     port:

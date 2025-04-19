@@ -1,9 +1,7 @@
 package auth
 
 import (
-	"fmt"
 	"net/http"
-	"net/url"
 	"strings"
 
 	"slices"
@@ -27,68 +25,33 @@ func Register(service types.IKernelService, router *gin.RouterGroup) error {
 	}
 	defaut_policy := types.IAccessPolicy(default_access)
 
-	login_url, err := configService.GetAsString("host.ingress.auth.loginUrl")
-	if err != nil {
-		log.ErrorF("Failed to get loginUrl: %s", err.Error())
-		return err
-	}
-
-	loginUrl, err := url.Parse(login_url)
-	if err != nil {
-		log.ErrorF("Failed to parse loginUrl: %s", err.Error())
-		return err
-	}
-
-	verify_url, err := configService.GetAsString("host.ingress.auth.verifyUrl")
-	if err != nil {
-		log.ErrorF("Failed to get verifyUrl: %s", err.Error())
-		return err
-	}
-	redirect_param, err := configService.GetAsString("host.ingress.auth.redirectParam")
-	if err != nil {
-		log.ErrorF("Failed to get redirectParam: %s", err.Error())
-		return err
-	}
-
-	if !strings.HasPrefix(verify_url, "http") {
-		rootUrl, err := configService.GetAsString("host.ingress.rootUrl")
-		if err != nil {
-			log.ErrorF("Failed to get rootUrl: %s", err.Error())
-			return err
-		}
-		verify_url = fmt.Sprintf("%s%s", rootUrl, verify_url)
-
-	}
-
 	router.Use(func(c *gin.Context) {
 
 		accessLevel := accessLevelEvaluation(service, c.Request, defaut_policy, log)
 		switch accessLevel {
 		case types.AccessPolicyPublic:
-			if levels.AllowAccessLevelPublic(c.Request, log) {
+			if levels.AllowAccessLevelPublic(c.Request, log, configService) {
 				c.Next()
 				return
 			} else {
-				levels.BlockAccessLevelPublic(c.Request, log, c)
+				levels.BlockAccessLevelPublic(c.Request, log, configService, c)
 				return
 			}
 
 		case types.AccessPolicyAuthenticated:
-			if levels.AllowAccessLevelAuthenticated(c.Request, log, verify_url, redirect_param) {
+			if levels.AllowAccessLevelAuthenticated(c.Request, log, configService) {
 				c.Next()
 				return
 			} else {
-				q := loginUrl.Query()
-				q.Add(redirect_param, c.Request.URL.Path)
-				loginUrl.RawQuery = q.Encode()
-
-				c.Redirect(http.StatusTemporaryRedirect, loginUrl.String())
-				c.Abort()
+				levels.RedirectAccessLevelAuthenticatedLogin(c.Request, log, configService, c)
 				return
 			}
 		case types.AccessPolicyAdmin:
-			if levels.AllowAccessLevelAdmin(c.Request, log) {
+			if levels.AllowAccessLevelAdmin(c.Request, log, configService) {
 				c.Next()
+				return
+			} else {
+				levels.RedirectAccessLevelAdminLogin(c.Request, log, configService, c)
 				return
 			}
 

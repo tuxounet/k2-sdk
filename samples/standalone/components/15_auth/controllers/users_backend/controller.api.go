@@ -1,4 +1,4 @@
-package auth_backend
+package users_backend
 
 import (
 	_ "embed"
@@ -8,11 +8,13 @@ import (
 	"github.com/tuxounet/k2-sdk/system"
 )
 
+const cookieKey = "auth"
+
 func (h *Controller) Register(r *gin.RouterGroup) error {
-	r.GET("/login", h.api_loginGet())
-	r.POST("/login", h.api_loginPost())
-	r.GET("/verify", h.api_verify())
-	r.GET("/logout", h.api_logout())
+	r.GET("/users/login", h.api_loginGet())
+	r.POST("/users/login", h.api_loginPost())
+	r.GET("/users/verify", h.api_verify())
+	r.GET("/users/logout", h.api_logout())
 	return nil
 }
 
@@ -28,7 +30,7 @@ func (h *Controller) Register(r *gin.RouterGroup) error {
 func (h *Controller) api_verify() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
-		authCookie, err := ctx.Cookie("auth")
+		authCookie, err := ctx.Cookie(cookieKey)
 		if err != nil {
 			ctx.JSON(403, gin.H{"message": "No auth cookie"})
 			return
@@ -58,7 +60,7 @@ func (h *Controller) api_verify() gin.HandlerFunc {
 // @Router /logout [get]
 func (h *Controller) api_logout() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		ctx.SetCookie("auth", "", -1, "/", "", false, true)
+		ctx.SetCookie(cookieKey, "", -1, "/", "", false, true)
 		configService := h.GetComponent().GetApp().GetKernel().GetService("config").(*config.Service)
 		rootUrl := configService.Get("host.ingress.rootUrl").(string)
 
@@ -82,7 +84,7 @@ func (h *Controller) api_loginGet() gin.HandlerFunc {
 	configService := h.GetComponent().GetApp().GetKernel().GetService("config").(*config.Service)
 	rootUrl := configService.Get("host.ingress.rootUrl").(string)
 
-	redirectParam := configService.Get("host.ingress.auth.redirectParam").(string)
+	redirectParam := configService.Get("host.ingress.auth.authenticated.redirectParam").(string)
 	return func(ctx *gin.Context) {
 
 		redirect := ctx.Query(redirectParam)
@@ -124,7 +126,7 @@ func (h *Controller) api_loginPost() gin.HandlerFunc {
 			if user.(map[string]any)["username"] == username && user.(map[string]any)["password"] == password {
 				username := user.(map[string]any)["username"].(string)
 
-				ctx.SetCookie("auth", username, 3600, "/", "", false, true)
+				ctx.SetCookie(cookieKey, username, 3600, "/", "", false, true)
 
 				if redirect != "" {
 					ctx.Redirect(302, redirect)
@@ -147,7 +149,7 @@ func (h *Controller) api_loginPost() gin.HandlerFunc {
 
 func (h *Controller) buildLoginPage(errorMessage *string, rootUrl string, redirect string) (string, error) {
 
-	return system.UnTemplateWithGoTemplate(string(loginPage), map[string]interface{}{
+	return system.UnTemplateWithGoTemplate(string(loginPage), map[string]any{
 		"errorMessage": errorMessage,
 		"rootUrl":      rootUrl,
 		"redirect":     redirect,

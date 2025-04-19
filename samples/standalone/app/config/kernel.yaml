@@ -8,6 +8,20 @@ host:
       port: 28443
       cert: "etc/pki/ssl/s.sample.local.crt"
       key: "etc/pki/ssl/s.sample.local.key"
+    auth:
+      defaultAccess: "public"
+      public:
+        enabled: true
+      authenticated:
+        enabled: true
+        loginUrl: "/auth/users/login"
+        verifyUrl: "/auth/users/verify"
+        redirectParam: "redirect"
+      admin:
+        enabled: true
+        loginUrl: "/auth/admin/login"
+        verifyUrl: "/auth/admin/verify"
+        redirectParam: "redirect"
   compute:
     port:
       start: 59000
