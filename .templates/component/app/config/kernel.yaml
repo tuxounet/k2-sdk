@@ -9,6 +9,9 @@ host:
     #   cert: "etc/pki/ssl/s.sample.local.crt"
     #   key: "etc/pki/ssl/s.sample.local.key"
   compute:
-    port:
-      start: 49000
-      end: 49999
+    enabled: true
+    containers:
+      engine: podman
+      port:
+        start: 49000
+        end: 49999

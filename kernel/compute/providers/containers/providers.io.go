@@ -1,20 +1,47 @@
 package containers
 
 import (
+	"github.com/tuxounet/k2-sdk/kernel/config"
 	"github.com/tuxounet/k2-sdk/kernel/storage/paths"
-	"github.com/tuxounet/k2-sdk/kernel/storage/stores"
-	storeTypes "github.com/tuxounet/k2-sdk/kernel/storage/stores/types"
 )
 
 func (p *Provider) getPathsService() *paths.Service {
 	return p.GetService().GetKernel().GetService(paths.ServiceKey).(*paths.Service)
 }
 
-func (p *Provider) getRootStore() (*storeTypes.Store, error) {
-	stores := p.GetService().GetKernel().GetService(stores.ServiceKey).(*stores.Service)
-	store, err := stores.GetStore("root")
+func (s *Provider) getHostPortStart() (int, error) {
+
+	kernel := s.GetService().GetKernel()
+	configService := kernel.GetService(config.ServiceKey).(*config.Service)
+
+	port, err := configService.GetAsInt("host.compute.containers.port.start")
 	if err != nil {
-		return nil, err
+		return -1, err
 	}
-	return store, nil
+	return port, nil
+
+}
+func (s *Provider) getHostPortEnd() (int, error) {
+	kernel := s.GetService().GetKernel()
+	configService := kernel.GetService(config.ServiceKey).(*config.Service)
+
+	port, err := configService.GetAsInt("host.compute.containers.port.end")
+	if err != nil {
+		return -1, err
+	}
+	return port, nil
+
+}
+func (s *Provider) getEngine() string {
+	defaultEngine := "podman"
+	kernel := s.GetService().GetKernel()
+	configService := kernel.GetService(config.ServiceKey).(*config.Service)
+
+	engine, err := configService.GetAsString("host.compute.containers.engine")
+	if err != nil {
+		s.GetLogger().ErrorF("Failed to get engine: %s", err)
+		return defaultEngine
+	}
+	return engine
+
 }

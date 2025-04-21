@@ -18,6 +18,8 @@ host:
         enabled: false
   compute:
     enabled: true
-    port:
-      start: 59000
-      end: 59999
+    containers:
+      engine: podman
+      port:
+        start: 59000
+        end: 59999

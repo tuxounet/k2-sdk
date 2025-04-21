@@ -3,9 +3,14 @@ package containers
 func (p *Provider) Nuke() error {
 	p.GetLogger().TraceF("Nuking up %s provider", ProviderKey)
 
-	p.killRootlessPort()
+	engine := p.getContainerEngine()
+	err := engine.Nuke()
+	if err != nil {
+		p.GetLogger().ErrorF("Failed to nuke %s provider: %s", ProviderKey, err)
+		return err
+	}
 
-	err := p.getPortsMapSore().Nuke()
+	err = p.getPortsMapSore().Nuke()
 	if err != nil {
 		p.GetLogger().ErrorF("Failed to nuke portsmap store: %s", err)
 		return err
@@ -16,10 +21,10 @@ func (p *Provider) Nuke() error {
 func (p *Provider) Setup() error {
 	p.GetLogger().TraceF("Setting up %s provider", ProviderKey)
 
-	_, err := p.listContainers()
+	engine := p.getContainerEngine()
+	err := engine.Setup()
 	if err != nil {
-		p.GetLogger().ErrorF("%s provider is not ready : %s", ProviderKey, err.Error())
-		p.GetLogger().InfoF("Try to install podman with the following command: 'sudo apt install podman podman-compose'")
+		p.GetLogger().ErrorF("Failed to nuke %s provider: %s", ProviderKey, err)
 		return err
 	}
 

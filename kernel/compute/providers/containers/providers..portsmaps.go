@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/tuxounet/k2-sdk/kernel/compute/providers/containers/types"
-	"github.com/tuxounet/k2-sdk/kernel/config"
 )
 
 func (s *Provider) RegisterIngress(name string, order int, ingress *types.ContainerDefinitionIngress) (int, error) {
@@ -68,29 +67,5 @@ func (s *Provider) LookupIngressPort(name string, order int, target string) (*ty
 	s.GetLogger().Warn("LookupPort: no port found")
 
 	return nil, nil
-
-}
-
-func (s *Provider) getHostPortStart() (int, error) {
-
-	kernel := s.GetService().GetKernel()
-	configService := kernel.GetService(config.ServiceKey).(*config.Service)
-
-	port, err := configService.GetAsInt("host.compute.port.start")
-	if err != nil {
-		return -1, err
-	}
-	return port, nil
-
-}
-func (s *Provider) getHostPortEnd() (int, error) {
-	kernel := s.GetService().GetKernel()
-	configService := kernel.GetService(config.ServiceKey).(*config.Service)
-
-	port, err := configService.GetAsInt("host.compute.port.end")
-	if err != nil {
-		return -1, err
-	}
-	return port, nil
 
 }

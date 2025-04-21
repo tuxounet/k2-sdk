@@ -23,6 +23,9 @@ host:
         verifyUrl: "/auth/admin/verify"
         redirectParam: "redirect"
   compute:
-    port:
-      start: 59000
-      end: 59999
+    enabled: true
+    containers:
+      engine: podman
+      port:
+        start: 59000
+        end: 59999

@@ -1,4 +1,4 @@
-package containers
+package engines
 
 import (
 	"fmt"
@@ -8,55 +8,48 @@ import (
 	computeTypes "github.com/tuxounet/k2-sdk/kernel/compute/types"
 )
 
-func (p *Provider) Render() ([]computeTypes.RunnerDefinition, error) {
+func (p *PodmanEngine) RenderPlaybookTasks(definition types.ContainerDefinition, verb computeTypes.RunnerVerb) (string, error) {
 
-	definitions := p.GetDefinitions()
+	tasks := ""
 
-	runners := make([]computeTypes.RunnerDefinition, 0)
-
-	for _, definition := range definitions {
-
-		newRunnerDefinition := computeTypes.RunnerDefinition{
-			Name:      definition.Name,
-			Order:     definition.Order,
-			Provider:  ProviderKey,
-			Provision: "",
-			Start:     "",
-			Stop:      "",
-			Teardown:  "",
-		}
-
-		provisionScript, err := p.renderPlaybookTasks(definition, "provision")
+	switch verb {
+	case computeTypes.RunnerVerbProvision:
+		files, err := p.renderPodmanProvisionContainerFilesTask(definition)
 		if err != nil {
-			return nil, err
+			return "", err
 		}
-		newRunnerDefinition.Provision = provisionScript
 
-		startScript, err := p.renderPlaybookTasks(definition, "start")
+		tasks = files
+
+	case computeTypes.RunnerVerbStart:
+		container, err := p.renderPodmanProvisionContainerTask(definition)
 		if err != nil {
-			return nil, err
+			return "", err
 		}
-		newRunnerDefinition.Start = startScript
 
-		stopScript, err := p.renderPlaybookTasks(definition, "stop")
+		tasks = container
+
+	case computeTypes.RunnerVerbStop:
+		tasks = p.renderPodmanContainerDeclarationTask(definition, "stopped")
+
+	case computeTypes.RunnerVerbTeardown:
+
+		container := p.renderPodmanContainerDeclarationTask(definition, "absent")
+
+		files, err := p.renderPodmanUnprovisionContainerFilesTask(definition)
 		if err != nil {
-			return nil, err
+			return "", err
 		}
-		newRunnerDefinition.Stop = stopScript
 
-		teardownScript, err := p.renderPlaybookTasks(definition, "teardown")
-		if err != nil {
-			return nil, err
-		}
-		newRunnerDefinition.Teardown = teardownScript
+		tasks = files + container
 
-		runners = append(runners, newRunnerDefinition)
 	}
 
-	return runners, nil
+	return tasks, nil
+
 }
 
-func (p *Provider) renderContainerDeclarationTask(definition types.ContainerDefinition, state string) string {
+func (p *PodmanEngine) renderPodmanContainerDeclarationTask(definition types.ContainerDefinition, state string) string {
 
 	task := fmt.Sprintf("- name: container %s\n", definition.Name)
 	task += fmt.Sprintf("  containers.podman.podman_container: #%s\n", definition.Name)
@@ -67,7 +60,7 @@ func (p *Provider) renderContainerDeclarationTask(definition types.ContainerDefi
 
 }
 
-func (p *Provider) renderProvisionContainerTask(definition types.ContainerDefinition) (string, error) {
+func (p *PodmanEngine) renderPodmanProvisionContainerTask(definition types.ContainerDefinition) (string, error) {
 	localAddress, err := p.getLocalHostAddress()
 	if err != nil {
 		return "", err
@@ -156,7 +149,7 @@ func (p *Provider) renderProvisionContainerTask(definition types.ContainerDefini
 			case "content":
 				if volume.Binding.Content != "" {
 					targetPath := paths.CominePath("var", "compute", fmt.Sprintf("%d_%s", definition.Order, definition.Name), "init", volume.ContainerPath)
-					runDir := p.GetService().GetKernel().GetRunDirectory()
+					runDir := p.service.GetKernel().GetRunDirectory()
 					hostPath = paths.CominePath(runDir, targetPath)
 				} else {
 					return "", fmt.Errorf("content value is not set for volume %s", volume.ContainerPath)
@@ -188,7 +181,7 @@ func (p *Provider) renderProvisionContainerTask(definition types.ContainerDefini
 						}
 					}
 
-					hostPath = paths.CominePath(p.GetService().GetKernel().GetRunDirectory(), targetPath)
+					hostPath = paths.CominePath(p.service.GetKernel().GetRunDirectory(), targetPath)
 				}
 			}
 
@@ -230,10 +223,10 @@ func (p *Provider) renderProvisionContainerTask(definition types.ContainerDefini
 				containerPort := ing.ContainerPort
 				containerProtocol := "TCP"
 				hostAddress := localAddress
-				localPort, err := p.RegisterIngress(definition.Name, definition.Order, ing)
+				localPort, err := p.ingressResgistar(definition.Name, definition.Order, ing)
 
 				if err != nil {
-					p.GetLogger().ErrorF("Failed to register ingress: %s on definition %s %s", err, definition.Name, definition.Order)
+					p.logger.ErrorF("Failed to register ingress: %s on definition %s %s", err, definition.Name, definition.Order)
 					return "", err
 				}
 
@@ -247,7 +240,7 @@ func (p *Provider) renderProvisionContainerTask(definition types.ContainerDefini
 	return task, nil
 }
 
-func (p *Provider) renderProvisionContainerFilesTask(definition types.ContainerDefinition) (string, error) {
+func (p *PodmanEngine) renderPodmanProvisionContainerFilesTask(definition types.ContainerDefinition) (string, error) {
 
 	files := make(map[string]string)
 
@@ -264,7 +257,7 @@ func (p *Provider) renderProvisionContainerFilesTask(definition types.ContainerD
 	if len(files) > 0 {
 		paths := p.getPathsService()
 
-		runDir := p.GetService().GetKernel().GetRunDirectory()
+		runDir := p.service.GetKernel().GetRunDirectory()
 		initFolder := paths.CominePath(runDir, "var", "compute", fmt.Sprintf("%d_%s", definition.Order, definition.Name), "init")
 
 		fileProvisionTasks := ""
@@ -300,7 +293,7 @@ func (p *Provider) renderProvisionContainerFilesTask(definition types.ContainerD
 
 }
 
-func (p *Provider) renderUnprovisionContainerFilesTask(definition types.ContainerDefinition) (string, error) {
+func (p *PodmanEngine) renderPodmanUnprovisionContainerFilesTask(definition types.ContainerDefinition) (string, error) {
 
 	files := make([]string, 0)
 
@@ -317,7 +310,7 @@ func (p *Provider) renderUnprovisionContainerFilesTask(definition types.Containe
 	if len(files) > 0 {
 		paths := p.getPathsService()
 
-		runDir := p.GetService().GetKernel().GetRunDirectory()
+		runDir := p.service.GetKernel().GetRunDirectory()
 		initFolder := paths.CominePath(runDir, "var", "compute", fmt.Sprintf("%d_%s", definition.Order, definition.Name), "init")
 
 		fileProvisionTasks := fmt.Sprintf("- name: delete init folder for %s\n", definition.Name)
@@ -329,46 +322,5 @@ func (p *Provider) renderUnprovisionContainerFilesTask(definition types.Containe
 	}
 
 	return "", nil
-
-}
-
-func (p *Provider) renderPlaybookTasks(definition types.ContainerDefinition, verb computeTypes.RunnerVerb) (string, error) {
-
-	tasks := ""
-
-	switch verb {
-	case computeTypes.RunnerVerbProvision:
-		files, err := p.renderProvisionContainerFilesTask(definition)
-		if err != nil {
-			return "", err
-		}
-
-		tasks = files
-
-	case computeTypes.RunnerVerbStart:
-		container, err := p.renderProvisionContainerTask(definition)
-		if err != nil {
-			return "", err
-		}
-
-		tasks = container
-
-	case computeTypes.RunnerVerbStop:
-		tasks = p.renderContainerDeclarationTask(definition, "stopped")
-
-	case computeTypes.RunnerVerbTeardown:
-
-		container := p.renderContainerDeclarationTask(definition, "absent")
-
-		files, err := p.renderUnprovisionContainerFilesTask(definition)
-		if err != nil {
-			return "", err
-		}
-
-		tasks = files + container
-
-	}
-
-	return tasks, nil
 
 }
