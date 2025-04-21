@@ -2,7 +2,7 @@ GOPATH := $(shell go env GOPATH)
 
 prepare:
 	go install github.com/swaggo/swag/cmd/swag@v1.16.4
-	$(shell go env GOPATH)/bin/swag init --instanceName KNeeds --parseInternal --parseDepth 1  --generalInfo component.go
+	$(shell go env GOPATH)/bin/swag init --instanceName {{ .name }} --parseInternal --parseDepth 1  --generalInfo component.go
 	$(shell go env GOPATH)/bin/swag fmt  
 
 build: prepare
