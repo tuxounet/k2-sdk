@@ -25,7 +25,7 @@ host:
   compute:
     enabled: true
     containers:
-      engine: podman
+      engine: docker
       port:
         start: 59000
         end: 59999

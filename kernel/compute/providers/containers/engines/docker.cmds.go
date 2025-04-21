@@ -1,6 +1,8 @@
 package engines
 
 import (
+	"strings"
+
 	"github.com/tuxounet/k2-sdk/system"
 )
 
@@ -24,31 +26,37 @@ func (e *DockerEngine) listContainers() ([]*listDockerContainerOutput, error) {
 		return make([]*listDockerContainerOutput, 0), nil
 	}
 
-	out, err := system.LoadJSONFromString[[]map[string]any](raw)
-	if err != nil {
-		e.logger.ErrorF("%s provider listContainers failed: %s", e.Name, err)
-		return nil, err
+	lines := strings.Split(raw, "\n")
+	if len(lines) == 0 {
+		return make([]*listDockerContainerOutput, 0), nil
 	}
-
 	ret := []*listDockerContainerOutput{}
+	for _, line := range lines {
+		if strings.TrimSpace(line) == "" {
+			continue
+		}
 
-	for _, container := range out {
+		out, err := system.LoadJSONFromString[map[string]string](line)
+		if err != nil {
+			e.logger.ErrorF("%s provider listContainers failed: %s", e.Name, err)
+			return nil, err
+		}
+
 		ret = append(ret, &listDockerContainerOutput{
-			ID:    container["Id"].(string),
-			Image: container["Image"].(string),
-			State: container["State"].(string),
-			Names: container["Names"].([]any),
+			ID:    out["ID"],
+			Image: out["Image"],
+			State: out["State"],
+			Names: out["Names"],
 		})
 
 	}
-
 	return ret, nil
 
 }
 
 type listDockerContainerOutput struct {
-	ID    string        `json:"ID"`
-	Image string        `json:"Image"`
-	State string        `json:"State"`
-	Names []interface{} `json:"Names"`
+	ID    string `json:"ID"`
+	Image string `json:"Image"`
+	State string `json:"State"`
+	Names string `json:"Names"`
 }
