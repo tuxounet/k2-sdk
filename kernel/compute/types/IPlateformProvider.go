@@ -8,6 +8,7 @@ type IBasePlateformProvider interface {
 	GetName() string
 	GetService() runtimeTypes.IKernelService
 	GetLogger() runtimeTypes.ILogger
+	Init() error
 	Nuke() error
 	Setup() error
 	Render() ([]RunnerDefinition, error)

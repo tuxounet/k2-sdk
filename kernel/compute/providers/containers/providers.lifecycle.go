@@ -8,6 +8,16 @@ import (
 	computeTypes "github.com/tuxounet/k2-sdk/kernel/compute/types"
 )
 
+func (p *Provider) Init() error {
+
+	err := p.getPortsMapSore().Nuke()
+	if err != nil {
+		p.GetLogger().ErrorF("Failed to nuke portsmap store: %s", err)
+		return err
+	}
+	return nil
+}
+
 func (p *Provider) Nuke() error {
 	p.GetLogger().TraceF("Nuking up %s provider", ProviderKey)
 
@@ -21,11 +31,6 @@ func (p *Provider) Nuke() error {
 		return err
 	}
 
-	err = p.getPortsMapSore().Nuke()
-	if err != nil {
-		p.GetLogger().ErrorF("Failed to nuke portsmap store: %s", err)
-		return err
-	}
 	return nil
 }
 
@@ -36,8 +41,8 @@ func (p *Provider) Setup() error {
 	if containerEngine == nil {
 		return fmt.Errorf("container engine is not set")
 	}
-
-	err := containerEngine.Setup()
+	engine := containerEngine
+	err := engine.Setup()
 	if err != nil {
 		p.GetLogger().ErrorF("Failed to nuke %s provider: %s", ProviderKey, err)
 		return err

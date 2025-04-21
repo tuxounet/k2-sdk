@@ -24,6 +24,14 @@ func (s *Service) Init() error {
 		playbooks.NewProvider(s),
 	}
 
+	for _, p := range providers {
+		err := p.Init()
+		if err != nil {
+			s.GetLogger().ErrorF("nuke failed: %s", err)
+			return err
+		}
+	}
+
 	s.setProviders(providers)
 
 	return nil
@@ -97,12 +105,6 @@ func (s *Service) Register() error {
 		if !found {
 			s.GetLogger().ErrorF("provider %s not found", p)
 			return fmt.Errorf("provider %s not found", p)
-		}
-
-		err := provider.Nuke()
-		if err != nil {
-			s.GetLogger().ErrorF("provider %s nuke failed: %s", provider.GetName(), err)
-			return err
 		}
 
 		err = provider.Setup()
