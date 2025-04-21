@@ -7,32 +7,30 @@ import (
 	runtimeTypes "github.com/tuxounet/k2-sdk/types"
 )
 
-type PodmanEngine struct {
+type DockerEngine struct {
 	Name             string
 	logger           runtimeTypes.ILogger
 	service          runtimeTypes.IKernelService
 	ingressResgistar func(name string, order int, ingress *types.ContainerDefinitionIngress) (int, error)
 }
 
-func NewPodmanEngine(service runtimeTypes.IKernelService, ingressResgistar func(name string, order int, ingress *types.ContainerDefinitionIngress) (int, error)) types.IContainerEngine {
-	log := service.GetLogger().CreateSubLogger(fmt.Sprintf("engine-%s", "podman"))
+func NewDockerEngine(service runtimeTypes.IKernelService, ingressResgistar func(name string, order int, ingress *types.ContainerDefinitionIngress) (int, error)) types.IContainerEngine {
+	log := service.GetLogger().CreateSubLogger(fmt.Sprintf("engine-%s", "docker"))
 
-	return &PodmanEngine{
-		Name:             "podman",
+	return &DockerEngine{
+		Name:             "docker",
 		logger:           log,
 		service:          service,
 		ingressResgistar: ingressResgistar,
 	}
 }
 
-func (e *PodmanEngine) Setup() error {
+func (e *DockerEngine) Setup() error {
 	e.logger.TraceF("Nuking up %s provider", e.Name)
-
-	e.killRootlessPort()
 
 	return nil
 }
-func (e *PodmanEngine) Nuke() error {
+func (e *DockerEngine) Nuke() error {
 	e.logger.TraceF("Setting up %s provider", e.Name)
 
 	_, err := e.listContainers()

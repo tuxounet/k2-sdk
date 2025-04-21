@@ -8,7 +8,7 @@ import (
 	computeTypes "github.com/tuxounet/k2-sdk/kernel/compute/types"
 )
 
-func (p *PodmanEngine) RenderPlaybookTasks(definition types.ContainerDefinition, verb computeTypes.RunnerVerb) (string, error) {
+func (p *DockerEngine) RenderPlaybookTasks(definition types.ContainerDefinition, verb computeTypes.RunnerVerb) (string, error) {
 
 	tasks := ""
 
@@ -49,10 +49,10 @@ func (p *PodmanEngine) RenderPlaybookTasks(definition types.ContainerDefinition,
 
 }
 
-func (p *PodmanEngine) renderContainerDeclarationTask(definition types.ContainerDefinition, state string) string {
+func (p *DockerEngine) renderContainerDeclarationTask(definition types.ContainerDefinition, state string) string {
 
 	task := fmt.Sprintf("- name: container %s\n", definition.Name)
-	task += fmt.Sprintf("  containers.podman.podman_container: #%s\n", definition.Name)
+	task += fmt.Sprintf("  community.docker.docker_container: #%s\n", definition.Name)
 	task += fmt.Sprintf("    name: %d-%s\n", definition.Order, definition.Name)
 	task += fmt.Sprintf("    state: %s\n", state)
 
@@ -60,14 +60,14 @@ func (p *PodmanEngine) renderContainerDeclarationTask(definition types.Container
 
 }
 
-func (p *PodmanEngine) renderProvisionContainerTask(definition types.ContainerDefinition) (string, error) {
+func (p *DockerEngine) renderProvisionContainerTask(definition types.ContainerDefinition) (string, error) {
 	localAddress, err := p.getLocalHostAddress()
 	if err != nil {
 		return "", err
 	}
 
 	task := fmt.Sprintf("- name: container %s\n", definition.Name)
-	task += fmt.Sprintf("  containers.podman.podman_container: #%s\n", definition.Name)
+	task += fmt.Sprintf("  community.docker.docker_container: #%s\n", definition.Name)
 	task += fmt.Sprintf("    state: %s\n", "started")
 	task += fmt.Sprintf("    name: %d-%s\n", definition.Order, definition.Name)
 	task += fmt.Sprintf("    image: %s\n", definition.Image)
@@ -240,7 +240,7 @@ func (p *PodmanEngine) renderProvisionContainerTask(definition types.ContainerDe
 	return task, nil
 }
 
-func (p *PodmanEngine) renderProvisionContainerFilesTask(definition types.ContainerDefinition) (string, error) {
+func (p *DockerEngine) renderProvisionContainerFilesTask(definition types.ContainerDefinition) (string, error) {
 
 	files := make(map[string]string)
 
@@ -293,7 +293,7 @@ func (p *PodmanEngine) renderProvisionContainerFilesTask(definition types.Contai
 
 }
 
-func (p *PodmanEngine) renderUnprovisionContainerFilesTask(definition types.ContainerDefinition) (string, error) {
+func (p *DockerEngine) renderUnprovisionContainerFilesTask(definition types.ContainerDefinition) (string, error) {
 
 	files := make([]string, 0)
 
