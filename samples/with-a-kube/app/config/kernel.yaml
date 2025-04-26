@@ -2,24 +2,30 @@ host:
   address: 127.0.0.1
   ingress:
     address: 127.0.0.1
-    port: 8080
-    rootUrl: http://127.0.0.1:8080
-    # tls:
-    #   port: 8443
-    #   cert: "etc/pki/ssl/s.sample.local.crt"
-    #   key: "etc/pki/ssl/s.sample.local.key"
+    port: 28080
+    rootUrl: https://localhost:28443
+    tls:
+      port: 28443
+      cert: "etc/pki/ssl/s.sample.local.crt"
+      key: "etc/pki/ssl/s.sample.local.key"
     auth:
       defaultAccess: "public"
       public:
         enabled: true
       authenticated:
         enabled: false
+        loginUrl: "/auth/users/login"
+        verifyUrl: "/auth/users/verify"
+        redirectParam: "redirect"
       admin:
         enabled: false
+        loginUrl: "/auth/admin/login"
+        verifyUrl: "/auth/admin/verify"
+        redirectParam: "redirect"
   compute:
     enabled: true
     containers:
-      engine: podman
+      engine: docker
       port:
         start: 59000
         end: 59999

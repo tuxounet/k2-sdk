@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/tuxounet/k2-sdk/kernel/compute/providers/containers"
+	"github.com/tuxounet/k2-sdk/kernel/compute/providers/kubernetes"
 	"github.com/tuxounet/k2-sdk/kernel/compute/providers/playbooks"
 
 	"github.com/tuxounet/k2-sdk/kernel/compute/types"
@@ -22,6 +23,7 @@ func (s *Service) Init() error {
 	providers := []types.IBasePlateformProvider{
 		containers.NewProvider(s),
 		playbooks.NewProvider(s),
+		kubernetes.NewProvider(s),
 	}
 
 	for _, p := range providers {

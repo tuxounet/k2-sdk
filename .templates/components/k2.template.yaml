@@ -1,0 +1,14 @@
+k2:
+  metadata:
+    id: k2.sdk.templates.component
+    kind: "template"
+  body:
+    name: "component"
+    parameters:
+      name: "component"
+      description: "Name of the new app"
+      module: "my.git.host/my-app"
+      sdk_module: "github.com/tuxounet/k2-sdk"
+    scripts:
+      pre: []
+      post: []

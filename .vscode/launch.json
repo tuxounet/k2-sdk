@@ -12,6 +12,15 @@
       "console": "integratedTerminal",
       "program": "${workspaceFolder}/samples/standalone/main.go",
       "cwd": "${workspaceFolder}/samples/standalone"
+    },
+    {
+      "name": "Debug SDK With A Kube Sample",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "console": "integratedTerminal",
+      "program": "${workspaceFolder}/samples/with-a-kube/main.go",
+      "cwd": "${workspaceFolder}/samples/with-a-kube"
     }
   ]
 }
