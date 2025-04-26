@@ -1,8 +1,9 @@
 package kubernetes
 
 import (
-	_ "embed"
+	"embed"
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/tuxounet/k2-sdk/kernel/compute/providers/kubernetes/types"
@@ -16,17 +17,11 @@ var setupPlaybook string
 //go:embed verbs/nuke.yaml
 var nukePlaybook string
 
-//go:embed verbs/provision.yaml
-var provisionPlaybook string
-
 //go:embed verbs/start.yaml
 var startPlaybook string
 
 //go:embed verbs/stop.yaml
 var stopPlaybook string
-
-//go:embed verbs/teardown.yaml
-var teardownPlaybook string
 
 func (p *Provider) Render() ([]computeTypes.RunnerDefinition, error) {
 
@@ -73,11 +68,6 @@ func (p *Provider) Render() ([]computeTypes.RunnerDefinition, error) {
 			Teardown:  "",
 		}
 
-		provisionScript, err := p.renderPlaybookTasks(&definition, provisionPlaybook)
-		if err != nil {
-			return nil, err
-		}
-		newRunnerDefinition.Provision = provisionScript
 		startScript, err := p.renderPlaybookTasks(&definition, startPlaybook)
 		if err != nil {
 			return nil, err
@@ -88,11 +78,6 @@ func (p *Provider) Render() ([]computeTypes.RunnerDefinition, error) {
 			return nil, err
 		}
 		newRunnerDefinition.Stop = stopScript
-		teardownScript, err := p.renderPlaybookTasks(&definition, teardownPlaybook)
-		if err != nil {
-			return nil, err
-		}
-		newRunnerDefinition.Teardown = teardownScript
 
 		runners = append(runners, newRunnerDefinition)
 	}
@@ -100,8 +85,8 @@ func (p *Provider) Render() ([]computeTypes.RunnerDefinition, error) {
 	return runners, nil
 }
 
-func (p *Provider) getTemplateValues() map[string]string {
-	return map[string]string{
+func (p *Provider) getTemplateValues() map[string]any {
+	return map[string]any{
 		"kubecontext": strings.ToLower(p.GetService().GetKernel().GetApp().GetName()),
 		"kubeconfig":  p.getKubeConfigValue(),
 		"kubeApiPort": fmt.Sprintf("%d", p.getKubeApiPort()),
@@ -128,6 +113,12 @@ func (p *Provider) renderPlaybookTasks(definition *types.NamespaceDefinition, sc
 	values := p.getTemplateValues()
 	values["namespace"] = definition.Name
 
+	entries, err := walkTemplates(definition.Templates)
+	if err != nil {
+		return "", fmt.Errorf("failed to walk templates: %s", err)
+	}
+	values["templates"] = entries
+
 	untemplated, err := system.UnTemplateWithGoTemplate(script, values)
 	if err != nil {
 		return "", fmt.Errorf("failed to untemplate script: %s", err)
@@ -135,5 +126,45 @@ func (p *Provider) renderPlaybookTasks(definition *types.NamespaceDefinition, sc
 	fullPlaybookTasks += untemplated
 
 	return fullPlaybookTasks, nil
+
+}
+
+func walkTemplates(fs *embed.FS) (map[string]any, error) {
+	templates := make(map[string]any)
+
+	var readDirRecursive func(string) error
+	readDirRecursive = func(dir string) error {
+		entries, err := fs.ReadDir(dir)
+		if err != nil {
+			return err
+		}
+
+		for _, entry := range entries {
+			fullPath := entry.Name()
+			if entry.IsDir() {
+				if err := readDirRecursive(filepath.Join(dir, fullPath)); err != nil {
+					return err
+				}
+			} else {
+				content, err := fs.ReadFile(filepath.Join(dir, fullPath))
+				if err != nil {
+					continue
+				}
+				tpl, err := system.LoadYamlFromString[any](string(content))
+				if err != nil {
+					return fmt.Errorf("failed to load yaml from string: %s", err)
+				}
+
+				templates[filepath.Join(dir, fullPath)] = tpl
+			}
+		}
+		return nil
+	}
+
+	if err := readDirRecursive("."); err != nil {
+		return nil, fmt.Errorf("failed to read templates: %s", err)
+	}
+
+	return templates, nil
 
 }

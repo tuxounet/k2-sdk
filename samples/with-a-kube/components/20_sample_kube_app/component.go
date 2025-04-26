@@ -5,6 +5,7 @@ import (
 
 	"github.com/tuxounet/k2-sdk/bases"
 
+	"github.com/tuxounet/k2-sdk/samples/with-a-kube/components/20_sample_kube_app/namespaces/admin"
 	"github.com/tuxounet/k2-sdk/samples/with-a-kube/components/20_sample_kube_app/namespaces/database"
 	"github.com/tuxounet/k2-sdk/samples/with-a-kube/components/20_sample_kube_app/namespaces/frontend"
 	"github.com/tuxounet/k2-sdk/samples/with-a-kube/components/20_sample_kube_app/ui"
@@ -25,6 +26,7 @@ func NewComponent(app types.IApp) types.IAppComponent {
 		&conf,
 		types.AccessPolicyPublic,
 		[]types.AppControllerCtor{
+			admin.NewController,
 			database.NewController,
 			frontend.NewController,
 		},

@@ -1,4 +1,4 @@
-package database
+package admin
 
 import (
 	"embed"
@@ -17,8 +17,8 @@ var templates embed.FS
 
 func NewController(component types.IAppComponent) types.IAppController {
 	base := kubernetesBases.NewBaseControllerKubernetes(component, &kubernetesTypes.NamespaceDefinition{
-		Order:     10,
-		Name:      "database",
+		Order:     5,
+		Name:      "admin",
 		Templates: &templates,
 	}, nil)
 	return &Controller{

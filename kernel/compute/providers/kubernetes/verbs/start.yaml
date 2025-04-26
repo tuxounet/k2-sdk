@@ -1,7 +1,21 @@
+{{ $kubeconfig := .kubeconfig }}
+{{ $namespace := .namespace }}
+
 - name: Create a k8s namespace
   kubernetes.core.k8s:
-    kubeconfig: "{{ .kubeconfig }}"
+    kubeconfig: "{{ $kubeconfig }}"
     state: present
-    name: "{{ .namespace }}"
+    name: "{{ $namespace }}"
     api_version: v1
     kind: Namespace
+
+{{ range $key, $value := .templates }}
+- name: apply kube manifest
+  kubernetes.core.k8s:
+    state: present
+    kubeconfig: "{{ $kubeconfig }}"
+    namespace: "{{ $namespace }}"
+    definition: {{ toRawJson  $value }}
+{{ end }}
+
+
