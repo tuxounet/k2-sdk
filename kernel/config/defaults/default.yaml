@@ -24,6 +24,6 @@ host:
         start: 59000
         end: 59999
     kubernetes:
-      enabled: false
       useEmbedded: true
       kubeConfig: "{{ run_dir }}/home/.kube/config"
+      kubeApiPort: 46443

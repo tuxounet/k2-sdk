@@ -1,0 +1,7 @@
+- name: Create a k8s namespace
+  kubernetes.core.k8s:
+    kubeconfig: "{{ .kubeconfig }}"
+    state: present
+    name: "{{ .namespace }}"
+    api_version: v1
+    kind: Namespace

@@ -1,4 +1,4 @@
-package db
+package frontend
 
 import (
 	"github.com/tuxounet/k2-sdk/bases"
@@ -10,7 +10,7 @@ type Controller struct {
 }
 
 func NewController(component types.IAppComponent) types.IAppController {
-	base := bases.NewBaseAppController(component, "db", 21, nil)
+	base := bases.NewBaseAppController(component, "frontend", 30, nil)
 	return &Controller{
 		base,
 	}

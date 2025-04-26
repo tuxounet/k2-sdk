@@ -1,0 +1,33 @@
+- name: prepare folders
+  file:
+    path: "{{ "{{" }} item {{ "}}" }}"
+    state: directory
+
+    recurse: yes
+  with_items:
+    - "{{ "{{" }} run_dir {{ "}}" }}/home/.kube"
+    - "{{ "{{" }} run_dir {{ "}}" }}/var/k3s"
+
+- name: start embedded k8s node
+  community.docker.docker_container: #control_plane
+    state: started
+    name: "{{ .kubecontext }}"
+    image: docker.io/rancher/k3s:v1.30.11-k3s1
+    env:
+      TZ: "Europe/Paris"
+      K3S_TOKEN: "a_random_token"
+      K3S_KUBECONFIG_OUTPUT: "/config/config"
+      K3S_KUBECONFIG_MODE: "666"
+    command:
+      - server
+      - --https-listen-port={{ .kubeApiPort }}
+      - --node-name=single-node
+      - --disable-cloud-controller
+      - --prefer-bundled-bin
+    privileged: yes
+    user: root
+    volumes:
+      - "{{ "{{" }} run_dir {{ "}}" }}/var/k3s:/var/lib/rancher/k3s"
+      - "{{ "{{" }} run_dir {{ "}}" }}/home/.kube:/config"
+    ports:
+      - "0.0.0.0:{{ .kubeApiPort }}:{{ .kubeApiPort }}/tcp"
