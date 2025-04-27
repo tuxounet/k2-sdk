@@ -1,20 +1,19 @@
 package compute
 
 import (
-	"github.com/tuxounet/k2-sdk/bases"
-
-	"github.com/tuxounet/k2-sdk/types"
+	runtimeBases "github.com/tuxounet/k2-sdk/bases"
+	runtimeTypes "github.com/tuxounet/k2-sdk/types"
 )
 
 const ServiceKey = "compute"
 
 type Service struct {
-	bases.BaseKernelService
+	runtimeBases.BaseKernelService
 }
 
-func NewService(k types.IKernel) types.IKernelService {
+func NewService(k runtimeTypes.IKernel) runtimeTypes.IKernelService {
 
-	base := bases.NewBaseKernelService(k, ServiceKey)
+	base := runtimeBases.NewBaseKernelService(k, ServiceKey)
 	instance := &Service{base}
 
 	return instance

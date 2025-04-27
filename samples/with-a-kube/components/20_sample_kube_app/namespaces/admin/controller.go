@@ -20,6 +20,12 @@ func NewController(component types.IAppComponent) types.IAppController {
 		Order:     5,
 		Name:      "admin",
 		Templates: &templates,
+		Ingresses: []kubernetesTypes.NamespaceIngress{
+			{
+				AccessPolicy: types.AccessPolicyAdmin,
+				IngressPath:  "/admin",
+			},
+		},
 	}, nil)
 	return &Controller{
 		base,

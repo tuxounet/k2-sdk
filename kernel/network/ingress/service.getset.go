@@ -1,6 +1,10 @@
 package ingress
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/tuxounet/k2-sdk/kernel/network/ingress/types"
+	storesTypes "github.com/tuxounet/k2-sdk/kernel/storage/stores/types"
+)
 
 func (s *Service) GetServer() *gin.Engine {
 	data := s.GetData("server")
@@ -24,4 +28,9 @@ func (s *Service) GetRouter() *gin.RouterGroup {
 	}
 
 	return data.(*gin.RouterGroup)
+}
+
+func (s *Service) getIngressesStore() storesTypes.IBaseObjectStore[[]types.IngressDefinition] {
+	return s.GetData("ingresses").(storesTypes.IBaseObjectStore[[]types.IngressDefinition])
+
 }

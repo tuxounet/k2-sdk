@@ -9,15 +9,21 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/tuxounet/k2-sdk/kernel/network/ingress/middlewares/auth"
+
 	"github.com/tuxounet/k2-sdk/kernel/network/ingress/middlewares/cdn"
 	"github.com/tuxounet/k2-sdk/kernel/network/ingress/middlewares/docs"
 	"github.com/tuxounet/k2-sdk/kernel/network/ingress/middlewares/logger"
+	"github.com/tuxounet/k2-sdk/kernel/network/ingress/middlewares/routes"
 	"github.com/tuxounet/k2-sdk/kernel/network/ingress/middlewares/ui"
 )
 
 func (s *Service) Init() error {
 
+	err := s.getIngressesStore().Nuke()
+	if err != nil {
+		s.GetLogger().ErrorF("Failed to nuke ingresses: %s", err.Error())
+		return err
+	}
 	return nil
 }
 
@@ -65,12 +71,6 @@ func (s *Service) Register() error {
 	}
 
 	router := server.Group(baseUrl)
-
-	err = auth.Register(s, router)
-	if err != nil {
-		s.GetLogger().ErrorF("Failed to register auth: %s", err.Error())
-		return err
-	}
 
 	components := app.GetComponents()
 
@@ -137,6 +137,21 @@ func (s *Service) Register() error {
 
 		}
 
+	}
+
+	ingStore := s.getIngressesStore()
+	records, err := ingStore.GetValue()
+	if err != nil {
+		s.GetLogger().ErrorF("Failed to get ingresses: %s", err.Error())
+		return err
+	}
+	if len(*records) > 0 {
+		s.GetLogger().DebugF("Found %d ingresses", len(*records))
+		err = routes.Register(s, router, *records)
+		if err != nil {
+			s.GetLogger().ErrorF("Failed to register ingresses: %s", err.Error())
+			return err
+		}
 	}
 
 	return nil

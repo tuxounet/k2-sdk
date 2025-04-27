@@ -7,7 +7,6 @@ import (
 
 func (s *Service) getConfigService() *config.Service {
 	return s.GetKernel().GetService(config.ServiceKey).(*config.Service)
-
 }
 
 func (s *Service) getPathsService() *paths.Service {

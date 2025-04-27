@@ -4,24 +4,28 @@ import (
 	"fmt"
 
 	"github.com/tuxounet/k2-sdk/kernel/compute/providers/containers/types"
+	ingressTypes "github.com/tuxounet/k2-sdk/kernel/network/ingress/types"
+	storesTypes "github.com/tuxounet/k2-sdk/kernel/storage/stores/types"
 	runtimeTypes "github.com/tuxounet/k2-sdk/types"
 )
 
 type PodmanEngine struct {
-	Name             string
-	logger           runtimeTypes.ILogger
-	service          runtimeTypes.IKernelService
-	ingressResgistar func(name string, order int, ingress *types.ContainerDefinitionIngress) (int, error)
+	Name            string
+	logger          runtimeTypes.ILogger
+	service         runtimeTypes.IKernelService
+	portMapStore    storesTypes.IBaseObjectStore[[]types.PortsMapRecord]
+	ingressRegistar ingressTypes.IngressRegistarFunction
 }
 
-func NewPodmanEngine(service runtimeTypes.IKernelService, ingressResgistar func(name string, order int, ingress *types.ContainerDefinitionIngress) (int, error)) types.IContainerEngine {
+func NewPodmanEngine(service runtimeTypes.IKernelService, portMapStore storesTypes.IBaseObjectStore[[]types.PortsMapRecord], ingressRegistar ingressTypes.IngressRegistarFunction) types.IContainerEngine {
 	log := service.GetLogger().CreateSubLogger(fmt.Sprintf("engine-%s", "podman"))
 
 	return &PodmanEngine{
-		Name:             "podman",
-		logger:           log,
-		service:          service,
-		ingressResgistar: ingressResgistar,
+		Name:            "podman",
+		logger:          log,
+		service:         service,
+		ingressRegistar: ingressRegistar,
+		portMapStore:    portMapStore,
 	}
 }
 

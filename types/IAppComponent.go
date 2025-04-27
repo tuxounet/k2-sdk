@@ -26,11 +26,3 @@ type IAppComponent interface {
 }
 
 type AppComponentCtor = func(app IApp) IAppComponent
-
-type IAccessPolicy string
-
-const (
-	AccessPolicyPublic        IAccessPolicy = "public"
-	AccessPolicyAuthenticated IAccessPolicy = "authenticated"
-	AccessPolicyAdmin         IAccessPolicy = "admin"
-)

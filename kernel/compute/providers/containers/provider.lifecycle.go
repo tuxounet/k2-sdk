@@ -9,12 +9,12 @@ import (
 )
 
 func (p *Provider) Init() error {
-
 	err := p.getPortsMapSore().Nuke()
 	if err != nil {
 		p.GetLogger().ErrorF("Failed to nuke portsmap store: %s", err)
 		return err
 	}
+
 	return nil
 }
 
@@ -60,9 +60,9 @@ func (p *Provider) Render() ([]computeTypes.RunnerDefinition, error) {
 	var engine containersTypes.IContainerEngine
 	switch engineName {
 	case "podman":
-		engine = engines.NewPodmanEngine(p.GetService(), p.RegisterIngress)
+		engine = engines.NewPodmanEngine(p.GetService(), p.getPortsMapSore(), p.GetIngressRegistar())
 	case "docker":
-		engine = engines.NewDockerEngine(p.GetService(), p.RegisterIngress)
+		engine = engines.NewDockerEngine(p.GetService(), p.getPortsMapSore(), p.GetIngressRegistar())
 	default:
 		return nil, fmt.Errorf("unknown engine: %s", engine)
 	}

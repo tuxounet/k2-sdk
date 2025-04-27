@@ -1,4 +1,4 @@
-package levels
+package access
 
 import (
 	"crypto/tls"
@@ -13,28 +13,30 @@ import (
 	"github.com/tuxounet/k2-sdk/types"
 )
 
-func isAdminEnabled(configService *config.Service) bool {
-	admin_enabled, err := configService.GetAsBool("host.ingress.auth.admin.enabled")
+func isAuthenticatedEnabled(configService *config.Service) bool {
+	authenticated_enabled, err := configService.GetAsBool("host.ingress.auth.authenticated.enabled")
 	if err != nil {
 		return false
 	}
-	return admin_enabled
+	return authenticated_enabled
 }
 
-func AllowAccessLevelAdmin(req *http.Request, log types.ILogger, configService *config.Service) bool {
+func AllowAccessLevelAuthenticated(req *http.Request, log types.ILogger, configService *config.Service) bool {
+
 	requestUrl := req.URL.Path
 	requestQuery := req.URL.RawQuery
 
-	if !isAdminEnabled(configService) {
-		log.InfoF("Admin access is disabled for path: %s", requestUrl)
+	if !isAuthenticatedEnabled(configService) {
+		log.InfoF("Authenticated access is disabled for path: %s", requestUrl)
 		return false
 	}
-	verify_url, err := configService.GetAsString("host.ingress.auth.admin.verifyUrl")
+
+	verify_url, err := configService.GetAsString("host.ingress.auth.authenticated.verifyUrl")
 	if err != nil {
 		log.ErrorF("Failed to get verifyUrl: %s", err.Error())
 		return false
 	}
-	redirect_param, err := configService.GetAsString("host.ingress.auth.admin.redirectParam")
+	redirect_param, err := configService.GetAsString("host.ingress.auth.authenticated.redirectParam")
 	if err != nil {
 		log.ErrorF("Failed to get redirectParam: %s", err.Error())
 		return false
@@ -89,19 +91,18 @@ func AllowAccessLevelAdmin(req *http.Request, log types.ILogger, configService *
 	}
 
 	return false
-
 }
 
-func RedirectAccessLevelAdminLogin(req *http.Request, log types.ILogger, configService *config.Service, ctx *gin.Context) {
+func RedirectAccessLevelAuthenticatedLogin(req *http.Request, log types.ILogger, configService *config.Service, ctx *gin.Context) {
 	requestUrl := req.URL.Path
 	requestQuery := req.URL.RawQuery
 
-	if !isAdminEnabled(configService) {
-		log.InfoF("Admin access is disabled for path: %s", requestUrl)
+	if !isAuthenticatedEnabled(configService) {
+		log.InfoF("Authenticated access is disabled for path: %s", requestUrl)
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 	}
 
-	login_url, err := configService.GetAsString("host.ingress.auth.admin.loginUrl")
+	login_url, err := configService.GetAsString("host.ingress.auth.authenticated.loginUrl")
 	if err != nil {
 		log.ErrorF("Failed to get loginUrl: %s", err.Error())
 		ctx.AbortWithStatus(http.StatusUnauthorized)
@@ -115,7 +116,7 @@ func RedirectAccessLevelAdminLogin(req *http.Request, log types.ILogger, configS
 		return
 	}
 
-	redirect_param, err := configService.GetAsString("host.ingress.auth.admin.redirectParam")
+	redirect_param, err := configService.GetAsString("host.ingress.auth.authenticated.redirectParam")
 	if err != nil {
 		log.ErrorF("Failed to get redirectParam: %s", err.Error())
 		ctx.AbortWithStatus(http.StatusUnauthorized)
@@ -130,4 +131,5 @@ func RedirectAccessLevelAdminLogin(req *http.Request, log types.ILogger, configS
 	log.InfoF("Redirecting to login: %s", loginUrl.String())
 	req.URL.Path = loginUrl.String()
 	ctx.Redirect(http.StatusFound, loginUrl.String())
+	ctx.Abort()
 }

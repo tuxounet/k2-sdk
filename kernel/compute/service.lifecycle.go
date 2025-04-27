@@ -7,6 +7,8 @@ import (
 	"github.com/tuxounet/k2-sdk/kernel/compute/providers/kubernetes"
 	"github.com/tuxounet/k2-sdk/kernel/compute/providers/playbooks"
 
+	"slices"
+
 	"github.com/tuxounet/k2-sdk/kernel/compute/types"
 )
 
@@ -20,10 +22,11 @@ func (s *Service) Init() error {
 		return nil
 	}
 	s.GetLogger().TraceF("begin init")
+
 	providers := []types.IBasePlateformProvider{
-		containers.NewProvider(s),
-		playbooks.NewProvider(s),
-		kubernetes.NewProvider(s),
+		containers.NewProvider(s, s.getIngressService().RegisterIngress),
+		playbooks.NewProvider(s, s.getIngressService().RegisterIngress),
+		kubernetes.NewProvider(s, s.getIngressService().RegisterIngress),
 	}
 
 	for _, p := range providers {
@@ -82,13 +85,7 @@ func (s *Service) Register() error {
 	requiredProviders := make([]string, 0)
 	for _, r := range allRunners {
 		if r.Provider != "" {
-			found := false
-			for _, p := range requiredProviders {
-				if p == r.Provider {
-					found = true
-					break
-				}
-			}
+			found := slices.Contains(requiredProviders, r.Provider)
 			if !found {
 				requiredProviders = append(requiredProviders, r.Provider)
 			}

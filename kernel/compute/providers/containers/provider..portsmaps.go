@@ -1,71 +1,67 @@
 package containers
 
-import (
-	"errors"
+// func (s *Provider) AllocateLocalPort(name string, order int, ingress *ingressTypes.IngressDefinition) (int, error) {
 
-	"github.com/tuxounet/k2-sdk/kernel/compute/providers/containers/types"
-)
+// 	portsmapStore := s.getPortsMapSore()
+// 	records, err := portsmapStore.GetValue()
+// 	if err != nil {
+// 		return -1, err
+// 	}
+// 	allRecords := *records
 
-func (s *Provider) RegisterIngress(name string, order int, ingress *types.ContainerDefinitionIngress) (int, error) {
+// 	portStart, err := s.getHostPortStart()
+// 	if err != nil {
+// 		return -1, err
+// 	}
+// 	index := len(allRecords)
 
-	portsmapStore := s.getPortsMapSore()
-	records, err := portsmapStore.GetValue()
-	if err != nil {
-		return -1, err
-	}
-	allRecords := *records
+// 	localPort := portStart + index
 
-	portStart, err := s.getHostPortStart()
-	if err != nil {
-		return -1, err
-	}
-	index := len(allRecords)
+// 	portEnd, err := s.getHostPortEnd()
+// 	if err != nil {
+// 		return -1, err
+// 	}
 
-	localPort := portStart + index
+// 	if localPort > portEnd {
+// 		return -1, errors.New("no more ports available")
+// 	}
 
-	portEnd, err := s.getHostPortEnd()
-	if err != nil {
-		return -1, err
-	}
+// 	ingress.ServicePort = localPort
 
-	if localPort > portEnd {
-		return -1, errors.New("no more ports available")
-	}
+// 	record := containersTypes.PortsMapRecord{
+// 		LocalPort:     localPort,
+// 		ContainerName: name,
+// 		Order:         order,
+// 		Ingress:       ingress,
+// 	}
 
-	record := types.PortsMapRecord{
-		LocalPort:     localPort,
-		ContainerName: name,
-		Order:         order,
-		Ingress:       ingress,
-	}
+// 	allRecords = append(allRecords, record)
 
-	allRecords = append(allRecords, record)
+// 	err = portsmapStore.SetValue(allRecords)
+// 	if err != nil {
+// 		s.GetLogger().ErrorF("Failed to write portmaps: %s", err)
+// 		return -1, err
+// 	}
 
-	err = portsmapStore.SetValue(allRecords)
-	if err != nil {
-		s.GetLogger().ErrorF("Failed to write portmaps: %s", err)
-		return -1, err
-	}
+// 	return record.LocalPort, nil
+// }
 
-	return record.LocalPort, nil
-}
+// func (s *Service) LookupIngressPort(name string, order int, target string) (*types.PortsMapRecord, error) {
+// 	portsmapStore := s.getPortsMapSore()
+// 	records, err := portsmapStore.GetValue()
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	allRecords := *records
 
-func (s *Provider) LookupIngressPort(name string, order int, target string) (*types.PortsMapRecord, error) {
-	portsmapStore := s.getPortsMapSore()
-	records, err := portsmapStore.GetValue()
-	if err != nil {
-		return nil, err
-	}
-	allRecords := *records
+// 	for _, port := range allRecords {
+// 		if port.Order == order && port.ContainerName == name && port.Ingress != nil && port.Ingress.Path == target {
+// 			return &port, nil
+// 		}
+// 	}
 
-	for _, port := range allRecords {
-		if port.Order == order && port.ContainerName == name && port.Ingress != nil && port.Ingress.Path == target {
-			return &port, nil
-		}
-	}
+// 	s.GetLogger().Warn("LookupPort: no port found")
 
-	s.GetLogger().Warn("LookupPort: no port found")
+// 	return nil, nil
 
-	return nil, nil
-
-}
+// }

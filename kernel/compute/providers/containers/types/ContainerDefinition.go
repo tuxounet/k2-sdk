@@ -1,5 +1,9 @@
 package types
 
+import (
+	runtimeTypes "github.com/tuxounet/k2-sdk/types"
+)
+
 type ContainerDefinition struct {
 	Name       string                        `json:"name"`
 	Order      int                           `json:"order"`
@@ -19,8 +23,9 @@ type ContainerDefinitionSecurity struct {
 }
 
 type ContainerDefinitionIngress struct {
-	ContainerPort string
+	ContainerPort int
 	Path          string
+	AccessPolicy  runtimeTypes.IAccessPolicy
 }
 
 type ContainerDefinitionPort struct {

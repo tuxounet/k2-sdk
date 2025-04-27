@@ -20,7 +20,8 @@ func NewController(component types.IAppComponent) types.IAppController {
 		Image: "docker.io/kennethreitz/httpbin:latest",
 		Ingresses: []*containersTypes.ContainerDefinitionIngress{
 			{
-				ContainerPort: "80",
+				AccessPolicy:  types.AccessPolicyAuthenticated,
+				ContainerPort: 80,
 				Path:          "/" + ControllerKey,
 			},
 		},

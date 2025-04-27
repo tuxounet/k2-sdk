@@ -2,6 +2,7 @@ package bases
 
 import (
 	"github.com/tuxounet/k2-sdk/kernel/compute/types"
+	ingressTypes "github.com/tuxounet/k2-sdk/kernel/network/ingress/types"
 	runtimeTypes "github.com/tuxounet/k2-sdk/types"
 )
 
@@ -42,4 +43,8 @@ func (b *BasePlateformProvider[D]) ResetDefinitions() {
 
 func (b *BasePlateformProvider[D]) GetRunners() []types.RunnerDefinition {
 	return b.runners
+}
+
+func (b *BasePlateformProvider[D]) GetIngressRegistar() ingressTypes.IngressRegistarFunction {
+	return b.ingressRegistar
 }

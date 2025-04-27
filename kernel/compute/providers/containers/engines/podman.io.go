@@ -32,3 +32,26 @@ func (p *PodmanEngine) getRootStore() (*storeTypes.Store, error) {
 	}
 	return store, nil
 }
+
+func (s *PodmanEngine) getHostPortStart() (int, error) {
+
+	kernel := s.service.GetKernel()
+	configService := kernel.GetService(config.ServiceKey).(*config.Service)
+
+	port, err := configService.GetAsInt("host.compute.containers.port.start")
+	if err != nil {
+		return -1, err
+	}
+	return port, nil
+
+}
+func (s *PodmanEngine) getHostPortEnd() (int, error) {
+	kernel := s.service.GetKernel()
+	configService := kernel.GetService(config.ServiceKey).(*config.Service)
+
+	port, err := configService.GetAsInt("host.compute.containers.port.end")
+	if err != nil {
+		return -1, err
+	}
+	return port, nil
+}

@@ -2,6 +2,7 @@ package compute
 
 import (
 	"github.com/tuxounet/k2-sdk/kernel/config"
+	"github.com/tuxounet/k2-sdk/kernel/network/ingress"
 	"github.com/tuxounet/k2-sdk/kernel/storage/paths"
 	"github.com/tuxounet/k2-sdk/kernel/storage/stores"
 	storeTypes "github.com/tuxounet/k2-sdk/kernel/storage/stores/types"
@@ -13,6 +14,10 @@ func (s *Service) getPathsService() *paths.Service {
 
 func (s *Service) getConfigService() *config.Service {
 	return s.GetKernel().GetService(config.ServiceKey).(*config.Service)
+}
+
+func (s *Service) getIngressService() *ingress.Service {
+	return s.GetKernel().GetService(ingress.ServiceKey).(*ingress.Service)
 }
 
 func (s *Service) getRootStore() (*storeTypes.Store, error) {

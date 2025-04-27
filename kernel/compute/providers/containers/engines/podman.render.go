@@ -1,11 +1,14 @@
 package engines
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/tuxounet/k2-sdk/kernel/compute/providers/containers/types"
+
 	computeTypes "github.com/tuxounet/k2-sdk/kernel/compute/types"
+	ingressTypes "github.com/tuxounet/k2-sdk/kernel/network/ingress/types"
 )
 
 func (p *PodmanEngine) RenderPlaybookTasks(definition types.ContainerDefinition, verb computeTypes.RunnerVerb) (string, error) {
@@ -223,7 +226,8 @@ func (p *PodmanEngine) renderProvisionContainerTask(definition types.ContainerDe
 				containerPort := ing.ContainerPort
 				containerProtocol := "TCP"
 				hostAddress := localAddress
-				localPort, err := p.ingressResgistar(definition.Name, definition.Order, ing)
+
+				localPort, err := p.allocateLocalPort(definition, containerPort)
 
 				if err != nil {
 					p.logger.ErrorF("Failed to register ingress: %s on definition %s %s", err, definition.Name, definition.Order)
@@ -231,7 +235,19 @@ func (p *PodmanEngine) renderProvisionContainerTask(definition types.ContainerDe
 				}
 
 				if localPort > 0 {
-					task += fmt.Sprintf("      - %s:%s/%s\n", fmt.Sprintf("%s:%d", hostAddress, localPort), containerPort, strings.ToLower(containerProtocol))
+					ingressDef := &ingressTypes.IngressDefinition{
+						AccessPolicy: ing.AccessPolicy,
+						ServiceHost:  hostAddress,
+						ServicePort:  localPort,
+						IngressPath:  ing.Path,
+					}
+					err = p.ingressRegistar(ingressDef)
+					if err != nil {
+						p.logger.ErrorF("Failed to register ingress: %s on definition %s %s", err, definition.Name, definition.Order)
+						return "", err
+					}
+
+					task += fmt.Sprintf("      - %s:%d/%s\n", fmt.Sprintf("%s:%d", hostAddress, localPort), containerPort, strings.ToLower(containerProtocol))
 				}
 			}
 		}
@@ -323,4 +339,47 @@ func (p *PodmanEngine) renderUnprovisionContainerFilesTask(definition types.Cont
 
 	return "", nil
 
+}
+
+func (p *PodmanEngine) allocateLocalPort(definition types.ContainerDefinition, port int) (int, error) {
+
+	records, err := p.portMapStore.GetValue()
+	if err != nil {
+		return -1, err
+	}
+	allRecords := *records
+
+	portStart, err := p.getHostPortStart()
+	if err != nil {
+		return -1, err
+	}
+	index := len(allRecords)
+
+	localPort := portStart + index
+
+	portEnd, err := p.getHostPortEnd()
+	if err != nil {
+		return -1, err
+	}
+
+	if localPort > portEnd {
+		return -1, errors.New("no more ports available")
+	}
+
+	record := types.PortsMapRecord{
+		LocalPort:     localPort,
+		ContainerName: definition.Name,
+		ContainerPort: port,
+		Order:         definition.Order,
+	}
+
+	allRecords = append(allRecords, record)
+
+	err = p.portMapStore.SetValue(allRecords)
+	if err != nil {
+		p.logger.ErrorF("Failed to write portmaps: %s", err)
+		return -1, err
+	}
+
+	return record.LocalPort, nil
 }
