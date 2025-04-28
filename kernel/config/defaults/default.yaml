@@ -24,6 +24,15 @@ host:
         start: 59000
         end: 59999
     kubernetes:
-      useEmbedded: true
+      embedded:
+        enabled: true
+        image: docker.io/rancher/k3s:v1.30.11-k3s1
+        networks:
+          - subnet: 172.99.27.0/24
+            gateway: 172.99.27.2
+            iprange: 172.99.27.0/26
+      ingress:
+        host: 172.99.27.1
+        port: 80
       kubeConfig: "{{ run_dir }}/home/.kube/config"
       kubeApiPort: 46443

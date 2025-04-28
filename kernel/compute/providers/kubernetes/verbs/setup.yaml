@@ -8,11 +8,19 @@
     - "{{ "{{" }} run_dir {{ "}}" }}/home/.kube"
     - "{{ "{{" }} run_dir {{ "}}" }}/var/k3s"
 
+
+- name: create docker network for k3s
+  community.docker.docker_network:
+    name: network_{{ .kubecontext }}
+    state: present
+    ipam_config: {{ toRawJson .kubeNetworks }}
+     
+
 - name: start embedded k8s node
-  community.docker.docker_container: #control_plane
+  community.docker.docker_container:
     state: started
     name: "{{ .kubecontext }}"
-    image: docker.io/rancher/k3s:v1.30.11-k3s1
+    image: "{{ .kubeImage }}"
     env:
       TZ: "Europe/Paris"
       K3S_TOKEN: "a_random_token"
@@ -31,3 +39,7 @@
       - "{{ "{{" }} run_dir {{ "}}" }}/home/.kube:/config"
     ports:
       - "0.0.0.0:{{ .kubeApiPort }}:{{ .kubeApiPort }}/tcp"
+    networks:
+      - name: network_{{ .kubecontext }}
+    healthcheck:
+      test: ["CMD", "kubectl", "get", "nodes"]

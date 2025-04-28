@@ -87,9 +87,11 @@ func (p *Provider) Render() ([]computeTypes.RunnerDefinition, error) {
 
 func (p *Provider) getTemplateValues() map[string]any {
 	return map[string]any{
-		"kubecontext": strings.ToLower(p.GetService().GetKernel().GetApp().GetName()),
-		"kubeconfig":  p.getKubeConfigValue(),
-		"kubeApiPort": fmt.Sprintf("%d", p.getKubeApiPort()),
+		"kubecontext":  strings.ToLower(p.GetService().GetKernel().GetApp().GetName()),
+		"kubeconfig":   p.getKubeConfigValue(),
+		"kubeApiPort":  fmt.Sprintf("%d", p.getKubeApiPort()),
+		"kubeImage":    p.getKubeImage(),
+		"kubeNetworks": p.getKubeNetworks(),
 	}
 }
 

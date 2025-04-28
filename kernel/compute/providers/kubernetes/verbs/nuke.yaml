@@ -12,3 +12,8 @@
   file:
     name: "{{ .kubeconfig }}"
     state: absent
+
+- name: remove docker network for k3s
+  community.docker.docker_network:
+    name: network_{{ .kubecontext }}
+    state: absent
