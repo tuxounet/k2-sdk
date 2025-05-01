@@ -5,18 +5,10 @@ import (
 )
 
 func (s *Service) RegisterIngress(ingress *types.IngressDefinition) error {
-	store := s.getIngressesStore()
-
-	records, err := store.GetValue()
-	if err != nil {
-		return err
-	}
-	allRecords := *records
-	allRecords = append(allRecords, *ingress)
-	err = store.SetValue(allRecords)
-	if err != nil {
-		return err
-	}
-	s.GetLogger().InfoF("Ingress %s registered", ingress.IngressHost)
+	records := s.getIngressesRecords()
+	records = append(records, *ingress)
+	s.setIngressesRecords(records)
+	s.GetLogger().InfoF("Ingress %s registered", ingress.IngressPath)
 	return nil
+
 }

@@ -3,8 +3,23 @@ package kubernetes
 import (
 	"path/filepath"
 
+	"github.com/tuxounet/k2-sdk/kernel/compute/providers/kubernetes/types"
 	"github.com/tuxounet/k2-sdk/kernel/config"
+	storesTypes "github.com/tuxounet/k2-sdk/kernel/storage/stores/types"
 )
+
+func (s *Provider) getPortsForwardsStore() storesTypes.IBaseObjectStore[[]types.PortsForwardRecord] {
+	return s.GetData("forwards").(storesTypes.IBaseObjectStore[[]types.PortsForwardRecord])
+}
+
+func (s *Provider) getLocalHostAddress() (string, error) {
+	defaultValue := "127.0.0.1"
+	kernel := s.GetService().GetKernel()
+	configService := kernel.GetService(config.ServiceKey).(*config.Service)
+
+	return configService.GetAsStringOrDefault("host.address", defaultValue)
+
+}
 
 func (p *Provider) getConfigService() *config.Service {
 	return p.GetService().GetKernel().GetService(config.ServiceKey).(*config.Service)
@@ -24,7 +39,11 @@ func (p *Provider) getKubeConfigValue() string {
 	if err != nil {
 		p.GetLogger().WarnF("unable to get kubeConfig config value: %s, using default %s", err, defaultValue)
 		return defaultValue
+	}
 
+	if value == "" {
+		p.GetLogger().WarnF("kubeConfig config value is empty, using default %s", defaultValue)
+		return defaultValue
 	}
 
 	return value
@@ -77,4 +96,35 @@ func (p *Provider) getKubeApiPort() int {
 	}
 
 	return value
+}
+
+func (s *Provider) getHostPortStart() (int, error) {
+
+	kernel := s.GetService().GetKernel()
+	configService := kernel.GetService(config.ServiceKey).(*config.Service)
+
+	port, err := configService.GetAsInt("host.compute.kubernetes.port.start")
+	if err != nil {
+		return -1, err
+	}
+	return port, nil
+
+}
+func (s *Provider) getHostPortEnd() (int, error) {
+	kernel := s.GetService().GetKernel()
+	configService := kernel.GetService(config.ServiceKey).(*config.Service)
+
+	port, err := configService.GetAsInt("host.compute.kubernetes.port.end")
+	if err != nil {
+		return -1, err
+	}
+	return port, nil
+}
+
+func (s *Provider) getForwarders() []*types.PortForwarder {
+	return s.GetData("forwarders").([]*types.PortForwarder)
+}
+
+func (s *Provider) setForwarders(forwarders []*types.PortForwarder) {
+	s.SetData("forwarders", forwarders)
 }

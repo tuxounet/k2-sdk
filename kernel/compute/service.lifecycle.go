@@ -7,8 +7,6 @@ import (
 	"github.com/tuxounet/k2-sdk/kernel/compute/providers/kubernetes"
 	"github.com/tuxounet/k2-sdk/kernel/compute/providers/playbooks"
 
-	"slices"
-
 	"github.com/tuxounet/k2-sdk/kernel/compute/types"
 )
 
@@ -81,30 +79,8 @@ func (s *Service) Register() error {
 		s.GetLogger().DebugF("no runners found")
 		return nil
 	}
-
-	requiredProviders := make([]string, 0)
-	for _, r := range allRunners {
-		if r.Provider != "" {
-			found := slices.Contains(requiredProviders, r.Provider)
-			if !found {
-				requiredProviders = append(requiredProviders, r.Provider)
-			}
-		}
-	}
-	for _, p := range requiredProviders {
-		var provider types.IBasePlateformProvider
-		found := false
-		for _, prov := range providers {
-			if prov.GetName() == p {
-				found = true
-				provider = prov
-				break
-			}
-		}
-		if !found {
-			s.GetLogger().ErrorF("provider %s not found", p)
-			return fmt.Errorf("provider %s not found", p)
-		}
+	requiredProviders := s.getRequiredProviders()
+	for _, provider := range requiredProviders {
 
 		err = provider.Setup()
 		if err != nil {
@@ -164,6 +140,17 @@ func (s *Service) Start() error {
 	if err != nil {
 		return fmt.Errorf("start phase failed: %s", err.Error())
 	}
+
+	requiredProviders := s.getRequiredProviders()
+	for _, provider := range requiredProviders {
+
+		err = provider.Start()
+		if err != nil {
+			s.GetLogger().ErrorF("provider %s setup failed: %s", provider.GetName(), err)
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -175,6 +162,15 @@ func (s *Service) Stop() error {
 	if !enabled {
 		s.GetLogger().DebugF("compute service is disabled")
 		return nil
+	}
+
+	requiredProviders := s.getRequiredProviders()
+	for _, provider := range requiredProviders {
+		err = provider.Stop()
+		if err != nil {
+			s.GetLogger().ErrorF("provider %s setup failed: %s", provider.GetName(), err)
+			return err
+		}
 	}
 
 	runners := s.getRunners()
@@ -195,4 +191,34 @@ func (s *Service) Stop() error {
 	}
 
 	return nil
+}
+
+func (s *Service) getRequiredProviders() []types.IBasePlateformProvider {
+	allRunners := s.getRunners()
+	allProviders := s.getProviders()
+	requiredProviders := make([]types.IBasePlateformProvider, 0)
+	for _, r := range allRunners {
+		if r.Provider != "" {
+			var provider types.IBasePlateformProvider
+			for _, p := range allProviders {
+				if p.GetName() == r.Provider {
+					provider = p
+					break
+				}
+			}
+			if provider != nil {
+				found := false
+				for _, p := range requiredProviders {
+					if p.GetName() == r.Provider {
+						found = true
+						break
+					}
+				}
+				if !found {
+					requiredProviders = append(requiredProviders, provider)
+				}
+			}
+		}
+	}
+	return requiredProviders
 }

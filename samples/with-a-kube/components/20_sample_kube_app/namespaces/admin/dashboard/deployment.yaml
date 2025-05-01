@@ -1,39 +1,27 @@
-kind: Deployment
+# website::tag::1:: Deploy the training/webapp Docker Container: https://hub.docker.com/r/training/webapp/
 apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: headlamp
-
+  name: hello-world-deployment
 spec:
-  replicas: 1
   selector:
     matchLabels:
-      k8s-app: headlamp
+      app: hello-world
+  replicas: 1
   template:
     metadata:
       labels:
-        k8s-app: headlamp
+        app: hello-world
     spec:
       containers:
-        - name: headlamp
-          image: ghcr.io/headlamp-k8s/headlamp:latest
-          args:
-            - "-in-cluster"
-            - "-plugins-dir=/headlamp/plugins"
+        # website::tag::2:: The container runs a Python webapp on port 5000 that responds with "Hello, World!"
+        - name: hello-world
+          image: training/webapp:latest
           ports:
-            - containerPort: 4466
+            - containerPort: 5000
           readinessProbe:
             httpGet:
-              scheme: HTTP
               path: /
-              port: 4466
-            initialDelaySeconds: 30
-            timeoutSeconds: 30
-          livenessProbe:
-            httpGet:
-              scheme: HTTP
-              path: /
-              port: 4466
-            initialDelaySeconds: 30
-            timeoutSeconds: 30
-      nodeSelector:
-        "kubernetes.io/os": linux
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 10

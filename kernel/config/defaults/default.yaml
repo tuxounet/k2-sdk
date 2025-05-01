@@ -22,7 +22,7 @@ host:
       engine: podman
       port:
         start: 59000
-        end: 59999
+        end: 59099
     kubernetes:
       embedded:
         enabled: true
@@ -31,8 +31,8 @@ host:
           - subnet: 172.99.27.0/24
             gateway: 172.99.27.2
             iprange: 172.99.27.0/26
-      ingress:
-        host: 172.99.27.1
-        port: 80
-      kubeConfig: "{{ run_dir }}/home/.kube/config"
+      port:
+        start: 59100
+        end: 59199
+      kubeConfig: ""
       kubeApiPort: 46443

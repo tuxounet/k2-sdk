@@ -370,7 +370,6 @@ func (p *DockerEngine) allocateLocalPort(definition types.ContainerDefinition, p
 		LocalPort:     localPort,
 		ContainerName: definition.Name,
 		ContainerPort: port,
-		Order:         definition.Order,
 	}
 
 	allRecords = append(allRecords, record)

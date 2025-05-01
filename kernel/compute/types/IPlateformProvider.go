@@ -12,6 +12,8 @@ type IBasePlateformProvider interface {
 	Nuke() error
 	Setup() error
 	Render() ([]RunnerDefinition, error)
+	Start() error
+	Stop() error
 }
 
 type IPlateformProvider[D any] interface {

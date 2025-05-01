@@ -16,6 +16,6 @@ type NamespaceDefinition struct {
 type NamespaceIngress struct {
 	AccessPolicy types.IAccessPolicy `json:"accessPolicy"`
 	IngressPath  string              `json:"ingressPath"`
-	ServiceHost  string              `json:"serviceHost"`
+	ServiceName  string              `json:"serviceName"`
 	ServicePort  int                 `json:"servicePort"`
 }

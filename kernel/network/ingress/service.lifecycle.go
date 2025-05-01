@@ -17,16 +17,6 @@ import (
 	"github.com/tuxounet/k2-sdk/kernel/network/ingress/middlewares/ui"
 )
 
-func (s *Service) Init() error {
-
-	err := s.getIngressesStore().Nuke()
-	if err != nil {
-		s.GetLogger().ErrorF("Failed to nuke ingresses: %s", err.Error())
-		return err
-	}
-	return nil
-}
-
 func (s *Service) Register() error {
 	configService := s.getConfigService()
 
@@ -139,15 +129,10 @@ func (s *Service) Register() error {
 
 	}
 
-	ingStore := s.getIngressesStore()
-	records, err := ingStore.GetValue()
-	if err != nil {
-		s.GetLogger().ErrorF("Failed to get ingresses: %s", err.Error())
-		return err
-	}
-	if len(*records) > 0 {
-		s.GetLogger().DebugF("Found %d ingresses", len(*records))
-		err = routes.Register(s, router, *records)
+	records := s.getIngressesRecords()
+	if len(records) > 0 {
+		s.GetLogger().DebugF("Found %d ingresses", len(records))
+		err = routes.Register(s, router, records)
 		if err != nil {
 			s.GetLogger().ErrorF("Failed to register ingresses: %s", err.Error())
 			return err

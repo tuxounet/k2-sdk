@@ -3,12 +3,16 @@ package kubernetes
 import (
 	"embed"
 	"fmt"
+	"net/http"
 	"path/filepath"
 	"strings"
 
+	"github.com/gin-gonic/gin"
 	"github.com/tuxounet/k2-sdk/kernel/compute/providers/kubernetes/types"
 	computeTypes "github.com/tuxounet/k2-sdk/kernel/compute/types"
+	ingressTypes "github.com/tuxounet/k2-sdk/kernel/network/ingress/types"
 	"github.com/tuxounet/k2-sdk/system"
+	runtimeTypes "github.com/tuxounet/k2-sdk/types"
 )
 
 //go:embed verbs/setup.yaml
@@ -77,7 +81,43 @@ func (p *Provider) Render() ([]computeTypes.RunnerDefinition, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		newRunnerDefinition.Stop = stopScript
+
+		if len(definition.Ingresses) > 0 {
+			localAddress, err := p.getLocalHostAddress()
+			if err != nil {
+				return nil, err
+			}
+
+			ingressRegistar := p.GetIngressRegistar()
+			for _, ing := range definition.Ingresses {
+
+				localPort, err := p.allocateLocalPort(definition.Name, ing.ServiceName, ing.ServicePort)
+				if err != nil {
+					return nil, fmt.Errorf("failed to allocate local port: %s", err)
+				}
+
+				customHandler, err := p.getIngressHandler(localPort)
+				if err != nil {
+					return nil, fmt.Errorf("failed to get ingress handler: %s", err)
+				}
+
+				ingressDef := &ingressTypes.IngressDefinition{
+					AccessPolicy:  runtimeTypes.AccessPolicyPublic,
+					IngressPath:   ing.IngressPath,
+					ServiceHost:   localAddress,
+					ServicePort:   localPort,
+					CustomHandler: customHandler,
+				}
+
+				err = ingressRegistar(ingressDef)
+				if err != nil {
+					return nil, fmt.Errorf("failed to get ingress port: %s", err)
+				}
+			}
+
+		}
 
 		runners = append(runners, newRunnerDefinition)
 	}
@@ -169,4 +209,99 @@ func walkTemplates(fs *embed.FS) (map[string]any, error) {
 
 	return templates, nil
 
+}
+
+func (p *Provider) allocateLocalPort(serviceNamespace string, serviceName string, servicePort int) (int, error) {
+
+	records, err := p.getPortsForwardsStore().GetValue()
+	if err != nil {
+		return -1, err
+	}
+	allRecords := *records
+
+	portStart, err := p.getHostPortStart()
+	if err != nil {
+		return -1, err
+	}
+	index := len(allRecords)
+
+	localPort := portStart + index
+
+	portEnd, err := p.getHostPortEnd()
+	if err != nil {
+		return -1, err
+	}
+
+	if localPort > portEnd {
+		return -1, fmt.Errorf("no more ports available")
+	}
+
+	record := types.PortsForwardRecord{
+		ServiceNamespace: serviceNamespace,
+		ServiceName:      serviceName,
+		ServicePort:      servicePort,
+		LocalPort:        localPort,
+	}
+
+	allRecords = append(allRecords, record)
+
+	err = p.getPortsForwardsStore().SetValue(allRecords)
+	if err != nil {
+		p.GetLogger().ErrorF("Failed to write portmaps: %s", err)
+		return -1, err
+	}
+
+	return record.LocalPort, nil
+}
+
+func (p *Provider) getIngressHandler(localPort int) (gin.HandlerFunc, error) {
+
+	forwards, err := p.getPortsForwardsStore().GetValue()
+	if err != nil {
+		return nil, err
+	}
+
+	var instance *types.PortsForwardRecord
+	allForwards := *forwards
+	for _, forward := range allForwards {
+		if forward.LocalPort == localPort {
+			instance = &forward
+			break
+		}
+	}
+	if instance == nil {
+		return nil, fmt.Errorf("no port forward found for local port %d", localPort)
+	}
+
+	handler := func(c *gin.Context) {
+		forwarders := p.getForwarders()
+		for _, forwarder := range forwarders {
+			if forwarder.Record.ServiceNamespace == instance.ServiceNamespace &&
+				forwarder.Record.ServiceName == instance.ServiceName &&
+				forwarder.Record.ServicePort == instance.ServicePort {
+				p.GetLogger().DebugF("Forwarding request to %s:%d", instance.ServiceName, instance.ServicePort)
+				if !forwarder.IsReady() {
+					err = forwarder.Mount()
+					if err != nil {
+						p.GetLogger().ErrorF("Failed to mount forwarder: %s", err)
+						c.Status(http.StatusBadGateway)
+						return
+					}
+				}
+
+				err = forwarder.ForwardRequest(c)
+				if err != nil {
+					p.GetLogger().ErrorF("Failed to forward request: %s", err)
+					c.Status(500)
+					return
+				}
+				return
+			}
+		}
+
+		p.GetLogger().WarnF("No forwarder found for %s:%d", instance.ServiceName, instance.ServicePort)
+		c.Status(404)
+	}
+
+	return handler, nil
 }

@@ -1,11 +1,12 @@
+# website::tag::3:: Expose the Python webapp on port 5000 via a Kubernetes LoadBalancer.
 kind: Service
 apiVersion: v1
 metadata:
-  name: headlamp
-
+  name: hello-world-service
 spec:
-  ports:
-    - port: 80
-      targetPort: 4466
   selector:
-    k8s-app: headlamp
+    app: hello-world
+  ports:
+    - protocol: TCP
+      targetPort: 5000
+      port: 5000

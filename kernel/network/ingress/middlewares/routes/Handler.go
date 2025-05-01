@@ -1,11 +1,15 @@
 package routes
 
 import (
+	"bytes"
 	_ "embed"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/tuxounet/k2-sdk/kernel/config"
@@ -17,7 +21,11 @@ import (
 func Register(service runtimeTypes.IKernelService, router *gin.RouterGroup, registrations []types.IngressDefinition) error {
 
 	for _, registration := range registrations {
-		router.Any(fmt.Sprintf("%s/*proxyPath", registration.IngressPath), ensureAuthLevel(service, registration), performProxyRequest(registration))
+		handler := registration.CustomHandler
+		if handler == nil {
+			handler = performProxyRequest(registration)
+		}
+		router.Any(fmt.Sprintf("%s/*proxyPath", registration.IngressPath), ensureAuthLevel(service, registration), handler)
 	}
 
 	return nil
@@ -76,13 +84,18 @@ func performProxyRequest(ingress types.IngressDefinition) gin.HandlerFunc {
 			ctx.String(500, "Failed to parse target url")
 			return
 		}
+
+		requestPath := ctx.Param("proxyPath")
+
 		proxy := httputil.NewSingleHostReverseProxy(remote)
+
 		proxy.Director = func(req *http.Request) {
 			req.Header = ctx.Request.Header
 			req.Host = remote.Host
 			req.URL.Scheme = remote.Scheme
 			req.URL.Host = remote.Host
-			req.URL.Path = ctx.Param("proxyPath")
+			req.URL.Path = requestPath
+			req.Host = remote.Host
 			req.Header.Set("X-Forwarded-Host", ctx.Request.Host)
 			if ctx.Request.TLS == nil {
 				req.Header.Set("X-Forwarded-Proto", "http")
@@ -91,6 +104,35 @@ func performProxyRequest(ingress types.IngressDefinition) gin.HandlerFunc {
 			}
 			req.Header.Set("X-Forwarded-For", ctx.Request.RemoteAddr)
 
+		}
+
+		// Customize the response by rewriting subpath references in the response body.
+		proxy.ModifyResponse = func(resp *http.Response) error {
+			// Here, we assume that only certain content types need rewriting.
+			contentType := resp.Header.Get("Content-Type")
+			if strings.Contains(contentType, "text/html") || strings.Contains(contentType, "text/plain") {
+				// Read the body
+				bodyBytes, err := io.ReadAll(resp.Body)
+				if err != nil {
+					return err
+				}
+				// Since we've read the body, close the original one.
+				resp.Body.Close()
+
+				// Convert to string and perform substitutions.
+				// In this example, we simply replace occurrences of href="/ and src="/
+				// with an internal link that prepends /subpath.
+				bodyStr := string(bodyBytes)
+				bodyStr = strings.ReplaceAll(bodyStr, `href="/`, `href="`+ingress.IngressPath+`"`)
+				bodyStr = strings.ReplaceAll(bodyStr, `src="/`, `src="`+ingress.IngressPath+`"`)
+
+				// Write the modified body back and update headers accordingly.
+				newBody := []byte(bodyStr)
+				resp.Body = io.NopCloser(bytes.NewReader(newBody))
+				resp.ContentLength = int64(len(newBody))
+				resp.Header.Set("Content-Length", strconv.Itoa(len(newBody)))
+			}
+			return nil
 		}
 
 		proxy.ServeHTTP(ctx.Writer, ctx.Request)

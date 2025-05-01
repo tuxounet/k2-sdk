@@ -1,7 +1,7 @@
 {{ $kubeconfig := .kubeconfig }}
 {{ $namespace := .namespace }}
 
-- name: Create a k8s namespace
+- name: "Create a k8s namespace {{ $namespace }}"
   kubernetes.core.k8s:
     kubeconfig: "{{ $kubeconfig }}"
     state: present
@@ -12,7 +12,7 @@
     wait_timeout: 60
     
 {{ range $key, $value := .templates }}
-- name: apply kube manifest
+- name: "apply kube manifest {{ $key }}"
   kubernetes.core.k8s:
     state: present
     kubeconfig: "{{ $kubeconfig }}"

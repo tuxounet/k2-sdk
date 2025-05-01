@@ -14,3 +14,10 @@ func (p *BasePlateformProvider[D]) Render() ([]types.RunnerDefinition, error) {
 func (p *BasePlateformProvider[D]) Setup() error {
 	return nil
 }
+
+func (p *BasePlateformProvider[D]) Start() error {
+	return nil
+}
+func (p *BasePlateformProvider[D]) Stop() error {
+	return nil
+}
