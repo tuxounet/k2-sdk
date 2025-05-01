@@ -99,6 +99,7 @@ func RedirectAccessLevelAdminLogin(req *http.Request, log types.ILogger, configS
 	if !isAdminEnabled(configService) {
 		log.InfoF("Admin access is disabled for path: %s", requestUrl)
 		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
 	}
 
 	login_url, err := configService.GetAsString("host.ingress.auth.admin.loginUrl")

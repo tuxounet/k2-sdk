@@ -36,4 +36,5 @@ func BlockAccessLevelPublic(req *http.Request, log types.ILogger, configService 
 	}
 	log.WarnF("Access denied to public level: %s", requestUrl)
 	c.AbortWithStatus(http.StatusForbidden)
+
 }

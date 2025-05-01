@@ -12,7 +12,6 @@ import (
 	computeTypes "github.com/tuxounet/k2-sdk/kernel/compute/types"
 	ingressTypes "github.com/tuxounet/k2-sdk/kernel/network/ingress/types"
 	"github.com/tuxounet/k2-sdk/system"
-	runtimeTypes "github.com/tuxounet/k2-sdk/types"
 )
 
 //go:embed verbs/setup.yaml
@@ -104,7 +103,7 @@ func (p *Provider) Render() ([]computeTypes.RunnerDefinition, error) {
 				}
 
 				ingressDef := &ingressTypes.IngressDefinition{
-					AccessPolicy:  runtimeTypes.AccessPolicyPublic,
+					AccessPolicy:  ing.AccessPolicy,
 					IngressPath:   ing.IngressPath,
 					ServiceHost:   localAddress,
 					ServicePort:   localPort,

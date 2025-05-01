@@ -13,12 +13,12 @@ host:
       public:
         enabled: true
       authenticated:
-        enabled: false
+        enabled: true
         loginUrl: "/auth/users/login"
         verifyUrl: "/auth/users/verify"
         redirectParam: "redirect"
       admin:
-        enabled: false
+        enabled: true
         loginUrl: "/auth/admin/login"
         verifyUrl: "/auth/admin/verify"
         redirectParam: "redirect"

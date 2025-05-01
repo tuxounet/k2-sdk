@@ -50,7 +50,6 @@ func (p *PortForwarder) IsReady() bool {
 		return false
 	}
 	if !p.mounted {
-
 		return false
 	}
 	return true

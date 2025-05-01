@@ -22,7 +22,7 @@ func NewController(component types.IAppComponent) types.IAppController {
 		Image: "docker.io/filebrowser/filebrowser:v2.31.2",
 		Ingresses: []*containersTypes.ContainerDefinitionIngress{
 			{
-				AccessPolicy:  types.AccessPolicyPublic,
+				AccessPolicy:  types.AccessPolicyAdmin,
 				ContainerPort: 8080,
 				Path:          fmt.Sprintf("/%s/%s/", component.GetName(), ControllerKey),
 			},

@@ -100,6 +100,7 @@ func RedirectAccessLevelAuthenticatedLogin(req *http.Request, log types.ILogger,
 	if !isAuthenticatedEnabled(configService) {
 		log.InfoF("Authenticated access is disabled for path: %s", requestUrl)
 		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
 	}
 
 	login_url, err := configService.GetAsString("host.ingress.auth.authenticated.loginUrl")
