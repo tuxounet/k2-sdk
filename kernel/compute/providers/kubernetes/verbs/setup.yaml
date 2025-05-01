@@ -2,11 +2,12 @@
   file:
     path: "{{ "{{" }} item {{ "}}" }}"
     state: directory
-
     recurse: yes
+ 
   with_items:
     - "{{ "{{" }} run_dir {{ "}}" }}/home/.kube"
     - "{{ "{{" }} run_dir {{ "}}" }}/var/k3s"
+    - "{{ "{{" }} run_dir {{ "}}" }}/var/data"
 
 
 - name: create docker network for k3s
@@ -32,10 +33,12 @@
       - --node-name=single-node
       - --disable-cloud-controller
       - --prefer-bundled-bin
+      - --default-local-storage-path=/data
     privileged: yes
-    user: root
+    user: 0:4
     volumes:
       - "{{ "{{" }} run_dir {{ "}}" }}/var/k3s:/var/lib/rancher/k3s"
+      - "{{ "{{" }} run_dir {{ "}}" }}/var/data:/data"
       - "{{ "{{" }} run_dir {{ "}}" }}/home/.kube:/config"
     ports:
       - "0.0.0.0:{{ .kubeApiPort }}:{{ .kubeApiPort }}/tcp"
