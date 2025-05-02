@@ -8,6 +8,7 @@
     - "{{ "{{" }} run_dir {{ "}}" }}/home/.kube"
     - "{{ "{{" }} run_dir {{ "}}" }}/var/k3s"
     - "{{ "{{" }} run_dir {{ "}}" }}/var/data"
+    - "{{ "{{" }} run_dir {{ "}}" }}/var/data/volumes"
 
 
 - name: create docker network for k3s
@@ -27,13 +28,14 @@
       K3S_TOKEN: "a_random_token"
       K3S_KUBECONFIG_OUTPUT: "/config/config"
       K3S_KUBECONFIG_MODE: "666"
+
     command:
       - server
       - --https-listen-port={{ .kubeApiPort }}
       - --node-name=single-node
       - --disable-cloud-controller
       - --prefer-bundled-bin
-      - --default-local-storage-path=/data
+      - --default-local-storage-path=/data/volumes
     privileged: yes
     user: 0:4
     volumes:
@@ -46,3 +48,8 @@
       - name: network_{{ .kubecontext }}
     healthcheck:
       test: ["CMD", "kubectl", "get", "nodes"]
+- name: wait for kubeconfig file to be created
+  ansible.builtin.wait_for:
+    path: "{{ "{{" }} run_dir {{ "}}" }}/home/.kube/config"
+    state: present
+    timeout: 60
