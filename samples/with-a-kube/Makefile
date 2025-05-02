@@ -4,6 +4,7 @@ GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 VERSION := $(if $(CI_COMMIT_TAG),$(CI_COMMIT_TAG),v${GIT_BRANCH})
 GO_PATH:=$(shell go env GOPATH)
 VERSION_FILE := ./app/version.go
+
 init: 
 	go get -v
 
@@ -24,3 +25,9 @@ run: prepare
 	go run \
 		-ldflags="-X 'app.AppVersion=${VERSION}' -X 'app.AppName=${APP_NAME}'" \
 		./main.go
+		
+ROOT_DIR := $(shell pwd)
+enter: 
+	cd ${ROOT_DIR}/.data/home && \
+		HOME=${ROOT_DIR}/.data/home \
+		bash

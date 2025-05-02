@@ -77,8 +77,11 @@ func (p *PortForwarder) ForwardRequest(c *gin.Context) error {
 	}
 	proxy := httputil.NewSingleHostReverseProxy(targetURL)
 
-	// Reset the request URL path to remove the /proxy prefix
-	c.Request.URL.Path = c.Param("any")
+	proxy.Director = func(r *http.Request) {
+		r.URL.Scheme = targetURL.Scheme
+		r.URL.Host = targetURL.Host
+		r.Host = "kube.k2"
+	}
 	proxy.ServeHTTP(c.Writer, c.Request)
 
 	return nil

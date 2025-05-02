@@ -4,7 +4,8 @@ import (
 	"embed"
 
 	"github.com/tuxounet/k2-sdk/bases"
-	pki "github.com/tuxounet/k2-sdk/samples/with-a-kube/components/10_pki"
+
+	provision "github.com/tuxounet/k2-sdk/samples/with-a-kube/components/10_provision"
 	auth "github.com/tuxounet/k2-sdk/samples/with-a-kube/components/15_auth"
 	sample_kube_app "github.com/tuxounet/k2-sdk/samples/with-a-kube/components/20_sample_kube_app"
 
@@ -22,7 +23,8 @@ func NewApp() types.IApp {
 		nil,
 		&conf,
 		[]types.AppComponentCtor{
-			pki.NewComponent,
+			provision.NewComponent,
+
 			auth.NewComponent,
 			sample_kube_app.NewComponent,
 		},

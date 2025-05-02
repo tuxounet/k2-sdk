@@ -65,3 +65,12 @@ func (c *Service) GetAsStringOrDefault(key string, def string) (string, error) {
 
 	return value.(string), nil
 }
+
+func (c *Service) GetAsIntOrDefault(key string, def int) (int, error) {
+	value := c.Get(key)
+	if value == nil {
+		return def, nil
+	}
+
+	return value.(int), nil
+}

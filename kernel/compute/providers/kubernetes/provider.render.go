@@ -59,6 +59,7 @@ func (p *Provider) Render() ([]computeTypes.RunnerDefinition, error) {
 		runners = append(runners, setupRunner)
 
 	}
+	configService := p.getConfigService()
 
 	for _, definition := range definitions {
 		newRunnerDefinition := computeTypes.RunnerDefinition{
@@ -91,8 +92,26 @@ func (p *Provider) Render() ([]computeTypes.RunnerDefinition, error) {
 
 			ingressRegistar := p.GetIngressRegistar()
 			for _, ing := range definition.Ingresses {
+				if ing.ServiceNamespace == "" {
+					ing.ServiceNamespace, err = configService.GetAsStringOrDefault("host.compute.kubernetes.ingress.serviceNamespace", "kube-system")
+					if err != nil {
+						return nil, fmt.Errorf("failed to get ingress service namespace: %s", err)
+					}
+				}
+				if ing.ServiceName == "" {
+					ing.ServiceName, err = configService.GetAsStringOrDefault("host.compute.kubernetes.ingress.serviceName", "traefik")
+					if err != nil {
+						return nil, fmt.Errorf("failed to get ingress service name: %s", err)
+					}
+				}
+				if ing.ServicePort == 0 {
+					ing.ServicePort, err = configService.GetAsIntOrDefault("host.compute.kubernetes.ingress.servicePort", 8000)
+					if err != nil {
+						return nil, fmt.Errorf("failed to get ingress service port: %s", err)
+					}
+				}
 
-				localPort, err := p.allocateLocalPort(definition.Name, ing.ServiceName, ing.ServicePort)
+				localPort, err := p.allocateLocalPort(ing.IngressPath, ing.ServiceNamespace, ing.ServiceName, ing.ServicePort)
 				if err != nil {
 					return nil, fmt.Errorf("failed to allocate local port: %s", err)
 				}
@@ -210,7 +229,7 @@ func walkTemplates(fs *embed.FS) (map[string]any, error) {
 
 }
 
-func (p *Provider) allocateLocalPort(serviceNamespace string, serviceName string, servicePort int) (int, error) {
+func (p *Provider) allocateLocalPort(ingressPath string, serviceNamespace string, serviceName string, servicePort int) (int, error) {
 
 	records, err := p.getPortsForwardsStore().GetValue()
 	if err != nil {
@@ -236,6 +255,7 @@ func (p *Provider) allocateLocalPort(serviceNamespace string, serviceName string
 	}
 
 	record := types.PortsForwardRecord{
+		Path:             ingressPath,
 		ServiceNamespace: serviceNamespace,
 		ServiceName:      serviceName,
 		ServicePort:      servicePort,

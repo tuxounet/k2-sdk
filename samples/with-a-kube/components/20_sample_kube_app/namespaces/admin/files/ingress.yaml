@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: files-ingress
+
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: kube.k2
+      http:
+        paths:
+          - path: /admin/files
+            pathType: Prefix
+            backend:
+              service:
+                name: files-service
+                port:
+                  number: 80

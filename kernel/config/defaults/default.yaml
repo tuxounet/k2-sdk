@@ -36,3 +36,7 @@ host:
         end: 59199
       kubeConfig: ""
       kubeApiPort: 46443
+      ingress:
+        serviceNamespace: "kube-system"
+        serviceName: "traefik"
+        servicePort: 8000

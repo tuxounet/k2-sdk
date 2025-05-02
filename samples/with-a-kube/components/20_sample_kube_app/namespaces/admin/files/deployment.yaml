@@ -2,29 +2,31 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hello-world-deployment
+  name: files-deployment
 spec:
   selector:
     matchLabels:
-      app: hello-world
+      app: files-deployment
   replicas: 1
   template:
     metadata:
       labels:
-        app: hello-world
+        app: files-deployment
     spec:
       containers:
         # website::tag::2:: The container runs a Python webapp on port 5000 that responds with "Hello, World!"
-        - name: hello-world
-          image: ealen/echo-server:0.9.2
-          env:
-            - name: PORT
-              value: "3000"
+        - name: files-deployment
+          image: filebrowser/filebrowser:latest
           ports:
-            - containerPort: 3000
+            - containerPort: 80
+          env:
+            - name: "FB_BASEURL"
+              value: "/admin/files"
+            - name: "FB_NOAUTH"
+              value: "true"
           readinessProbe:
             httpGet:
               path: /
-              port: 3000
+              port: 80
             initialDelaySeconds: 5
             periodSeconds: 10

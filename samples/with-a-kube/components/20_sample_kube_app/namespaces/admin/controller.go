@@ -23,9 +23,11 @@ func NewController(component types.IAppComponent) types.IAppController {
 		Ingresses: []kubernetesTypes.NamespaceIngress{
 			{
 				AccessPolicy: types.AccessPolicyAdmin,
-				IngressPath:  "/admin",
-				ServiceName:  "hello-world-service",
-				ServicePort:  5000,
+				IngressPath:  "/admin/dashboard",
+			},
+			{
+				AccessPolicy: types.AccessPolicyAdmin,
+				IngressPath:  "/admin/files",
 			},
 		},
 	}, nil)
