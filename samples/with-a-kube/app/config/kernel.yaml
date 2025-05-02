@@ -30,7 +30,6 @@ host:
         start: 59000
         end: 59999
     kubernetes:
-      enabled: false
       embedded:
         enabled: true
         image: docker.io/rancher/k3s:v1.30.11-k3s1
