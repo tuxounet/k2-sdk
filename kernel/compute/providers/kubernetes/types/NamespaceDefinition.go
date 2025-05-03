@@ -7,10 +7,11 @@ import (
 )
 
 type NamespaceDefinition struct {
-	Name      string             `json:"name"`
-	Order     int                `json:"order"`
-	Templates *embed.FS          `json:"templates"`
-	Ingresses []NamespaceIngress `json:"ingresses"`
+	Name      string                  `json:"name"`
+	Order     int                     `json:"order"`
+	Templates *embed.FS               `json:"templates"`
+	Ingresses []NamespaceIngress      `json:"ingresses"`
+	Ports     []NamespacePortForwards `json:"ports"`
 }
 
 type NamespaceIngress struct {
@@ -19,4 +20,11 @@ type NamespaceIngress struct {
 	ServiceNamespace string              `json:"serviceNamespace"`
 	ServiceName      string              `json:"serviceName"`
 	ServicePort      int                 `json:"servicePort"`
+}
+
+type NamespacePortForwards struct {
+	LocalPort        int    `json:"localPort"`
+	ServiceNamespace string `json:"serviceNamespace"`
+	ServiceName      string `json:"serviceName"`
+	ServicePort      int    `json:"servicePort"`
 }

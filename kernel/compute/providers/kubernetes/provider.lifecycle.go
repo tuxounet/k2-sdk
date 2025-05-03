@@ -1,6 +1,10 @@
 package kubernetes
 
-import "github.com/tuxounet/k2-sdk/kernel/compute/providers/kubernetes/types"
+import (
+	"strings"
+
+	"github.com/tuxounet/k2-sdk/kernel/compute/providers/kubernetes/types"
+)
 
 func (p *Provider) Init() error {
 	p.GetLogger().TraceF("Initializing %s provider", ProviderKey)
@@ -43,8 +47,17 @@ func (p *Provider) Start() error {
 
 		p.GetLogger().ErrorF("Starting port forward %v", forward)
 		forwarder := types.NewPortForwarder(forward, p.getKubeConfigValue(), p.GetLogger(), hostAddress)
-
 		forwarders = append(forwarders, forwarder)
+
+		if strings.HasPrefix(forwarder.Record.Path, ":") {
+			err := forwarder.Mount()
+			if err != nil {
+				p.GetLogger().ErrorF("Failed to mount port forward %v: %s", forward, err)
+				return err
+			}
+
+		}
+
 	}
 
 	p.setForwarders(forwarders)

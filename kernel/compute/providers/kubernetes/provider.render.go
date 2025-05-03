@@ -111,7 +111,7 @@ func (p *Provider) Render() ([]computeTypes.RunnerDefinition, error) {
 					}
 				}
 
-				localPort, err := p.allocateLocalPort(ing.IngressPath, ing.ServiceNamespace, ing.ServiceName, ing.ServicePort)
+				localPort, err := p.allocateIngressPort(ing.IngressPath, ing.ServiceNamespace, ing.ServiceName, ing.ServicePort)
 				if err != nil {
 					return nil, fmt.Errorf("failed to allocate local port: %s", err)
 				}
@@ -135,6 +135,16 @@ func (p *Provider) Render() ([]computeTypes.RunnerDefinition, error) {
 				}
 			}
 
+		}
+
+		if len(definition.Ports) > 0 {
+			for _, port := range definition.Ports {
+				err := p.allocateLocalPort(port.LocalPort, port.ServiceNamespace, port.ServiceName, port.ServicePort)
+				if err != nil {
+					return nil, fmt.Errorf("failed to allocate local port: %s", err)
+				}
+
+			}
 		}
 
 		runners = append(runners, newRunnerDefinition)
@@ -229,7 +239,7 @@ func walkTemplates(fs *embed.FS) (map[string]any, error) {
 
 }
 
-func (p *Provider) allocateLocalPort(ingressPath string, serviceNamespace string, serviceName string, servicePort int) (int, error) {
+func (p *Provider) allocateIngressPort(ingressPath string, serviceNamespace string, serviceName string, servicePort int) (int, error) {
 
 	records, err := p.getPortsForwardsStore().GetValue()
 	if err != nil {
@@ -271,6 +281,44 @@ func (p *Provider) allocateLocalPort(ingressPath string, serviceNamespace string
 	}
 
 	return record.LocalPort, nil
+}
+
+func (p *Provider) allocateLocalPort(localPort int, serviceNamespace string, serviceName string, servicePort int) error {
+
+	records, err := p.getPortsForwardsStore().GetValue()
+	if err != nil {
+		return err
+	}
+	allRecords := *records
+
+	found := false
+	for _, record := range allRecords {
+		if record.LocalPort == localPort {
+			found = true
+			break
+		}
+	}
+	if found {
+		return fmt.Errorf("port %d already allocated", localPort)
+	}
+
+	record := types.PortsForwardRecord{
+		Path:             fmt.Sprintf(":%d", localPort),
+		ServiceNamespace: serviceNamespace,
+		ServiceName:      serviceName,
+		ServicePort:      servicePort,
+		LocalPort:        localPort,
+	}
+
+	allRecords = append(allRecords, record)
+
+	err = p.getPortsForwardsStore().SetValue(allRecords)
+	if err != nil {
+		p.GetLogger().ErrorF("Failed to write portmaps: %s", err)
+		return err
+	}
+
+	return nil
 }
 
 func (p *Provider) getIngressHandler(localPort int) (gin.HandlerFunc, error) {
