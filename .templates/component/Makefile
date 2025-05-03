@@ -19,9 +19,10 @@ update-sdk:
 
 ROOT_DIR := $(shell pwd)
 enter: 
+	echo 'echo "welcome"' > ${ROOT_DIR}/.data/home/.profile
 	cd ${ROOT_DIR}/.data/home && \
 		HOME=${ROOT_DIR}/.data/home \
-		bash
+		bash --rcfile ${ROOT_DIR}/.data/home/.profile 
 	
 plan:
 	${GOPATH}/bin/k2 plan  --inventory ./k2.inventory.yaml
