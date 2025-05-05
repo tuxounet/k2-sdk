@@ -28,9 +28,9 @@
     privileged: yes
 
     volumes:
-      - "{{ run_dir }}/var/k3s:/var/lib/rancher/k3s"
-      - "{{ run_dir }}/var/data:/data"
-      - "{{ run_dir }}/home/.kube:/config"
+      - "{{ "{{" }} run_dir {{ "}}" }}/var/k3s:/var/lib/rancher/k3s"
+      - "{{ "{{" }} run_dir {{ "}}" }}/var/data:/data"
+      - "{{ "{{" }} run_dir {{ "}}" }}/home/.kube:/config"
     ports:
       - "127.0.0.1:46443:46443/tcp"
     healthcheck:
@@ -38,8 +38,8 @@
 
 - name: wait for container to be healthy
   community.docker.docker_container_info:
-    name: "needs"
-  until: "container_info.container.State.Health.Status == 'healthy'"
+    name: "{{ .kubecontext }}"
+  until: "container_info.container is defined and container_info.container.State is defined and container_info.container.State.Health.Status == 'healthy'"
   register: container_info
   retries: 15
   delay: 10
