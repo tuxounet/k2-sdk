@@ -8,7 +8,6 @@
     - "{{ "{{" }} run_dir {{ "}}" }}/var/k3s"
     - "{{ "{{" }} run_dir {{ "}}" }}/var/data"
     - "{{ "{{" }} run_dir {{ "}}" }}/var/data/volumes"
-
 - name: start embedded k8s node
   community.docker.docker_container:
     state: started
@@ -27,19 +26,24 @@
       - --prefer-bundled-bin
       - --default-local-storage-path=/data/volumes
     privileged: yes
-   
+
     volumes:
-      - "{{ "{{" }} run_dir {{ "}}" }}/var/k3s:/var/lib/rancher/k3s"
-      - "{{ "{{" }} run_dir {{ "}}" }}/var/data:/data"
-      - "{{ "{{" }} run_dir {{ "}}" }}/home/.kube:/config"
+      - "{{ run_dir }}/var/k3s:/var/lib/rancher/k3s"
+      - "{{ run_dir }}/var/data:/data"
+      - "{{ run_dir }}/home/.kube:/config"
     ports:
-      - "0.0.0.0:{{ .kubeApiPort }}:{{ .kubeApiPort }}/tcp"
-    networks:
-      - name: network_{{ .kubecontext }}
+      - "127.0.0.1:46443:46443/tcp"
+    healthcheck:
+      test: ["CMD", "kubectl", "get", "nodes"]
+
+- name: wait for container to be healthy
+  community.docker.docker_container_info:
+    name: "needs"
   until: "container_info.container.State.Health.Status == 'healthy'"
   register: container_info
   retries: 15
   delay: 10
+
 
 - name: wait for kubeconfig file to be created
   ansible.builtin.wait_for:
