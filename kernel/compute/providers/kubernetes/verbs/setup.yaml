@@ -3,20 +3,11 @@
     path: "{{ "{{" }} item {{ "}}" }}"
     state: directory
     recurse: yes
- 
   with_items:
     - "{{ "{{" }} run_dir {{ "}}" }}/home/.kube"
     - "{{ "{{" }} run_dir {{ "}}" }}/var/k3s"
     - "{{ "{{" }} run_dir {{ "}}" }}/var/data"
     - "{{ "{{" }} run_dir {{ "}}" }}/var/data/volumes"
-
-
-- name: create docker network for k3s
-  community.docker.docker_network:
-    name: network_{{ .kubecontext }}
-    state: present
-    ipam_config: {{ toRawJson .kubeNetworks }}
-     
 
 - name: start embedded k8s node
   community.docker.docker_container:
@@ -28,7 +19,6 @@
       K3S_TOKEN: "a_random_token"
       K3S_KUBECONFIG_OUTPUT: "/config/config"
       K3S_KUBECONFIG_MODE: "666"
-
     command:
       - server
       - --https-listen-port={{ .kubeApiPort }}
@@ -46,8 +36,11 @@
       - "0.0.0.0:{{ .kubeApiPort }}:{{ .kubeApiPort }}/tcp"
     networks:
       - name: network_{{ .kubecontext }}
-    healthcheck:
-      test: ["CMD", "kubectl", "get", "nodes"]
+  until: "container_info.container.State.Health.Status == 'healthy'"
+  register: container_info
+  retries: 15
+  delay: 10
+
 - name: wait for kubeconfig file to be created
   ansible.builtin.wait_for:
     path: "{{ "{{" }} run_dir {{ "}}" }}/home/.kube/config"
