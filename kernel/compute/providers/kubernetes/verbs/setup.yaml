@@ -37,7 +37,7 @@
       - --prefer-bundled-bin
       - --default-local-storage-path=/data/volumes
     privileged: yes
-    user: 0:4
+   
     volumes:
       - "{{ "{{" }} run_dir {{ "}}" }}/var/k3s:/var/lib/rancher/k3s"
       - "{{ "{{" }} run_dir {{ "}}" }}/var/data:/data"
