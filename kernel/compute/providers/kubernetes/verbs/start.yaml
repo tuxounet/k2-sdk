@@ -18,6 +18,8 @@
     kubeconfig: "{{ $kubeconfig }}"
     namespace: "{{ $namespace }}"
     definition: {{ toRawJson  $value }}
+    wait: true
+    wait_timeout: 60
 {{ end }}
 
 

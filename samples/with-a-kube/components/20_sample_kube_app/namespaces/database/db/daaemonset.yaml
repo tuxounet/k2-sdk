@@ -36,6 +36,11 @@ spec:
           volumeMounts:
             - name: database
               mountPath: /data
+          readinessProbe:
+            tcpSocket:
+              port: 5432
+            initialDelaySeconds: 5
+            periodSeconds: 10
       volumes:
         - name: database
           hostPath:

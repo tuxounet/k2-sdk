@@ -20,14 +20,14 @@ func NewController(component types.IAppComponent) types.IAppController {
 		Order:     10,
 		Name:      "database",
 		Templates: &templates,
-		// Ports: []kubernetesTypes.NamespacePortForwards{
-		// 	{
-		// 		LocalPort:        38000,
-		// 		ServiceNamespace: "database",
-		// 		ServiceName:      "db",
-		// 		ServicePort:      5432,
-		// 	},
-		// },
+		Ports: []kubernetesTypes.NamespacePortForwards{
+			{
+				LocalPort:        38000,
+				ServiceNamespace: "database",
+				ServiceName:      "db",
+				ServicePort:      5432,
+			},
+		},
 	}, nil)
 	return &Controller{
 		base,
