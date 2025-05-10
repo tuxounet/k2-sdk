@@ -3,3 +3,4 @@ __debug_bin*
 .data/
 refs/
 .refs/
+node_modules/

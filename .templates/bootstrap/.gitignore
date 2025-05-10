@@ -2,3 +2,4 @@ __debug_bin*
 .out/
 .data/
 refs/
+node_modules/
