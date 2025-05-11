@@ -22,7 +22,7 @@ func NewComponent(app types.IApp) types.IAppComponent {
 		nil,
 		nil,
 		&conf,
-		types.AccessPolicyAdmin,
+
 		[]types.AppControllerCtor{
 			tls_ca.NewController,
 			tls_ingress.NewController,

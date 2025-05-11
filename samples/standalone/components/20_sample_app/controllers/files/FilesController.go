@@ -12,7 +12,7 @@ type FilesController struct {
 }
 
 func NewFilesController(component types.IAppComponent) types.IAppController {
-	base := bases.NewBaseAppController(component, "files", 0, nil)
+	base := bases.NewBaseAppController(component, "files", 0, nil, types.AccessPolicyAuthenticated)
 	return &FilesController{
 		base,
 	}

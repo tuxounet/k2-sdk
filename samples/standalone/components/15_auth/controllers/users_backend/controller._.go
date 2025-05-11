@@ -15,7 +15,7 @@ type Controller struct {
 }
 
 func NewController(component types.IAppComponent) types.IAppController {
-	base := bases.NewBaseAppController(component, "users_backend", 10, &conf)
+	base := bases.NewBaseAppController(component, "users_backend", 10, &conf, types.AccessPolicyPublic)
 	return &Controller{
 		base,
 	}

@@ -15,7 +15,7 @@ type BaseControllerKubernetes struct {
 
 func NewBaseControllerKubernetes(component runtimeTypes.IAppComponent, definition *types.NamespaceDefinition, config *embed.FS) BaseControllerKubernetes {
 	name := definition.Name
-	base := runtimeBases.NewBaseAppController(component, name, definition.Order, config)
+	base := runtimeBases.NewBaseAppController(component, name, definition.Order, config, runtimeTypes.AccessPolicyAdmin)
 	instance := BaseControllerKubernetes{base}
 	instance.SetData("definition", definition)
 

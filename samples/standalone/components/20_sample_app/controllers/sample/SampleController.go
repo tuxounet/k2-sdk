@@ -12,7 +12,7 @@ type SampleController struct {
 }
 
 func NewSampleController(component types.IAppComponent) types.IAppController {
-	base := bases.NewBaseAppController(component, "sample", 1, nil)
+	base := bases.NewBaseAppController(component, "sample", 1, nil, types.AccessPolicyAuthenticated)
 	return &SampleController{
 		base,
 	}

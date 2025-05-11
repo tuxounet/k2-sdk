@@ -6,8 +6,10 @@ import (
 	"github.com/tuxounet/k2-sdk/bases"
 
 	// "github.com/tuxounet/k2-sdk/samples/with-a-kube/components/20_sample_kube_app/namespaces/admin"
+	"github.com/tuxounet/k2-sdk/samples/with-a-kube/components/20_sample_kube_app/namespaces/admin"
 	"github.com/tuxounet/k2-sdk/samples/with-a-kube/components/20_sample_kube_app/namespaces/database"
-	// "github.com/tuxounet/k2-sdk/samples/with-a-kube/components/20_sample_kube_app/namespaces/frontend"
+	"github.com/tuxounet/k2-sdk/samples/with-a-kube/components/20_sample_kube_app/namespaces/frontend"
+
 	"github.com/tuxounet/k2-sdk/samples/with-a-kube/components/20_sample_kube_app/ui"
 
 	"github.com/tuxounet/k2-sdk/types"
@@ -24,11 +26,10 @@ func NewComponent(app types.IApp) types.IAppComponent {
 		nil,
 		&ui.Dist,
 		&conf,
-		types.AccessPolicyPublic,
 		[]types.AppControllerCtor{
-			// admin.NewController,
+			admin.NewController,
 			database.NewController,
-			// frontend.NewController,
+			frontend.NewController,
 		},
 	)
 }

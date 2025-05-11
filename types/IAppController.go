@@ -12,7 +12,7 @@ type IAppController interface {
 	GetOrder() int
 	GetComponent() IAppComponent
 	GetConfig() *embed.FS
-
+	GetAccessPolicy() IAccessPolicy
 	Init() error
 	Register(r *gin.RouterGroup) error
 	Start() error

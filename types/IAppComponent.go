@@ -15,7 +15,7 @@ type IAppComponent interface {
 	GetConfig() *embed.FS
 	GetDocs() *swag.Spec
 	GetUI() *embed.FS
-	GetAccessPolicy() IAccessPolicy
+
 	GetControllers() []IAppController
 	GetController(name string) IAppController
 

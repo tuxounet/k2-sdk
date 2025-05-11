@@ -10,7 +10,7 @@ type Controller struct {
 }
 
 func NewController(component types.IAppComponent) types.IAppController {
-	base := bases.NewBaseAppController(component, "frontend", 30, nil)
+	base := bases.NewBaseAppController(component, "frontend", 30, nil, types.AccessPolicyPublic)
 	return &Controller{
 		base,
 	}

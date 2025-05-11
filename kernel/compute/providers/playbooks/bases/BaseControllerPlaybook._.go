@@ -15,7 +15,7 @@ type BaseControllerPlaybook struct {
 
 func NewBaseControllerPlaybook(component runtimeTypes.IAppComponent, definition *types.PlaybookDefinition, config *embed.FS) BaseControllerPlaybook {
 	name := definition.Name
-	base := runtimeBases.NewBaseAppController(component, name, definition.Order, config)
+	base := runtimeBases.NewBaseAppController(component, name, definition.Order, config, runtimeTypes.AccessPolicyAdmin)
 	instance := BaseControllerPlaybook{base}
 	instance.SetData("definition", definition)
 

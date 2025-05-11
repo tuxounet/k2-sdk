@@ -8,24 +8,27 @@ import (
 )
 
 type BaseAppController struct {
-	name      string
-	order     int
-	component types.IAppComponent
-	log       types.ILogger
-	config    *embed.FS
-	data      map[string]interface{}
+	name         string
+	order        int
+	component    types.IAppComponent
+	log          types.ILogger
+	config       *embed.FS
+	accessPolicy types.IAccessPolicy
+	data         map[string]any
 }
 
-func NewBaseAppController(component types.IAppComponent, name string, order int, config *embed.FS) BaseAppController {
+func NewBaseAppController(component types.IAppComponent, name string, order int, config *embed.FS, access types.IAccessPolicy) BaseAppController {
 
 	log := component.GetLogger().CreateSubLogger(name)
+
 	base := BaseAppController{
-		name:      name,
-		component: component,
-		order:     order,
-		config:    config,
-		log:       log,
-		data:      make(map[string]interface{}),
+		name:         name,
+		component:    component,
+		order:        order,
+		config:       config,
+		log:          log,
+		accessPolicy: access,
+		data:         make(map[string]any),
 	}
 
 	return base
@@ -65,11 +68,15 @@ func (b *BaseAppController) Stop() error {
 func (b *BaseAppController) GetConfig() *embed.FS {
 	return b.config
 }
-func (a *BaseAppController) GetData(key string) interface{} {
+func (a *BaseAppController) GetData(key string) any {
 	return a.data[key]
 }
 
-func (a *BaseAppController) SetData(key string, value interface{}) {
+func (a *BaseAppController) SetData(key string, value any) {
 
 	a.data[key] = value
+}
+
+func (a *BaseAppController) GetAccessPolicy() types.IAccessPolicy {
+	return a.accessPolicy
 }

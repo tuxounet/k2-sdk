@@ -21,7 +21,7 @@ func NewComponent(app types.IApp) types.IAppComponent {
 		nil,
 		nil,
 		&conf,
-		types.AccessPolicyPublic,
+
 		[]types.AppControllerCtor{
 			users_backend.NewController,
 			admin_backend.NewController,
