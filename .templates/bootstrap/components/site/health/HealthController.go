@@ -11,7 +11,7 @@ type HealthController struct {
 }
 
 func NewController(component runtimeTypes.IAppComponent) runtimeTypes.IAppController {
-	base := runtimeBases.NewBaseAppController(component, "health", 1, nil)
+	base := runtimeBases.NewBaseAppController(component, "health", 1, nil, runtimeTypes.AccessPolicyPublic)
 	return &HealthController{
 		base,
 	}
