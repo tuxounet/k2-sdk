@@ -12,13 +12,12 @@ type Controller struct {
 
 func NewController(component runtimeTypes.IAppComponent) runtimeTypes.IAppController {
 	base := runtimeBases.NewBaseAppController(component, "health", 1, nil, runtimeTypes.AccessPolicyPublic)
-	return &HealthController{
+	return &Controller{
 		base,
 	}
 }
 
 func (h *Controller) Register(r *gin.RouterGroup) error {
-
 	r.GET("/health", h.api_health())
 	return nil
 }
