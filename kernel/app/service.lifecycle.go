@@ -10,6 +10,17 @@ func (s *Service) Init() error {
 	appLogger := s.GetLogger().CreateSubLogger(app.GetName())
 	app.SetLogger(appLogger)
 
+	config := app.GetConfig()
+
+	if config != nil {
+
+		err := s.getConfigService().LoadFromEmbedFS("config", config)
+
+		if err != nil {
+			s.GetLogger().ErrorF("Error loading config for app %s: %s", app.GetName(), err.Error())
+			return err
+		}
+	}
 	components := app.GetComponents()
 	for _, component := range components {
 
@@ -36,18 +47,6 @@ func (s *Service) Init() error {
 			err := ctrl.Init()
 			if err != nil {
 				s.GetLogger().ErrorF("controller %s init failed: %s", ctrl.GetName(), err.Error())
-				return err
-			}
-		}
-
-		config := app.GetConfig()
-
-		if config != nil {
-
-			err := s.getConfigService().LoadFromEmbedFS("config", config)
-
-			if err != nil {
-				s.GetLogger().ErrorF("Error loading config for app %s: %s", app.GetName(), err.Error())
 				return err
 			}
 		}

@@ -31,6 +31,7 @@ func (s *Service) LoadFromEmbedFS(folder string, fs *embed.FS) error {
 		if err != nil {
 			s.GetLogger().WarnF("Failed to read config directory: %v", err)
 		} else {
+
 			for _, entry := range entries {
 				if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".yaml") {
 					continue
