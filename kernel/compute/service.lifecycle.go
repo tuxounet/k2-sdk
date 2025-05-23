@@ -41,6 +41,15 @@ func (s *Service) Init() error {
 }
 
 func (s *Service) Register() error {
+	err := s.nukeInventory()
+	if err != nil {
+		s.GetLogger().ErrorF("nuke inventory failed: %s", err)
+		return err
+	}
+	err = s.renderInventory()
+	if err != nil {
+		return fmt.Errorf("failed to render inventory: %s ", err.Error())
+	}
 
 	enabled, err := s.isEnabled()
 	if err != nil {
@@ -52,11 +61,6 @@ func (s *Service) Register() error {
 	}
 
 	providers := s.getProviders()
-	err = s.nukeInventory()
-	if err != nil {
-		s.GetLogger().ErrorF("nuke inventory failed: %s", err)
-		return err
-	}
 
 	err = s.resetRunners()
 	if err != nil {
@@ -89,10 +93,6 @@ func (s *Service) Register() error {
 		}
 	}
 
-	err = s.renderInventory()
-	if err != nil {
-		return fmt.Errorf("failed to render inventory: %s ", err.Error())
-	}
 	err = s.renderProvisionRunners()
 	if err != nil {
 		return fmt.Errorf("failed to render provision playbook from rendered runners: %s ", err.Error())
