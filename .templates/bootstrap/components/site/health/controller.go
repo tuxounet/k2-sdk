@@ -6,7 +6,7 @@ import (
 	runtimeTypes "{{ .sdk_module }}/types"
 )
 
-type HealthController struct {
+type Controller struct {
 	runtimeBases.BaseAppController
 }
 
@@ -17,7 +17,7 @@ func NewController(component runtimeTypes.IAppComponent) runtimeTypes.IAppContro
 	}
 }
 
-func (h *HealthController) Register(r *gin.RouterGroup) error {
+func (h *Controller) Register(r *gin.RouterGroup) error {
 
 	r.GET("/health", h.api_health())
 	return nil
@@ -30,7 +30,7 @@ func (h *HealthController) Register(r *gin.RouterGroup) error {
 // @Produce json
 // @Success 200  {string} string "OK"
 // @Router /site/health [get]
-func (h *HealthController) api_health() gin.HandlerFunc {
+func (h *Controller) api_health() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		ctx.JSON(200, "OK")
 	}
