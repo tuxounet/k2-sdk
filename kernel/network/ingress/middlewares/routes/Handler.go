@@ -17,9 +17,9 @@ import (
 func Register(service runtimeTypes.IKernelService, router *gin.RouterGroup, registrations []types.IngressDefinition) error {
 
 	for _, registration := range registrations {
-		handler := registration.CustomHandler
-		if handler == nil {
-			handler = performProxyRequest(registration)
+		handler := performProxyRequest(registration)
+		if registration.CustomHandler != nil {
+			handler = registration.CustomHandler(registration)
 		}
 		router.Any(fmt.Sprintf("%s/*proxyPath", registration.IngressPath), ensureAuthLevel(service, registration), handler)
 	}

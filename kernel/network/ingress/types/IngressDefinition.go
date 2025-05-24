@@ -6,11 +6,11 @@ import (
 )
 
 type IngressDefinition struct {
-	IngressPath   string                     `json:"path"`
-	AccessPolicy  runtimeTypes.IAccessPolicy `json:"accessPolicy"`
-	ServicePort   int                        `json:"servicePort"`
-	ServiceHost   string                     `json:"serviceHost"`
-	CustomHandler gin.HandlerFunc            `json:"-"`
+	IngressPath   string                                      `json:"path"`
+	AccessPolicy  runtimeTypes.IAccessPolicy                  `json:"accessPolicy"`
+	ServicePort   int                                         `json:"servicePort"`
+	ServiceHost   string                                      `json:"serviceHost"`
+	CustomHandler func(def IngressDefinition) gin.HandlerFunc `json:"-"`
 }
 
 type IngressRegistarFunction func(ingress *IngressDefinition) error
