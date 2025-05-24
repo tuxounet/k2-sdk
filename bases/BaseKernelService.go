@@ -19,9 +19,9 @@ func NewBaseKernelService(kernel types.IKernel, name string) BaseKernelService {
 		kernel: kernel,
 		log:    log,
 		config: make(map[string]string),
-		data:   make(map[string]interface{}),
+		data:   make(map[string]any),
 	}
-	log.DebugF("Service %s created", name)
+	log.TraceF("[BOOT] complete")
 	return instance
 }
 
@@ -45,11 +45,11 @@ func (b *BaseKernelService) SetConfig(key string, value string) {
 	b.config[key] = value
 }
 
-func (b *BaseKernelService) GetData(key string) interface{} {
+func (b *BaseKernelService) GetData(key string) any {
 	return b.data[key]
 }
 
-func (b *BaseKernelService) SetData(key string, value interface{}) {
+func (b *BaseKernelService) SetData(key string, value any) {
 	b.data[key] = value
 }
 

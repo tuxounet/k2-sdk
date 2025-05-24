@@ -5,8 +5,8 @@ import (
 	"strings"
 )
 
-func (c *Service) GetCurrent() map[string]interface{} {
-	return c.GetData("records").(map[string]interface{})
+func (c *Service) GetCurrent() map[string]any {
+	return c.GetData("records").(map[string]any)
 }
 
 func (c *Service) Has(key string) bool {
@@ -14,12 +14,12 @@ func (c *Service) Has(key string) bool {
 }
 
 // Get retrieves the value at the given path from the map.
-func (c *Service) Get(path string) interface{} {
+func (c *Service) Get(path string) any {
 	m := c.GetCurrent()
 	keys := strings.Split(path, ".")
-	var result interface{} = m
+	var result any = m
 	for _, key := range keys {
-		if resultMap, ok := result.(map[string]interface{}); ok {
+		if resultMap, ok := result.(map[string]any); ok {
 			result = resultMap[key]
 		} else {
 			return nil

@@ -14,6 +14,11 @@ type Service struct {
 func NewService(k types.IKernel) types.IKernelService {
 
 	base := bases.NewBaseKernelService(k, ServiceKey)
-	return &Service{base}
+
+	instance := &Service{
+		base,
+	}
+
+	return instance
 
 }

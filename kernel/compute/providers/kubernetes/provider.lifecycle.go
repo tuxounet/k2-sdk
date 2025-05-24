@@ -7,30 +7,18 @@ import (
 )
 
 func (p *Provider) Init() error {
-	p.GetLogger().TraceF("Initializing %s provider", ProviderKey)
+	p.GetLogger().TraceF("[INIT] Initializing %s provider", ProviderKey)
 	err := p.getPortsForwardsStore().Nuke()
 	if err != nil {
 		p.GetLogger().ErrorF("Failed to nuke ports forwards store: %s", err)
 		return err
 	}
+	p.GetLogger().TraceF("[INIT] %s provider initialized", ProviderKey)
 	return nil
-}
-
-func (p *Provider) Nuke() error {
-	p.GetLogger().TraceF("Nuking up %s provider", ProviderKey)
-
-	return nil
-}
-
-func (p *Provider) Setup() error {
-	p.GetLogger().TraceF("Setting up %s provider", ProviderKey)
-
-	return nil
-
 }
 
 func (p *Provider) Start() error {
-	p.GetLogger().TraceF("Starting %s provider", ProviderKey)
+	p.GetLogger().TraceF("[START] Starting %s provider", ProviderKey)
 
 	forwards, err := p.getPortsForwardsStore().GetValue()
 	if err != nil {
@@ -61,11 +49,12 @@ func (p *Provider) Start() error {
 	}
 
 	p.setForwarders(forwarders)
+	p.GetLogger().TraceF("[START] provider %s started", ProviderKey)
 	return nil
 }
 
 func (p *Provider) Stop() error {
-	p.GetLogger().TraceF("Stopping %s provider", ProviderKey)
+	p.GetLogger().TraceF("[STOP] Stopping %s provider", ProviderKey)
 
 	for _, forward := range p.getForwarders() {
 		p.GetLogger().ErrorF("Stoping port forward %v", forward)
@@ -76,5 +65,6 @@ func (p *Provider) Stop() error {
 		}
 	}
 
+	p.GetLogger().TraceF("[STOP] provider %s stopped", ProviderKey)
 	return nil
 }

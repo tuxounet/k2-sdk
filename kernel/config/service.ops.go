@@ -2,6 +2,8 @@ package config
 
 import (
 	"embed"
+	"fmt"
+	"os"
 	"strings"
 
 	"dario.cat/mergo"
@@ -13,8 +15,8 @@ var defaultConfig embed.FS
 
 func (s *Service) initDefaultConfig() error {
 
-	s.SetData("records", make(map[string]interface{}))
-	err := s.LoadFromEmbedFS("defaults", &defaultConfig)
+	s.SetData("records", make(map[string]any))
+	err := s.LoadFromEmbedFS("kernel", "defaults", &defaultConfig)
 	if err != nil {
 		s.GetLogger().ErrorF("Failed to load default configuration: %v", err)
 		return err
@@ -23,44 +25,51 @@ func (s *Service) initDefaultConfig() error {
 	return nil
 }
 
-func (s *Service) LoadFromEmbedFS(folder string, fs *embed.FS) error {
+func (s *Service) LoadFromEmbedFS(source string, folder string, fs *embed.FS) error {
 
-	if fs != nil {
+	if fs == nil {
+		//nothing to do
+		return nil
+	}
 
-		entries, err := fs.ReadDir(folder)
-		if err != nil {
-			s.GetLogger().WarnF("Failed to read config directory: %v", err)
+	entries, err := fs.ReadDir(folder)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil // directory does not exist, nothing to load
 		} else {
-
-			for _, entry := range entries {
-				if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".yaml") {
-					continue
-				}
-				data, err := fs.ReadFile(folder + "/" + entry.Name())
-				if err != nil {
-					s.GetLogger().ErrorF("Failed to read config file %v: %v", entry.Name(), err)
-					return err
-				}
-
-				//unmarshal data
-				result, err := system.LoadYamlFromString[map[string]interface{}](string(data))
-				if err != nil {
-					s.GetLogger().ErrorF("Failed to unmarshal config file %v: %v", entry.Name(), err)
-					return err
-				}
-
-				current := s.GetCurrent()
-				err = mergo.Merge(&current, result, mergo.WithOverride)
-				if err != nil {
-					s.GetLogger().ErrorF("Failed to merge configuration: %v", err)
-					return err
-				}
-				s.SetData("records", current)
-
-			}
-
+			return fmt.Errorf("failed to read embeded config directory %s: %v", folder, err)
 		}
 	}
+
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".yaml") {
+			continue
+		}
+		data, err := fs.ReadFile(folder + "/" + entry.Name())
+		if err != nil {
+			s.GetLogger().ErrorF("Failed to read config file %v: %v", entry.Name(), err)
+			return err
+		}
+		configKey := fmt.Sprintf("%s/%s/%s", source, folder, entry.Name())
+
+		//unmarshal data
+		result, err := system.LoadYamlFromString[map[string]any](string(data))
+		if err != nil {
+			s.GetLogger().ErrorF("Failed to unmarshal config file %s: %s", configKey, err.Error())
+			return err
+		}
+
+		current := s.GetCurrent()
+		err = mergo.Merge(&current, result, mergo.WithOverride)
+		if err != nil {
+			s.GetLogger().ErrorF("Failed to merge configuration with %s: %s", configKey, err.Error())
+			return err
+		}
+		s.GetLogger().DebugF("Loaded config file %s", configKey)
+		s.SetData("records", current)
+
+	}
+
 	return nil
 }
 
