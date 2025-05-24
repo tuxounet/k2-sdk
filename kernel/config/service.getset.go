@@ -19,6 +19,8 @@ func (c *Service) Get(path string) any {
 	keys := strings.Split(path, ".")
 	var result any = m
 	for _, key := range keys {
+		key = strings.TrimSpace(key)
+		key = strings.ToLower(key)
 		if resultMap, ok := result.(map[string]any); ok {
 			result = resultMap[key]
 		} else {
