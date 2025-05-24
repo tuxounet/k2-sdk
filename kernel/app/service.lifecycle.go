@@ -12,18 +12,6 @@ func (s *Service) Init() error {
 	appLogger := s.GetLogger().CreateSubLogger(app.GetName())
 	app.SetLogger(appLogger)
 
-	config := app.GetConfig()
-
-	if config != nil {
-
-		s.GetLogger().TraceF("[INIT] init config for app %s", app.GetName())
-		err := s.getConfigService().LoadFromEmbedFS("app", "config", config)
-
-		if err != nil {
-			return fmt.Errorf("failed to get config for app %s: %s", app.GetName(), err.Error())
-		}
-		s.GetLogger().TraceF("[INIT] inited config for app %s", app.GetName())
-	}
 	components := app.GetComponents()
 	for _, component := range components {
 
@@ -56,6 +44,19 @@ func (s *Service) Init() error {
 		}
 
 	}
+	config := app.GetConfig()
+
+	if config != nil {
+
+		s.GetLogger().TraceF("[INIT] init config for app %s", app.GetName())
+		err := s.getConfigService().LoadFromEmbedFS("app", "config", config)
+
+		if err != nil {
+			return fmt.Errorf("failed to get config for app %s: %s", app.GetName(), err.Error())
+		}
+		s.GetLogger().TraceF("[INIT] inited config for app %s", app.GetName())
+	}
+
 	s.GetLogger().TraceF("[INIT] complete")
 	return nil
 }
