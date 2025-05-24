@@ -58,3 +58,9 @@ build: prepare
 		$(MAKE) -C ./components build; \
 	fi
 	go build -o ./.out/${APP_NAME}-${VERSION} ./main.go
+
+
+release: prepare	
+	if [ -f ./Makefile.inc ]; then \
+		make -f Makefile.inc release; \
+	fi
