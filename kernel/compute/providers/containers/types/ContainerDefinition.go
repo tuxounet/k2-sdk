@@ -1,6 +1,7 @@
 package types
 
 import (
+	"github.com/gin-gonic/gin"
 	runtimeTypes "github.com/tuxounet/k2-sdk/types"
 )
 
@@ -23,9 +24,10 @@ type ContainerDefinitionSecurity struct {
 }
 
 type ContainerDefinitionIngress struct {
-	ContainerPort int
-	Path          string
-	AccessPolicy  runtimeTypes.IAccessPolicy
+	ContainerPort int                        `json:"containerPort"`
+	Path          string                     `json:"path"`
+	AccessPolicy  runtimeTypes.IAccessPolicy `json:"accessPolicy"`
+	CustomHandler gin.HandlerFunc            `json:"-"`
 }
 
 type ContainerDefinitionPort struct {

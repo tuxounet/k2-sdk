@@ -236,10 +236,11 @@ func (p *DockerEngine) renderProvisionContainerTask(definition types.ContainerDe
 				if localPort > 0 {
 
 					ingressDef := &ingressTypes.IngressDefinition{
-						AccessPolicy: ing.AccessPolicy,
-						ServiceHost:  hostAddress,
-						ServicePort:  localPort,
-						IngressPath:  ing.Path,
+						AccessPolicy:  ing.AccessPolicy,
+						ServiceHost:   hostAddress,
+						ServicePort:   localPort,
+						IngressPath:   ing.Path,
+						CustomHandler: ing.CustomHandler,
 					}
 					err = p.ingressRegistar(ingressDef)
 					if err != nil {
