@@ -11,7 +11,11 @@
       "mode": "auto",
       "console": "integratedTerminal",
       "program": "${workspaceFolder}/samples/standalone/main.go",
-      "cwd": "${workspaceFolder}/samples/standalone"
+      "cwd": "${workspaceFolder}/samples/standalone",
+      "env": {
+        "K2_MESBOULES_ACTIVE": "yes",
+        "K2_greeting": "Bonjour le monde",
+      }
     },
     {
       "name": "Debug SDK With A Kube Sample",

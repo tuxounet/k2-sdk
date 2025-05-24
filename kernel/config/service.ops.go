@@ -73,6 +73,39 @@ func (s *Service) LoadFromEmbedFS(source string, folder string, fs *embed.FS) er
 	return nil
 }
 
+func (s *Service) LoadFromEnvVars(source string) error {
+	envPrefix := "K2_"
+	envVars := os.Environ()
+	found := make([]string, 0)
+	for _, envVar := range envVars {
+		if strings.HasPrefix(envVar, envPrefix) {
+			envVarKey := strings.Split(envVar, "=")[0]
+			found = append(found, envVarKey)
+
+		}
+	}
+
+	if len(found) > 0 {
+		s.GetLogger().DebugF("Found environment variables: %v", found)
+
+		for _, envKey := range found {
+			envValue := os.Getenv(envKey)
+			normalizedKey := strings.TrimPrefix(envKey, envPrefix)
+			normalizedKey = strings.ToLower(normalizedKey)
+			normalizedKey = strings.ReplaceAll(normalizedKey, "_", ".")
+
+			err := s.SetValue(normalizedKey, envValue)
+			if err != nil {
+				return fmt.Errorf("failed to set value from env var %s: %v", envKey, err)
+			}
+			s.GetLogger().DebugF("Set value from env var %s to %s", normalizedKey, envValue)
+
+		}
+	}
+
+	return nil
+}
+
 type untemplateData struct {
 	Config     map[string]interface{}
 	FileName   string

@@ -57,6 +57,13 @@ func (s *Service) Init() error {
 		s.GetLogger().TraceF("[INIT] inited config for app %s", app.GetName())
 	}
 
+	s.GetLogger().TraceF("[INIT] load env vars for app %s", app.GetName())
+	err := s.getConfigService().LoadFromEnvVars("host")
+	if err != nil {
+		return fmt.Errorf("failed to load env vars for host: %s", err.Error())
+	}
+	s.GetLogger().TraceF("[INIT] loaded env vars for app %s", app.GetName())
+
 	s.GetLogger().TraceF("[INIT] complete")
 	return nil
 }

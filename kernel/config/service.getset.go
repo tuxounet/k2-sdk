@@ -74,3 +74,39 @@ func (c *Service) GetAsIntOrDefault(key string, def int) (int, error) {
 
 	return value.(int), nil
 }
+
+func (c *Service) SetValue(key string, value any) error {
+	if key == "" {
+		return fmt.Errorf("key cannot be empty")
+	}
+
+	m := c.GetCurrent()
+	keys := strings.Split(key, ".")
+	var current any = m
+
+	for i, k := range keys {
+		if i == len(keys)-1 {
+			if resultMap, ok := current.(map[string]any); ok {
+				resultMap[k] = value
+			} else {
+				return fmt.Errorf("cannot set value at %s, not a map", key)
+			}
+		} else {
+			if resultMap, ok := current.(map[string]any); ok {
+				if next, exists := resultMap[k]; exists {
+					current = next
+				} else {
+					nextMap := make(map[string]any)
+					resultMap[k] = nextMap
+					current = nextMap
+				}
+			} else {
+				return fmt.Errorf("cannot traverse %s, not a map", key)
+			}
+		}
+	}
+	c.GetLogger().DebugF("Set value at %s to %v", key, value)
+
+	c.SetData("records", m)
+	return nil
+}

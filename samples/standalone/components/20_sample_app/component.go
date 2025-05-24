@@ -5,7 +5,6 @@ import (
 
 	"github.com/tuxounet/k2-sdk/bases"
 	"github.com/tuxounet/k2-sdk/samples/standalone/components/20_sample_app/controllers/files"
-	"github.com/tuxounet/k2-sdk/samples/standalone/components/20_sample_app/controllers/httpbin"
 	"github.com/tuxounet/k2-sdk/samples/standalone/components/20_sample_app/controllers/sample"
 	"github.com/tuxounet/k2-sdk/samples/standalone/components/20_sample_app/controllers/sample2"
 	"github.com/tuxounet/k2-sdk/samples/standalone/components/20_sample_app/ui"
@@ -28,7 +27,6 @@ func NewComponent(app types.IApp) types.IAppComponent {
 			sample.NewSampleController,
 			sample2.NewSample2Controller,
 			files.NewFilesController,
-			httpbin.NewController,
 		},
 	)
 }
