@@ -27,8 +27,8 @@ host:
     containers:
       engine: docker
       port:
-        start: 59000
-        end: 59999
+        start: 25000
+        end: 25999
     kubernetes:
       embedded:
         enabled: true

@@ -41,7 +41,7 @@ func AllowAccessLevelAdmin(req *http.Request, log types.ILogger, configService *
 	}
 
 	if !strings.HasPrefix(verify_url, "http") {
-		rootUrl, err := configService.GetAsString("host.ingress.root_url")
+		rootUrl, err := configService.GetAsString("host.ingress.root")
 		if err != nil {
 			log.ErrorF("Failed to get rootUrl: %s", err.Error())
 			return false

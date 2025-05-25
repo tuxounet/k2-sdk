@@ -29,7 +29,7 @@ func Register(service types.IKernelService, docs *swag.Spec, router *gin.RouterG
 	)
 
 	configService := service.GetKernel().GetService(config.ServiceKey).(*config.Service)
-	rootUrl, err := configService.GetAsString("host.ingress.root_url")
+	rootUrl, err := configService.GetAsString("host.ingress.root")
 	if err != nil {
 		log.ErrorF("Error getting rootUrl: %v", err)
 		return err

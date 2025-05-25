@@ -62,7 +62,7 @@ func (h *Controller) api_logout() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		ctx.SetCookie("auth", "", -1, "/", "", false, true)
 		configService := h.GetComponent().GetApp().GetKernel().GetService("config").(*config.Service)
-		rootUrl := configService.Get("host.ingress.root_url").(string)
+		rootUrl := configService.Get("host.ingress.root").(string)
 
 		ctx.Redirect(302, rootUrl)
 	}
@@ -82,7 +82,7 @@ var loginPage []byte
 // @Router /login [get]
 func (h *Controller) api_loginGet() gin.HandlerFunc {
 	configService := h.GetComponent().GetApp().GetKernel().GetService("config").(*config.Service)
-	rootUrl := configService.Get("host.ingress.root_url").(string)
+	rootUrl := configService.Get("host.ingress.root").(string)
 
 	return func(ctx *gin.Context) {
 		redirectParam, err := configService.GetAsString("host.ingress.auth.authenticated.redirectParam")
@@ -118,7 +118,7 @@ func (h *Controller) api_loginGet() gin.HandlerFunc {
 // @Router /login [post]
 func (h *Controller) api_loginPost() gin.HandlerFunc {
 	configService := h.GetComponent().GetApp().GetKernel().GetService("config").(*config.Service)
-	rootUrl := configService.Get("host.ingress.root_url").(string)
+	rootUrl := configService.Get("host.ingress.root").(string)
 	allowedUsers := configService.Get("auth.admins").([]any)
 	return func(ctx *gin.Context) {
 

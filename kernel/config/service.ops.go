@@ -119,7 +119,7 @@ type untemplateData struct {
 func (s *Service) Untemplate(templated []byte, baseRoute string) ([]byte, error) {
 	app := s.GetKernel().GetApp()
 
-	rootUrl, err := s.GetAsString("host.ingress.root_url")
+	rootUrl, err := s.GetAsString("host.ingress.root")
 	if err != nil {
 		return nil, err
 	}

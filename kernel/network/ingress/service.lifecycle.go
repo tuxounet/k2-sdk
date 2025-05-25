@@ -40,7 +40,7 @@ func (s *Service) Register() error {
 		return err
 	}
 
-	rootUrl, err := configService.GetAsString("host.ingress.root_url")
+	rootUrl, err := configService.GetAsString("host.ingress.root")
 	if err != nil {
 		s.GetLogger().ErrorF("Failed to get rootUrl: %s", err.Error())
 		return err
@@ -160,7 +160,7 @@ func (s *Service) Listen() error {
 		return err
 	}
 
-	rootUrl, err := configService.GetAsString("host.ingress.root_url")
+	rootUrl, err := configService.GetAsString("host.ingress.root")
 	if err != nil {
 		return err
 	}
