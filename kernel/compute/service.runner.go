@@ -96,7 +96,7 @@ func (s *Service) renderPlaybook(verb types.RunnerVerb, tasks string) error {
 
 	playbook := ""
 	playbook += fmt.Sprintf("- name: %s\n", verb)
-	playbook += fmt.Sprintf("  hosts: %s\n", "localhost")
+	playbook += fmt.Sprintf("  hosts: %s\n", "all")
 	playbook += fmt.Sprintf("  gather_facts: %s\n", "no")
 
 	if tasks == "" {

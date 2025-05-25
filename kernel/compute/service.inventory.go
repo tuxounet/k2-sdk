@@ -17,6 +17,13 @@ func (s *Service) renderInventory() error {
 	hosts += "    kernel:\n"
 	hosts += "      name: " + s.GetKernel().GetApp().GetName() + "\n"
 	hosts += "      version: " + s.GetKernel().GetApp().GetVersion() + "\n"
+	hosts += "  children:\n"
+	hosts += "    ungrouped:\n"
+	hosts += "      hosts:\n"
+	hosts += "        localhost:\n"
+	hosts += "          ansible_connection: local\n"
+	hosts += "          ansible_python_interpreter: \"{{ansible_playbook_python}}\"\n"
+
 	err = store.WriteObject(paths.CominePath(inventoryPath, "hosts.yaml"), []byte(hosts))
 	if err != nil {
 		s.GetLogger().ErrorF("Failed to write hosts.yaml: %s", err)
