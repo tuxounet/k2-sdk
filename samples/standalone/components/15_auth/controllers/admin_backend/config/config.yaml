@@ -1,4 +1,0 @@
-auth:
-  admins:
-    - username: admin
-      password: admin123

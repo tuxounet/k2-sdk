@@ -50,14 +50,6 @@ func ensureAuthLevel(service runtimeTypes.IKernelService, ingress types.IngressD
 				access.RedirectAccessLevelAuthenticatedLogin(c.Request, log, configService, c)
 				return
 			}
-		case runtimeTypes.AccessPolicyAdmin:
-			if access.AllowAccessLevelAdmin(c.Request, log, configService) {
-				c.Next()
-				return
-			} else {
-				access.RedirectAccessLevelAdminLogin(c.Request, log, configService, c)
-				return
-			}
 
 		default:
 			log.ErrorF("Unknown access level: %s", ingress.AccessPolicy)

@@ -14,8 +14,9 @@ host:
         enabled: true
       authenticated:
         enabled: false
-      admin:
-        enabled: false
+        # loginUrl: "/auth/users/login"
+        # verifyUrl: "/auth/users/verify"
+        # redirectParam: "redirect"
   compute:
     enabled: true
     containers:

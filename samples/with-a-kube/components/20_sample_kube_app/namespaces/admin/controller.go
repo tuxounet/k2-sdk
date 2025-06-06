@@ -22,11 +22,11 @@ func NewController(component types.IAppComponent) types.IAppController {
 		Templates: &templates,
 		Ingresses: []kubernetesTypes.NamespaceIngress{
 			{
-				AccessPolicy: types.AccessPolicyAdmin,
+				AccessPolicy: types.AccessPolicyAuthenticated,
 				IngressPath:  "/admin/dashboard",
 			},
 			{
-				AccessPolicy: types.AccessPolicyAdmin,
+				AccessPolicy: types.AccessPolicyAuthenticated,
 				IngressPath:  "/admin/files",
 			},
 		},

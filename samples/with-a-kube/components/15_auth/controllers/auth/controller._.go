@@ -1,4 +1,4 @@
-package users_backend
+package auth
 
 import (
 	"embed"

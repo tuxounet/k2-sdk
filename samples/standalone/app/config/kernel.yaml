@@ -17,11 +17,7 @@ host:
         loginUrl: "/auth/users/login"
         verifyUrl: "/auth/users/verify"
         redirectParam: "redirect"
-      admin:
-        enabled: true
-        loginUrl: "/auth/admin/login"
-        verifyUrl: "/auth/admin/verify"
-        redirectParam: "redirect"
+
   compute:
     enabled: true
     containers:

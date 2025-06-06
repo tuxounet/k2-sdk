@@ -1,4 +1,4 @@
-package admin_backend
+package auth
 
 import (
 	_ "embed"
@@ -8,13 +8,13 @@ import (
 	"github.com/tuxounet/k2-sdk/system"
 )
 
-const cookieKey = "admin_auth"
+const cookieKey = "auth"
 
 func (h *Controller) Register(r *gin.RouterGroup) error {
-	r.GET("/admin/login", h.api_loginGet())
-	r.POST("/admin/login", h.api_loginPost())
-	r.GET("/admin/verify", h.api_verify())
-	r.GET("/admin/logout", h.api_logout())
+	r.GET("/users/login", h.api_loginGet())
+	r.POST("/users/login", h.api_loginPost())
+	r.GET("/users/verify", h.api_verify())
+	r.GET("/users/logout", h.api_logout())
 	return nil
 }
 
@@ -37,7 +37,7 @@ func (h *Controller) api_verify() gin.HandlerFunc {
 		}
 
 		configService := h.GetComponent().GetApp().GetKernel().GetService("config").(*config.Service)
-		allowedUsers := configService.Get("auth.admins").([]any)
+		allowedUsers := configService.Get("auth.users").([]any)
 		for _, user := range allowedUsers {
 			if user.(map[string]any)["username"] == authCookie {
 				ctx.Status(200)
@@ -60,7 +60,7 @@ func (h *Controller) api_verify() gin.HandlerFunc {
 // @Router /logout [get]
 func (h *Controller) api_logout() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		ctx.SetCookie("auth", "", -1, "/", "", false, true)
+		ctx.SetCookie(cookieKey, "", -1, "/", "", false, true)
 		configService := h.GetComponent().GetApp().GetKernel().GetService("config").(*config.Service)
 		rootUrl := configService.Get("host.ingress.root").(string)
 
@@ -119,7 +119,7 @@ func (h *Controller) api_loginGet() gin.HandlerFunc {
 func (h *Controller) api_loginPost() gin.HandlerFunc {
 	configService := h.GetComponent().GetApp().GetKernel().GetService("config").(*config.Service)
 	rootUrl := configService.Get("host.ingress.root").(string)
-	allowedUsers := configService.Get("auth.admins").([]any)
+	allowedUsers := configService.Get("auth.users").([]any)
 	return func(ctx *gin.Context) {
 
 		redirect := ctx.PostForm("redirect")
@@ -153,7 +153,7 @@ func (h *Controller) api_loginPost() gin.HandlerFunc {
 
 func (h *Controller) buildLoginPage(errorMessage *string, rootUrl string, redirect string) (string, error) {
 
-	return system.UnTemplateWithGoTemplate(string(loginPage), map[string]interface{}{
+	return system.UnTemplateWithGoTemplate(string(loginPage), map[string]any{
 		"errorMessage": errorMessage,
 		"rootUrl":      rootUrl,
 		"redirect":     redirect,
