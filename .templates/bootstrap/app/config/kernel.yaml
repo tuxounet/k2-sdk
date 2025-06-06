@@ -1,0 +1,14 @@
+host:
+  address: 127.0.0.1
+  ingress:
+    address: 127.0.0.1
+    port: 8080
+    root: http://localhost:8080
+    # tls:
+    #   port: 28443
+    #   cert: "etc/pki/ssl/s.sample.local.crt"
+    #   key: "etc/pki/ssl/s.sample.local.key"
+  compute:
+    port:
+      start: 49000
+      end: 49999

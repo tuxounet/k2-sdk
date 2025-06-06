@@ -1,0 +1,14 @@
+- name: Stop embedded k8s node
+  community.docker.docker_container: #control_plane
+    name: "{{ .kubecontext }}"
+    state: stopped
+
+- name: remove embedded k8s node
+  community.docker.docker_container: #control_plane
+    name: "{{ .kubecontext }}"
+    state: absent
+
+- name: remove kubeconfig
+  file:
+    name: "{{ .kubeconfig }}"
+    state: absent

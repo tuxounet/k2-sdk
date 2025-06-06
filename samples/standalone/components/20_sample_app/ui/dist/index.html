@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ .Name }}</title>
+
+  <link rel="stylesheet" href="{{ .BasePath }}cdn/bulma@1.0.2/css/bulma.min.css" />
+</head>
+
+<body>
+  <div class="container">
+    <div class="panel">
+      <div class="panel-block">
+        <div class="level is-flex-grow-1 is-flex-direction-row">
+          <div class="level-left is-flex-grow-1 is-flex-direction-row">
+            <div class="level-item">
+              <a href="{{ .BasePath }}">{{ .Name }}</a>&nbsp;/
+            </div>
+            <div class="level-item">
+              Sample
+            </div>
+          </div>
+
+          <div class="level-right">
+            <div class="level-item">
+              <strong>{{ .Version }}</strong>&nbsp;-&nbsp;
+              <a href="../docs/index.html" target="_blank">
+                API
+              </a>
+            </div>
+            <div class="level-item">
+              <a href="{{ .RootUrl }}/auth/users/logout">
+                Déconnexion
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel-block">
+        <section class="hero">
+          <div class="hero-body">
+            <p class="title">{{ .Name }}</p>
+            <p class="subtitle">App Component</p>
+          </div>
+        </section>
+      </div>
+
+    </div>
+  </div>
+</body>
+
+</html>

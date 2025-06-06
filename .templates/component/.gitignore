@@ -1,0 +1,6 @@
+__debug_bin*
+.out/
+.data/
+refs/
+.refs/
+node_modules/

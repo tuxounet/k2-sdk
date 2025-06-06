@@ -1,0 +1,42 @@
+host:
+  address: 127.0.0.1
+  ingress:
+    address: 127.0.0.1
+    port: 8080
+    root: http://127.0.0.1:8080
+    # tls:
+    #   port: 8443
+    #   cert: "etc/pki/ssl/s.sample.local.crt"
+    #   key: "etc/pki/ssl/s.sample.local.key"
+    auth:
+      defaultAccess: "public"
+      public:
+        enabled: true
+      authenticated:
+        enabled: false
+      admin:
+        enabled: false
+  compute:
+    enabled: true
+    containers:
+      engine: podman
+      port:
+        start: 59000
+        end: 59099
+    kubernetes:
+      embedded:
+        enabled: true
+        image: docker.io/rancher/k3s:v1.30.11-k3s1
+        networks:
+          - subnet: 172.99.27.0/24
+            gateway: 172.99.27.2
+            iprange: 172.99.27.0/26
+      port:
+        start: 59100
+        end: 59199
+      kubeConfig: ""
+      kubeApiPort: 46443
+      ingress:
+        serviceNamespace: "kube-system"
+        serviceName: "traefik"
+        servicePort: 8000

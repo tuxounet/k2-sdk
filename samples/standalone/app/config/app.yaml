@@ -1,0 +1,10 @@
+greeting: "Salut salut"
+messages:
+  french:
+    hello: "Bonjour"
+    goodbye: "Au revoir"
+site:
+  tls:
+    ca:
+      key:
+        seed: "hhpki"

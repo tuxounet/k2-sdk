@@ -1,0 +1,19 @@
+site:
+  tls:
+    paths:
+      secrets: "{{ run_dir }}/etc/pki"
+    ca:
+      domain: sample.local
+      expiration: "+365d"
+      key:
+        seed: "ppki"
+        type: RSA
+        size: 4096
+        cipher: auto
+      info:
+        organization: sample.local
+        common_name: "My Samples Federation"
+        locality: Nowhere
+        country: FR
+        state: Ile-de-France
+        email: "admin@sample.local"

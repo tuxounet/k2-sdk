@@ -1,0 +1,35 @@
+host:
+  address: 127.0.0.1
+  ingress:
+    address: 127.0.0.1
+    port: 28080
+    rootUrl: https://localhost:28443
+    tls:
+      port: 28443
+      cert: "etc/pki/ssl/s.sample.local.crt"
+      key: "etc/pki/ssl/s.sample.local.key"
+    auth:
+      defaultAccess: "public"
+      public:
+        enabled: true
+      authenticated:
+        enabled: true
+        loginUrl: "/auth/users/login"
+        verifyUrl: "/auth/users/verify"
+        redirectParam: "redirect"
+      admin:
+        enabled: true
+        loginUrl: "/auth/admin/login"
+        verifyUrl: "/auth/admin/verify"
+        redirectParam: "redirect"
+  compute:
+    enabled: true
+    containers:
+      engine: docker
+      port:
+        start: 25000
+        end: 25999
+    kubernetes:
+      embedded:
+        enabled: true
+        image: docker.io/rancher/k3s:v1.30.11-k3s1

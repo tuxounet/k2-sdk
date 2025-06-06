@@ -1,0 +1,30 @@
+package types
+
+import (
+	"embed"
+
+	"github.com/tuxounet/k2-sdk/types"
+)
+
+type NamespaceDefinition struct {
+	Name      string                  `json:"name"`
+	Order     int                     `json:"order"`
+	Templates *embed.FS               `json:"templates"`
+	Ingresses []NamespaceIngress      `json:"ingresses"`
+	Ports     []NamespacePortForwards `json:"ports"`
+}
+
+type NamespaceIngress struct {
+	AccessPolicy     types.IAccessPolicy `json:"accessPolicy"`
+	IngressPath      string              `json:"ingressPath"`
+	ServiceNamespace string              `json:"serviceNamespace"`
+	ServiceName      string              `json:"serviceName"`
+	ServicePort      int                 `json:"servicePort"`
+}
+
+type NamespacePortForwards struct {
+	LocalPort        int    `json:"localPort"`
+	ServiceNamespace string `json:"serviceNamespace"`
+	ServiceName      string `json:"serviceName"`
+	ServicePort      int    `json:"servicePort"`
+}

@@ -1,0 +1,24 @@
+{{ $kubeconfig := .kubeconfig }}
+{{ $namespace := .namespace }}
+
+{{ range $key, $value := .templates }}
+- name: "remove kube manifest {{ $key }}"
+  kubernetes.core.k8s:
+    state: absent
+    kubeconfig: "{{ $kubeconfig }}"
+    namespace: "{{ $namespace }}"
+    definition: {{ toRawJson  $value }}
+    wait: true
+    wait_timeout: 60
+{{ end }}
+
+- name: "Remove a k8s namespace {{ $namespace }}"
+  kubernetes.core.k8s:
+    kubeconfig: "{{ $kubeconfig }}"
+    state: absent
+    name: "{{ $namespace }}"
+    api_version: v1
+    kind: Namespace
+    wait: true
+    wait_timeout: 60
+    

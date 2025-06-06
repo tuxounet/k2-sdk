@@ -1,0 +1,30 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug SDK Standalone Sample",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "console": "integratedTerminal",
+      "program": "${workspaceFolder}/samples/standalone/main.go",
+      "cwd": "${workspaceFolder}/samples/standalone",
+      "env": {
+        "K2_MESBOULES_ACTIVE": "yes",
+        "K2_greeting": "Bonjour le monde",
+      }
+    },
+    {
+      "name": "Debug SDK With A Kube Sample",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "console": "integratedTerminal",
+      "program": "${workspaceFolder}/samples/with-a-kube/main.go",
+      "cwd": "${workspaceFolder}/samples/with-a-kube"
+    }
+  ]
+}

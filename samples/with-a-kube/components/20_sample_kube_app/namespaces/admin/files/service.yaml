@@ -1,0 +1,12 @@
+# website::tag::3:: Expose the Python webapp on port 5000 via a Kubernetes LoadBalancer.
+kind: Service
+apiVersion: v1
+metadata:
+  name: files-service
+spec:
+  selector:
+    app: files-deployment
+  ports:
+    - protocol: TCP
+      targetPort: 80
+      port: 80
