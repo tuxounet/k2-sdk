@@ -1,6 +1,7 @@
 {{ $kubeconfig := .kubeconfig }}
 {{ $namespace := .namespace }}
 
+
 - name: "Create a k8s namespace {{ $namespace }}"
   kubernetes.core.k8s:
     kubeconfig: "{{ $kubeconfig }}"

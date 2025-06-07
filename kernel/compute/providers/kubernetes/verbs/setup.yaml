@@ -1,52 +1,103 @@
 - name: prepare folders
   file:
-    path: "{{ "{{" }} item {{ "}}" }}"
+    path: '{{ "{{" }} item {{ "}}" }}'
     state: directory
     recurse: yes
   with_items:
-    - "{{ "{{" }} run_dir {{ "}}" }}/home/.kube"
-    - "{{ "{{" }} run_dir {{ "}}" }}/var/k3s"
-    - "{{ "{{" }} run_dir {{ "}}" }}/var/data"
-    - "{{ "{{" }} run_dir {{ "}}" }}/var/data/volumes"
-- name: start embedded k8s node
-  community.docker.docker_container:
-    state: started
-    name: "{{ .kubecontext }}"
-    image: "{{ .kubeImage }}"
-    env:
-      TZ: "Europe/Paris"
-      K3S_TOKEN: "a_random_token"
-      K3S_KUBECONFIG_OUTPUT: "/config/config"
-      K3S_KUBECONFIG_MODE: "666"
-    command:
-      - server
-      - --https-listen-port={{ .kubeApiPort }}
-      - --node-name=single-node
-      - --disable-cloud-controller
-      - --prefer-bundled-bin
-      - --default-local-storage-path=/data/volumes
-    privileged: yes
+    - '{{ "{{" }} run_dir {{ "}}" }}/bin'
+    - '{{ "{{" }} run_dir {{ "}}" }}/home/.kube'
+    - '{{ "{{" }} run_dir {{ "}}" }}/etc/compute/kubernetes'
+    - '{{ "{{" }} run_dir {{ "}}" }}/var/kubernetes/control-plane'
+    - '{{ "{{" }} run_dir {{ "}}" }}/var/kubernetes/worker'
 
-    volumes:
-      - "{{ "{{" }} run_dir {{ "}}" }}/var/k3s:/var/lib/rancher/k3s"
-      - "{{ "{{" }} run_dir {{ "}}" }}/var/data:/data"
-      - "{{ "{{" }} run_dir {{ "}}" }}/home/.kube:/config"
-    ports:
-      - "127.0.0.1:46443:46443/tcp"
-    healthcheck:
-      test: ["CMD", "kubectl", "get", "nodes"]
+- name: get local arch
+  shell:
+    cmd: "uname -m"
+  register: local_arch
 
-- name: wait for container to be healthy
-  community.docker.docker_container_info:
-    name: "{{ .kubecontext }}"
-  until: "container_info.container is defined and container_info.container.State is defined and container_info.container.State.Health.Status == 'healthy'"
-  register: container_info
-  retries: 15
-  delay: 10
+- ansible.builtin.set_fact:
+    version_arch: '{{ "{{" }} (local_arch.stdout == "x86_64") | ternary( "amd64",  "arm64") {{ "}}" }}'
 
+- name: download kind binary
+  ansible.builtin.get_url:
+    url: https://kind.sigs.k8s.io/dl/v0.29.0/kind-linux-{{ "{{" }} version_arch {{ "}}" }}
+    dest: '{{ "{{" }} run_dir {{ "}}/bin/kind" }}'
+    mode: "0755"
+  register: kind_download
 
-- name: wait for kubeconfig file to be created
-  ansible.builtin.wait_for:
-    path: "{{ "{{" }} run_dir {{ "}}" }}/home/.kube/config"
+- name: setup cluster config file
+  copy:
+    dest: '{{ "{{" }} run_dir {{ "}}" }}/etc/compute/kubernetes/cluster.yaml'
+    content: |
+      kind: Cluster
+      apiVersion: kind.x-k8s.io/v1alpha4
+      name: {{ .kubecontext }}
+      nodes:
+      - role: control-plane
+        extraMounts:
+          - hostPath: {{ "{{" }} run_dir {{ "}}" }}/var/kubernetes/control-plane
+            containerPath: /srv
+        extraPortMappings:
+        - containerPort: 80
+          hostPort: {{ .kubeIngressPortPlain }}
+          listenAddress: "127.0.0.1"
+          protocol: TCP
+
+        - containerPort: 443
+          hostPort: {{ .kubeIngressPortTls }}
+          listenAddress: "127.0.0.1"
+          protocol: TCP
+      - role: worker
+        extraMounts:
+          - hostPath: {{ "{{" }} run_dir {{ "}}" }}/var/kubernetes/worker
+            containerPath: /srv
+  register: cluster_config
+
+- name: list present kind clusters
+  shell:
+    cmd: "../bin/kind get clusters"
+    chdir: '{{ "{{" }} run_dir {{ "}}" }}/home'
+  register: kind_clusters
+
+- name: nuke previous kind cluster
+  shell:
+    cmd: "../bin/kind delete cluster --name {{ .kubecontext }}"
+    chdir: '{{ "{{" }} run_dir {{ "}}" }}/home'
+  when: '"{{ .kubecontext }}" in kind_clusters.stdout_lines and (cluster_config.changed or kind_download.changed)'
+
+- name: create kind cluster
+  shell:
+    cmd: "../bin/kind create cluster --config ../etc/compute/kubernetes/cluster.yaml"
+    chdir: '{{ "{{" }} run_dir {{ "}}" }}/home'
+  environment:
+    HOME: '{{ "{{" }} run_dir {{ "}}" }}/home'
+  register: kind_create_result
+  when: (cluster_config.changed or kind_download.changed)
+
+- name: add ingress helm repo
+  kubernetes.core.helm_repository:
+    name: ingress-nginx
+    repo_url: https://kubernetes.github.io/ingress-nginx
+    kubeconfig: '{{ "{{" }} run_dir {{ "}}" }}/home/.kube/config'
     state: present
-    timeout: 60
+
+- name: install ingress helm chart
+  kubernetes.core.helm:
+    name: ingress-nginx
+    chart_ref: ingress-nginx/ingress-nginx
+    kubeconfig: '{{ "{{" }} run_dir {{ "}}" }}/home/.kube/config'
+    namespace: ingress-nginx
+    create_namespace: true
+
+- name: wait for ingress controller to be ready
+  kubernetes.core.k8s_info:
+    kind: Deployment
+    namespace: ingress-nginx
+    kubeconfig: '{{ "{{" }} run_dir {{ "}}" }}/home/.kube/config'
+  register: ingress_deployment
+  until: ingress_deployment.resources[0].status.readyReplicas > 0
+  retries: 30
+  delay: 5
+
+- debug:
+    var: ingress_deployment.resources[0].status.readyReplicas

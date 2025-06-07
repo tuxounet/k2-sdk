@@ -9,10 +9,10 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-    - host: kube.k2
+    - host: localhost
       http:
         paths:
-          - path: /admin/files
+          - path: /
             pathType: Prefix
             backend:
               service:
