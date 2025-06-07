@@ -15,8 +15,8 @@ type Controller struct {
 //go:embed config/*.yaml
 var controllerConfig embed.FS
 
-//go:embed playbooks/provision.yaml
-var provisionPlaybook string
+//go:embed tasks/provision.yaml
+var provisionTasks string
 
 const ControllerKey = "tls_ca"
 
@@ -25,7 +25,7 @@ func NewController(component types.IAppComponent) types.IAppController {
 	base := playbooksBases.NewBaseControllerPlaybook(component, &playbooksTypes.PlaybookDefinition{
 		Order:     3,
 		Name:      ControllerKey,
-		Provision: provisionPlaybook,
+		Provision: provisionTasks,
 	}, &controllerConfig)
 	return &Controller{
 		base,

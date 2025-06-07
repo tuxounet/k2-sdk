@@ -87,17 +87,6 @@ func (p *Provider) getKubeNetworks() []any {
 	return value.([]any)
 }
 
-func (p *Provider) getKubeApiPort() int {
-	defaultValue := 6443
-	value, err := p.getConfigService().GetAsInt("host.compute.kubernetes.embedded.ports.api")
-	if err != nil {
-		p.GetLogger().WarnF("unable to get kubeApiPort config value: %s, using default %d", err, defaultValue)
-		return defaultValue
-	}
-
-	return value
-}
-
 func (p *Provider) getKubeIngressPortPlain() int {
 	defaultValue := 80
 	value, err := p.getConfigService().GetAsInt("host.compute.kubernetes.embedded.ports.http")

@@ -29,9 +29,8 @@ host:
         enabled: true
         image: docker.io/rancher/k3s:v1.30.11-k3s1
         ports:
-          api: 59343
-          http: 59480
-          https: 59443
+          http: 31480
+          https: 31443
         networks:
           - subnet: 172.99.27.0/24
             gateway: 172.99.27.2

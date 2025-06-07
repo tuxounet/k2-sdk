@@ -1,0 +1,83 @@
+- block:
+    - name: install tools
+      become: true
+      apt:
+        name:
+          - openssl
+          - apt-transport-https
+          - ca-certificates
+          - gnupg
+          - curl
+        state: present
+
+    # debut CA
+    - name: ensure ca directory exists
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: 0700
+      with_items:
+        - "{{ site.tls.paths.secrets }}/ca"
+
+    - name: check if password file exists
+      stat:
+        path: "{{ site.tls.paths.secrets }}/ca/{{ site.tls.ca.domain }}.pwd"
+      register: pwd_key_exists
+
+    - name: create password
+      ansible.builtin.set_fact:
+        ca_pwd: "{{ lookup('ansible.builtin.password', '/dev/null', seed=site.tls.ca.key.seed, length=32) }}"
+
+    - name: write password to file
+      copy:
+        dest: "{{ site.tls.paths.secrets }}/ca/{{ site.tls.ca.domain }}.pwd"
+        content: "{{ ca_pwd }}"
+      when: not pwd_key_exists.stat.exists
+      register: ca_password_value
+
+    - name: check for private_key exists
+      stat:
+        path: "{{ site.tls.paths.secrets }}/ca/{{ site.tls.ca.domain }}.key"
+      register: private_key_exists
+
+    - name: read password file
+      slurp:
+        src: "{{ site.tls.paths.secrets }}/ca/{{ site.tls.ca.domain }}.pwd"
+      register: pwd_value
+      when: not private_key_exists.stat.exists or ca_password_value.changed
+
+    - name: generating CA private key
+      openssl_privatekey:
+        path: "{{ site.tls.paths.secrets }}/ca/{{ site.tls.ca.domain }}.key"
+        passphrase: "{{ pwd_value.content | b64decode }}"
+        backup: yes
+        size: "{{ site.tls.ca.key.size }}"
+        cipher: "{{ site.tls.ca.key.cipher }}"
+        type: "{{ site.tls.ca.key.type }}"
+      register: private_key
+      when: not private_key_exists.stat.exists or ca_password_value.changed
+
+    - name: generale CA root request
+      openssl_csr:
+        path: "{{ site.tls.paths.secrets }}/ca/{{ site.tls.ca.domain }}.csr"
+        privatekey_path: "{{ site.tls.paths.secrets }}/ca/{{ site.tls.ca.domain }}.key"
+        privatekey_passphrase: "{{ pwd_value.content | b64decode }}"
+        country_name: "{{ site.tls.ca.info.country}}"
+        state_or_province_name: "{{ site.tls.ca.info.state }}"
+        locality_name: "{{ site.tls.ca.info.locality }}"
+        organization_name: "{{ site.tls.ca.info.organization }}"
+        organizational_unit_name: "{{ site.tls.ca.domain }}"
+        email_address: "{{ site.tls.ca.info.email }}"
+        common_name: "{{ site.tls.ca.info.common_name }}"
+        basicConstraints: ["CA:TRUE"]
+      when: private_key.changed
+
+    - name: self-sign root CA certificate
+      openssl_certificate:
+        path: "{{ site.tls.paths.secrets }}/ca/{{ site.tls.ca.domain }}.crt"
+        privatekey_path: "{{ site.tls.paths.secrets }}/ca/{{ site.tls.ca.domain }}.key"
+        privatekey_passphrase: "{{ pwd_value.content | b64decode }}"
+        csr_path: "{{ site.tls.paths.secrets }}/ca/{{ site.tls.ca.domain }}.csr"
+        provider: selfsigned
+        selfsigned_not_after: "{{ site.tls.ca.expiration }}"
+      when: private_key.changed

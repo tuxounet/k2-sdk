@@ -159,7 +159,6 @@ func (p *Provider) getTemplateValues() map[string]any {
 	return map[string]any{
 		"kubecontext":          strings.ToLower(p.GetService().GetKernel().GetApp().GetName()),
 		"kubeconfig":           p.getKubeConfigValue(),
-		"kubeApiPort":          fmt.Sprintf("%d", p.getKubeApiPort()),
 		"kubeIngressPortPlain": fmt.Sprintf("%d", p.getKubeIngressPortPlain()),
 		"kubeIngressPortTls":   fmt.Sprintf("%d", p.getKubeIngressPortTls()),
 		"kubeImage":            p.getKubeImage(),
