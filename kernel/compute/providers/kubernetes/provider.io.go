@@ -49,18 +49,6 @@ func (p *Provider) getKubeConfigValue() string {
 	return value
 }
 
-func (p *Provider) getKubeImage() string {
-	defaultValue := "docker.io/rancher/k3s:v1.30.11-k3s1"
-	value, err := p.getConfigService().GetAsStringOrDefault("host.compute.kubernetes.embedded.image", defaultValue)
-	if err != nil {
-		p.GetLogger().WarnF("unable to get kube image config value: %s, using default %s", err, defaultValue)
-		return defaultValue
-
-	}
-
-	return value
-}
-
 func (p *Provider) getKubeNetworks() []any {
 	defaultValue := []any{
 		map[string]string{
@@ -85,27 +73,6 @@ func (p *Provider) getKubeNetworks() []any {
 	}
 
 	return value.([]any)
-}
-
-func (p *Provider) getKubeIngressPortPlain() int {
-	defaultValue := 80
-	value, err := p.getConfigService().GetAsInt("host.compute.kubernetes.embedded.ports.http")
-	if err != nil {
-		p.GetLogger().WarnF("unable to get kubeIngressPortPlain config value: %s, using default %d", err, defaultValue)
-		return defaultValue
-	}
-
-	return value
-}
-func (p *Provider) getKubeIngressPortTls() int {
-	defaultValue := 443
-	value, err := p.getConfigService().GetAsInt("host.compute.kubernetes.embedded.ports.https")
-	if err != nil {
-		p.GetLogger().WarnF("unable to get kubeIngressPortTls config value: %s, using default %d", err, defaultValue)
-		return defaultValue
-	}
-
-	return value
 }
 
 func (s *Provider) getHostPortStart() (int, error) {
