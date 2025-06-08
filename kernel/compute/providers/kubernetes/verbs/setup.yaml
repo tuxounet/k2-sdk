@@ -44,11 +44,11 @@
         extraPortMappings:
         - containerPort: {{ "{{" }} host.compute.kubernetes.embedded.ports.http {{ "}}" }}
           hostPort: {{ "{{" }} host.compute.kubernetes.embedded.ports.http {{ "}}" }}
-          listenAddress: "{{ "{{" }} host.address {{ "}}" }}"
+          listenAddress: "0.0.0.0"
           protocol: TCP
         - containerPort: {{ "{{" }} host.compute.kubernetes.embedded.ports.https {{ "}}" }}
           hostPort: {{ "{{" }} host.compute.kubernetes.embedded.ports.https {{ "}}" }}
-          listenAddress: "{{ "{{" }} host.address {{ "}}" }}"
+          listenAddress: "0.0.0.0"
           protocol: TCP
   register: cluster_config
 
