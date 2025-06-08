@@ -2,13 +2,13 @@
     - name: decrypt key
       become: true
       shell: |
-        rm -f  {{ run_dir }}/etc/pki/ca/{{ site.tls.ca.domain }}.clear.key
-        openssl rsa -in {{ run_dir }}/etc/pki/ca/{{ site.tls.ca.domain }}.key -out {{ run_dir }}/etc/pki/ca/{{ site.tls.ca.domain }}.clear.key -passin pass:{{ lookup('ansible.builtin.file', site.tls.paths.secrets + '/ca/' + site.tls.ca.domain + '.pwd') }}
+        rm -f  {{ site.tls.paths.secrets }}/ca/{{ site.tls.ca.domain }}.clear.key
+        openssl rsa -in {{ site.tls.paths.secrets }}/ca/{{ site.tls.ca.domain }}.key -out {{ site.tls.paths.secrets }}/ca/{{ site.tls.ca.domain }}.clear.key -passin pass:{{ lookup('ansible.builtin.file', site.tls.paths.secrets + '/ca/' + site.tls.ca.domain + '.pwd') }}
 
     - name: read tls-key
       become: true
       slurp:
-        src: "{{ run_dir }}/etc/pki/ca/{{ site.tls.ca.domain }}.clear.key"
+        src: "{{ site.tls.paths.secrets }}/ca/{{ site.tls.ca.domain }}.clear.key"
       register: ca_key_body
 
     - name: cleanup
@@ -17,7 +17,7 @@
         path: "{{ item }}"
         state: absent
       loop:
-        - "{{ run_dir }}/etc/pki/ca/{{ site.tls.ca.domain }}.clear.key"
+        - "{{ site.tls.paths.secrets }}/ca/{{ site.tls.ca.domain }}.clear.key"
 
     - name: "add ca secret"
       kubernetes.core.k8s:
@@ -50,6 +50,6 @@
             namespace: kube-system
           spec:
             ca:
-              secretName: ca-issuer-secret
+              secretName: f-issuer-secret
         wait: true
         wait_timeout: 60

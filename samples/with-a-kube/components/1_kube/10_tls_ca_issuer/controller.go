@@ -1,7 +1,7 @@
-package ca_issuer
+package tls_ca_issuer
 
 import (
-	_ "embed"
+	"embed"
 
 	playbooksBases "github.com/tuxounet/k2-sdk/kernel/compute/providers/playbooks/bases"
 	playbooksTypes "github.com/tuxounet/k2-sdk/kernel/compute/providers/playbooks/types"
@@ -15,15 +15,18 @@ type Controller struct {
 //go:embed tasks/provision.yaml
 var provisionTasks string
 
-const ControllerKey = "ca_issuer"
+//go:embed config/*.yaml
+var controllerConfig embed.FS
+
+const ControllerKey = "tls_ca_issuer"
 
 func NewController(component types.IAppComponent) types.IAppController {
 
 	base := playbooksBases.NewBaseControllerPlaybook(component, &playbooksTypes.PlaybookDefinition{
-		Order:     4,
+		Order:     60,
 		Name:      ControllerKey,
 		Provision: provisionTasks,
-	}, nil)
+	}, &controllerConfig)
 	return &Controller{
 		base,
 	}

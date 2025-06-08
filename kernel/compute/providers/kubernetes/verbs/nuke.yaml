@@ -6,6 +6,6 @@
 
 - name: nuke kind cluster
   shell:
-    cmd: "../bin/kind delete cluster --name {{ .kubecontext }}"
+    cmd: '../bin/kind delete cluster --name {{ "{{" }} kernel.name | lower {{ "}}" }}'
     chdir: '{{ "{{" }} run_dir {{ "}}" }}/home'
-  when: '"{{ .kubecontext }}" in kind_clusters.stdout_lines'
+  when: '"{{ "{{" }} kernel.name | lower {{ "}}" }}" in kind_clusters.stdout_lines'

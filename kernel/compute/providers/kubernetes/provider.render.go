@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"path/filepath"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/tuxounet/k2-sdk/kernel/compute/providers/kubernetes/types"
@@ -157,7 +156,6 @@ func (p *Provider) Render() ([]computeTypes.RunnerDefinition, error) {
 
 func (p *Provider) getTemplateValues() map[string]any {
 	return map[string]any{
-		"kubecontext":  strings.ToLower(p.GetService().GetKernel().GetApp().GetName()),
 		"kubeconfig":   p.getKubeConfigValue(),
 		"kubeNetworks": p.getKubeNetworks(),
 	}

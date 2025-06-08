@@ -22,6 +22,7 @@ func (s *Service) renderProvisionRunners() error {
 
 	for _, r := range allRunners {
 		if r.Provision != "" {
+			s.GetLogger().DebugF("Adding provision task for runner %d [%s] %s", r.Order, r.Provider, r.Name)
 			tasks += r.Provision + "\n"
 		}
 	}
@@ -42,6 +43,7 @@ func (s *Service) renderStartRunners() error {
 
 	for _, r := range allRunners {
 		if r.Start != "" {
+			s.GetLogger().DebugF("Adding start task for runner %d [%s] %s", r.Order, r.Provider, r.Name)
 			tasks += r.Start + "\n"
 		}
 	}
@@ -61,6 +63,7 @@ func (s *Service) renderStopRunners() error {
 
 	for _, r := range allRunners {
 		if r.Stop != "" {
+			s.GetLogger().DebugF("Adding stop task for runner %d [%s] %s", r.Order, r.Provider, r.Name)
 			tasks += r.Stop + "\n"
 		}
 	}
@@ -81,6 +84,7 @@ func (s *Service) renderTeardownRunners() error {
 
 	for _, r := range allRunners {
 		if r.Teardown != "" {
+			s.GetLogger().DebugF("Adding teardown task for runner %d [%s] %s", r.Order, r.Provider, r.Name)
 			tasks += r.Teardown + "\n"
 		}
 	}

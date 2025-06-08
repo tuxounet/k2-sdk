@@ -31,7 +31,7 @@
     content: |
       kind: Cluster
       apiVersion: kind.x-k8s.io/v1alpha4
-      name: {{ .kubecontext }}
+      name: {{ "{{" }} kernel.name | lower {{ "}}" }}
       nodes:
       - role: control-plane
         extraMounts:
@@ -42,13 +42,13 @@
           - hostPath: {{ "{{" }} run_dir {{ "}}" }}/var/kubernetes/worker
             containerPath: /srv
         extraPortMappings:
-        - containerPort: {{ .kubeIngressPortPlain }}
-          hostPort: {{ .kubeIngressPortPlain }}
-          listenAddress: "0.0.0.0"
+        - containerPort: {{ "{{" }} host.compute.kubernetes.embedded.ports.http {{ "}}" }}
+          hostPort: {{ "{{" }} host.compute.kubernetes.embedded.ports.http {{ "}}" }}
+          listenAddress: "{{ "{{" }} host.address {{ "}}" }}"
           protocol: TCP
-        - containerPort: {{ .kubeIngressPortTls }}
-          hostPort: {{ .kubeIngressPortTls }}
-          listenAddress: "0.0.0.0"
+        - containerPort: {{ "{{" }} host.compute.kubernetes.embedded.ports.https {{ "}}" }}
+          hostPort: {{ "{{" }} host.compute.kubernetes.embedded.ports.https {{ "}}" }}
+          listenAddress: "{{ "{{" }} host.address {{ "}}" }}"
           protocol: TCP
   register: cluster_config
 
@@ -60,9 +60,9 @@
 
 - name: nuke previous kind cluster
   shell:
-    cmd: "../bin/kind delete cluster --name {{ .kubecontext }}"
+    cmd: '../bin/kind delete cluster --name {{ "{{" }} kernel.name | lower {{ "}}" }}'
     chdir: '{{ "{{" }} run_dir {{ "}}" }}/home'
-  when: '"{{ .kubecontext }}" in kind_clusters.stdout_lines'
+  when: '"{{ "{{" }} kernel.name | lower {{ "}}" }}" in kind_clusters.stdout_lines'
 
 - name: create kind cluster
   shell:

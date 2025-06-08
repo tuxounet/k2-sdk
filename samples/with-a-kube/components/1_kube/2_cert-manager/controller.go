@@ -1,4 +1,4 @@
-package tls_ingress
+package cert_manager
 
 import (
 	"embed"
@@ -12,18 +12,18 @@ type Controller struct {
 	playbooksBases.BaseControllerPlaybook
 }
 
-//go:embed config/*.yaml
-var controllerConfig embed.FS
-
 //go:embed tasks/provision.yaml
 var provisionTasks string
 
-const ControllerKey = "tls_ingress"
+//go:embed config/*.yaml
+var controllerConfig embed.FS
+
+const ControllerKey = "cert_manager"
 
 func NewController(component types.IAppComponent) types.IAppController {
 
 	base := playbooksBases.NewBaseControllerPlaybook(component, &playbooksTypes.PlaybookDefinition{
-		Order:     4,
+		Order:     52,
 		Name:      ControllerKey,
 		Provision: provisionTasks,
 	}, &controllerConfig)

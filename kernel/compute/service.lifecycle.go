@@ -19,7 +19,7 @@ func (s *Service) Init() error {
 		s.GetLogger().DebugF("compute service is disabled")
 		return nil
 	}
-	s.GetLogger().TraceF("begin init")
+	s.GetLogger().TraceF("[INIT] begin init")
 
 	providers := []types.IBasePlateformProvider{
 		containers.NewProvider(s, s.getIngressService().RegisterIngress),
@@ -30,7 +30,7 @@ func (s *Service) Init() error {
 	for _, p := range providers {
 		err := p.Init()
 		if err != nil {
-			s.GetLogger().ErrorF("nuke failed: %s", err)
+			s.GetLogger().ErrorF("[INIT] nuke failed: %s", err)
 			return err
 		}
 	}
