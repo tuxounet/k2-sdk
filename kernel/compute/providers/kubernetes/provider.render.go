@@ -27,6 +27,8 @@ var stopPlaybook string
 
 func (p *Provider) Render() ([]computeTypes.RunnerDefinition, error) {
 
+	p.GetLogger().DebugF("[RENDER] Rendering %s provider", ProviderKey)
+
 	definitions := p.GetDefinitions()
 
 	if len(definitions) == 0 {
@@ -36,6 +38,7 @@ func (p *Provider) Render() ([]computeTypes.RunnerDefinition, error) {
 	runners := make([]computeTypes.RunnerDefinition, 0)
 
 	if p.getIsEmbeddedEnabled() {
+		p.GetLogger().DebugF("Embedded mode is enabled for %s provider", ProviderKey)
 
 		setupScript, err := p.renderPlaybookProvider(setupPlaybook)
 		if err != nil {
@@ -57,6 +60,8 @@ func (p *Provider) Render() ([]computeTypes.RunnerDefinition, error) {
 		}
 		runners = append(runners, setupRunner)
 
+	} else {
+		p.GetLogger().DebugF("Embedded mode is disabled for %s provider", ProviderKey)
 	}
 	configService := p.getConfigService()
 
@@ -150,6 +155,8 @@ func (p *Provider) Render() ([]computeTypes.RunnerDefinition, error) {
 
 		runners = append(runners, newRunnerDefinition)
 	}
+
+	p.GetLogger().DebugF("[RENDER] Rendered %d runners for %s provider", len(runners), ProviderKey)
 
 	return runners, nil
 }

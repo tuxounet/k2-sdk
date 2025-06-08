@@ -9,6 +9,8 @@ import (
 
 func (p *Provider) Render() ([]computeTypes.RunnerDefinition, error) {
 
+	p.GetLogger().DebugF("[RENDER] Rendering %s provider", ProviderKey)
+
 	definitions := p.GetDefinitions()
 	runners := make([]computeTypes.RunnerDefinition, 0)
 
@@ -57,6 +59,8 @@ func (p *Provider) Render() ([]computeTypes.RunnerDefinition, error) {
 		}
 		runners = append(runners, newRunnerDefinition)
 	}
+
+	p.GetLogger().DebugF("Rendered %d runners for %s provider", len(runners), ProviderKey)
 
 	return runners, nil
 }
