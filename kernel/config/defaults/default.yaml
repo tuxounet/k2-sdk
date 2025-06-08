@@ -27,7 +27,6 @@ host:
     kubernetes:
       embedded:
         enabled: true
-        image: docker.io/rancher/k3s:v1.30.11-k3s1
         ports:
           http: 31480
           https: 31443
