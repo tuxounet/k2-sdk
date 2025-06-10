@@ -71,3 +71,5 @@
   environment:
     HOME: '{{ "{{" }} run_dir {{ "}}" }}/home'
   register: kind_create_result
+
+-

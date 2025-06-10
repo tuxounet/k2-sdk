@@ -5,9 +5,9 @@ import (
 
 	"github.com/tuxounet/k2-sdk/bases"
 
-	auth "github.com/tuxounet/k2-sdk/samples/with-a-kube/components/15_auth"
 	kube "github.com/tuxounet/k2-sdk/samples/with-a-kube/components/1_kube"
-	sample_kube_app "github.com/tuxounet/k2-sdk/samples/with-a-kube/components/20_sample_kube_app"
+	// auth "github.com/tuxounet/k2-sdk/samples/with-a-kube/components/15_auth"
+	// sample_kube_app "github.com/tuxounet/k2-sdk/samples/with-a-kube/components/20_sample_kube_app"
 
 	"github.com/tuxounet/k2-sdk/types"
 )
@@ -24,8 +24,8 @@ func NewApp() types.IApp {
 		&conf,
 		[]types.AppComponentCtor{
 			kube.NewComponent,
-			auth.NewComponent,
-			sample_kube_app.NewComponent,
+			// auth.NewComponent,
+			// sample_kube_app.NewComponent,
 		},
 	)
 }

@@ -1,0 +1,50 @@
+- block:
+    - name: ensure kind-lb binary is present
+      command:
+        cmd: dpkg --print-architecture
+      register: machine_arch
+    - name: download kind-lb binary
+      get_url:
+        url: https://github.com/kubernetes-sigs/cloud-provider-kind/releases/download/v0.6.0/cloud-provider-kind_0.6.0_linux_{{ machine_arch.stdout }}.tar.gz
+        dest: "{{ run_dir }}/bin/kind-lb.tar.gz"
+    - name: extract kind-lb binary
+      unarchive:
+        src: "{{ run_dir }}/bin/kind-lb.tar.gz"
+        dest: "{{ run_dir }}/bin"
+        remote_src: yes
+        mode: "0755"
+      register: kind_kb_extracted
+    - name: delete kind-lb tarball
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - "{{ run_dir }}/bin/kind-lb.tar.gz"
+        - "{{ run_dir }}/bin/README.md"
+        - "{{ run_dir }}/bin/LICENSE"
+
+    - name: create systemd service for kind-lb
+      become: true
+      copy:
+        dest: /etc/systemd/system/{{ kernel.name | lower }}-lb.service
+        content: |
+          [Unit]
+          Description=Kind Load Balancer for {{ kernel.name | lower }}
+          After=docker.service
+          Requires=docker.service
+
+          [Service]
+          Type=simple
+          ExecStart={{ run_dir }}/bin/cloud-provider-kind
+          Restart=always
+          RestartSec=5
+          Environment=KUBECONFIG={{ run_dir }}/home/.kube/config
+          Environment=KIND_CLUSTER_NAME={{ kernel.name | lower }}
+
+    - name: ensure kind-lb service is enabled and started
+      become: true
+      systemd:
+        name: "{{ kernel.name | lower }}-lb.service"
+        state: started
+        enabled: yes
+        daemon_reload: yes

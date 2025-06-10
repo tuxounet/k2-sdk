@@ -1,0 +1,17 @@
+- block:
+    - name: remove kind-lb service is enabled and started
+      become: true
+      systemd:
+        name: "{{ kernel.name | lower }}-lb.service"
+        state: stopped
+        enabled: no
+    - name: remove kind-lb service file
+      become: true
+      file:
+        path: /etc/systemd/system/{{ kernel.name | lower }}-lb.service
+        state: absent
+
+    - name: reload systemd daemon
+      become: true
+      systemd:
+        daemon_reload: yes
