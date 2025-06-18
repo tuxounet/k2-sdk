@@ -73,8 +73,6 @@ func performProxyRequest(ingress types.IngressDefinition) gin.HandlerFunc {
 			return
 		}
 
-		requestPath := ctx.Param("proxyPath")
-
 		proxy := httputil.NewSingleHostReverseProxy(remote)
 
 		proxy.Director = func(req *http.Request) {
@@ -82,7 +80,7 @@ func performProxyRequest(ingress types.IngressDefinition) gin.HandlerFunc {
 			req.Host = remote.Host
 			req.URL.Scheme = remote.Scheme
 			req.URL.Host = remote.Host
-			req.URL.Path = requestPath
+			req.URL.Path = ctx.Request.URL.Path
 			req.Host = remote.Host
 			req.Header.Set("X-Forwarded-Host", ctx.Request.Host)
 			if ctx.Request.TLS == nil {
