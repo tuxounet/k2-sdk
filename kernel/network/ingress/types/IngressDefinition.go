@@ -10,6 +10,7 @@ type IngressDefinition struct {
 	AccessPolicy  runtimeTypes.IAccessPolicy                  `json:"accessPolicy"`
 	ServicePort   int                                         `json:"servicePort"`
 	ServiceHost   string                                      `json:"serviceHost"`
+	RewritePath   *string                                     `json:"rewritePath,omitempty"`
 	CustomHandler func(def IngressDefinition) gin.HandlerFunc `json:"-"`
 }
 

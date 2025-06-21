@@ -240,6 +240,7 @@ func (p *PodmanEngine) renderProvisionContainerTask(definition types.ContainerDe
 						ServiceHost:   hostAddress,
 						ServicePort:   localPort,
 						IngressPath:   ing.Path,
+						RewritePath:   ing.RewritePath,
 						CustomHandler: ing.CustomHandler,
 					}
 					err = p.ingressRegistar(ingressDef)

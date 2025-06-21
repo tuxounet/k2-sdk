@@ -128,6 +128,7 @@ func (p *Provider) Render() ([]computeTypes.RunnerDefinition, error) {
 				ingressDef := &ingressTypes.IngressDefinition{
 					AccessPolicy: ing.AccessPolicy,
 					IngressPath:  ing.IngressPath,
+					RewritePath:  ing.RewritePath,
 					ServiceHost:  localAddress,
 					ServicePort:  localPort,
 					CustomHandler: func(_ ingressTypes.IngressDefinition) gin.HandlerFunc {

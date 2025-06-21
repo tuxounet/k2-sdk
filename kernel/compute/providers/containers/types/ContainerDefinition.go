@@ -27,6 +27,7 @@ type ContainerDefinitionSecurity struct {
 type ContainerDefinitionIngress struct {
 	ContainerPort int                                                      `json:"containerPort"`
 	Path          string                                                   `json:"path"`
+	RewritePath   *string                                                  `json:"rewritePath,omitempty"`
 	AccessPolicy  runtimeTypes.IAccessPolicy                               `json:"accessPolicy"`
 	CustomHandler func(def ingressTypes.IngressDefinition) gin.HandlerFunc `json:"-"`
 }
