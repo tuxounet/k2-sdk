@@ -17,6 +17,7 @@ type ContainerDefinition struct {
 	Env        map[string]string             `json:"env"`
 	Capacities *[]ContainerCapacity          `json:"capacities"`
 	Security   *ContainerDefinitionSecurity  `json:"security"`
+	Networks   *[]string                     `json:"network,omitempty"`
 }
 
 type ContainerDefinitionSecurity struct {

@@ -255,6 +255,13 @@ func (p *DockerEngine) renderProvisionContainerTask(definition types.ContainerDe
 		}
 	}
 
+	if definition.Networks != nil && len(*definition.Networks) > 0 {
+		task += "    networks:\n"
+		for _, network := range *definition.Networks {
+			task += fmt.Sprintf("      - %s\n", network)
+		}
+	}
+
 	return task, nil
 }
 

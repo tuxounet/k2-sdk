@@ -167,7 +167,6 @@ func (p *PodmanEngine) renderProvisionContainerTask(definition types.ContainerDe
 					if volumeName == "" {
 						volumeName = fmt.Sprintf("%s-%d", definition.Name, i)
 					}
-					//TODO: change var to data to get var non persistent
 					targetPath := paths.CominePath("var", "compute", fmt.Sprintf("%d_%s", definition.Order, definition.Name), "volumes", volumeName)
 
 					volumeFile := paths.CominePath(targetPath, ".volume")
@@ -252,6 +251,13 @@ func (p *PodmanEngine) renderProvisionContainerTask(definition types.ContainerDe
 					task += fmt.Sprintf("      - %s:%d/%s\n", fmt.Sprintf("%s:%d", hostAddress, localPort), containerPort, strings.ToLower(containerProtocol))
 				}
 			}
+		}
+	}
+
+	if definition.Networks != nil && len(*definition.Networks) > 0 {
+		task += "    networks:\n"
+		for _, network := range *definition.Networks {
+			task += fmt.Sprintf("      - %s\n", network)
 		}
 	}
 
