@@ -255,7 +255,7 @@ func (p *PodmanEngine) renderProvisionContainerTask(definition types.ContainerDe
 	}
 
 	if definition.Networks != nil && len(*definition.Networks) > 0 {
-		task += "    networks:\n"
+		task += "    network:\n"
 		for _, network := range *definition.Networks {
 			task += fmt.Sprintf("      - %s\n", network)
 		}
