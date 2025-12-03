@@ -74,6 +74,7 @@ func (p *PodmanEngine) renderProvisionContainerTask(definition types.ContainerDe
 	task += fmt.Sprintf("    state: %s\n", "started")
 	task += fmt.Sprintf("    name: %d-%s\n", definition.Order, definition.Name)
 	task += fmt.Sprintf("    image: %s\n", definition.Image)
+	task += fmt.Sprintf("    restart_policy: %s\n", "always")
 
 	if definition.Capacities != nil {
 
