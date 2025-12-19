@@ -149,7 +149,7 @@ func (p *DockerEngine) renderProvisionContainerTask(definition types.ContainerDe
 			hostPath := ""
 
 			switch volume.Binding.Type {
-			case "content":
+			case types.ContainerDefinitionVolumeBindingTypeContent:
 				if volume.Binding.Content != "" {
 					targetPath := paths.CominePath("var", "compute", fmt.Sprintf("%d_%s", definition.Order, definition.Name), "init", volume.ContainerPath)
 					runDir := p.service.GetKernel().GetRunDirectory()
@@ -157,7 +157,7 @@ func (p *DockerEngine) renderProvisionContainerTask(definition types.ContainerDe
 				} else {
 					return "", fmt.Errorf("content value is not set for volume %s", volume.ContainerPath)
 				}
-			case "mount":
+			case types.ContainerDefinitionVolumeBindingTypeMount:
 
 				if volume.Binding.HostPath != "" {
 					hostPath = volume.Binding.HostPath
@@ -186,6 +186,32 @@ func (p *DockerEngine) renderProvisionContainerTask(definition types.ContainerDe
 
 					hostPath = paths.CominePath(p.service.GetKernel().GetRunDirectory(), targetPath)
 				}
+
+			case types.ContainerDefinitionVolumeBindingTypeEphemeral:
+
+				volumeName := volume.Name
+				if volumeName == "" {
+					volumeName = fmt.Sprintf("%s-%d", definition.Name, i)
+				}
+				//TODO: change var to data to get var non persistent
+				targetPath := paths.CominePath("tmp", "compute", fmt.Sprintf("%d_%s", definition.Order, definition.Name), "volumes", volumeName)
+
+				volumeFile := paths.CominePath(targetPath, ".volume")
+
+				found, err := rootStore.Exists(volumeFile)
+				if err != nil {
+					return "", err
+				}
+
+				if !found {
+					err = rootStore.WriteObject(paths.CominePath(targetPath, ".volume"), []byte(""))
+					if err != nil {
+						return "", err
+					}
+				}
+
+				hostPath = paths.CominePath(p.service.GetKernel().GetRunDirectory(), targetPath)
+
 			}
 
 			if hostPath != "" {

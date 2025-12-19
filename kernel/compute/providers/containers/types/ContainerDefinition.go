@@ -48,8 +48,9 @@ type ContainerDefinitionVolume struct {
 type ContainerDefinitionVolumeBindingType string
 
 const (
-	ContainerDefinitionVolumeBindingTypeMount   ContainerDefinitionVolumeBindingType = "mount"
-	ContainerDefinitionVolumeBindingTypeContent ContainerDefinitionVolumeBindingType = "content"
+	ContainerDefinitionVolumeBindingTypeMount     ContainerDefinitionVolumeBindingType = "mount"
+	ContainerDefinitionVolumeBindingTypeEphemeral ContainerDefinitionVolumeBindingType = "ephemeral"
+	ContainerDefinitionVolumeBindingTypeContent   ContainerDefinitionVolumeBindingType = "content"
 )
 
 type ContainerDefinitionVolumeBinding struct {
