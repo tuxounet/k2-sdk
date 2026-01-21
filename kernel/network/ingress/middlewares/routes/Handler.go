@@ -14,9 +14,9 @@ import (
 	runtimeTypes "github.com/tuxounet/k2-sdk/types"
 )
 
-func Register(service runtimeTypes.IKernelService, router *gin.RouterGroup, registrations []types.IngressDefinition) error {
+func RegisterIngresses(service runtimeTypes.IKernelService, router *gin.RouterGroup, ingresses []types.IngressDefinition) error {
 
-	for _, registration := range registrations {
+	for _, registration := range ingresses {
 		handler := performProxyRequest(registration)
 		if registration.CustomHandler != nil {
 			handler = registration.CustomHandler(registration)
@@ -25,6 +25,19 @@ func Register(service runtimeTypes.IKernelService, router *gin.RouterGroup, regi
 	}
 
 	return nil
+}
+
+func EnsureAuthLevelForController(service runtimeTypes.IKernelService, controller runtimeTypes.IAppController, baseRoute string) gin.HandlerFunc {
+	log := controller.GetLogger().CreateSubLogger(baseRoute)
+
+	log.Info("REGISTEING!")
+
+	return func(c *gin.Context) {
+		level := controller.GetAccessPolicy()
+		log.InfoF("checking %s, %s, %s", baseRoute, c.Request.URL.Path, level)
+
+		c.Next()
+	}
 }
 
 func ensureAuthLevel(service runtimeTypes.IKernelService, ingress types.IngressDefinition) gin.HandlerFunc {

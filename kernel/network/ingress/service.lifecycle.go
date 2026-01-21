@@ -95,7 +95,10 @@ func (s *Service) Register() error {
 
 		controllers := component.GetControllers()
 		for _, ctrl := range controllers {
-			err := ctrl.Register(componentRouter)
+			controllerRouter := componentRouter.Group(ctrl.GetName())
+			controllerRouter.Use(routes.EnsureAuthLevelForController(s, ctrl, controllerRouter.BasePath()))
+
+			err := ctrl.Register(controllerRouter)
 			if err != nil {
 				s.GetLogger().ErrorF("controller %s in component %s register failed: %s", ctrl.GetName(), component.GetName(), err.Error())
 				return err
@@ -129,10 +132,10 @@ func (s *Service) Register() error {
 
 	}
 
-	records := s.getIngressesRecords()
-	if len(records) > 0 {
-		s.GetLogger().DebugF("Found %d ingresses", len(records))
-		err = routes.Register(s, router, records)
+	ingressRecords := s.getIngressesRecords()
+	if len(ingressRecords) > 0 {
+		s.GetLogger().DebugF("Found %d ingresses", len(ingressRecords))
+		err = routes.RegisterIngresses(s, router, ingressRecords)
 		if err != nil {
 			s.GetLogger().ErrorF("Failed to register ingresses: %s", err.Error())
 			return err
