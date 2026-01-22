@@ -9,14 +9,14 @@ host:
       cert: "etc/pki/ssl/s.sample.local.crt"
       key: "etc/pki/ssl/s.sample.local.key"
     auth:
-      defaultAccess: "public"
+      default_access: "public"
       public:
         enabled: true
       authenticated:
         enabled: true
-        loginUrl: "/auth/users/login"
-        verifyUrl: "/auth/users/verify"
-        redirectParam: "redirect"
+        login_url: "/auth/users/login"
+        verify_url: "/auth/users/verify"
+        redirect_param: "redirect"
   compute:
     enabled: true
     containers:

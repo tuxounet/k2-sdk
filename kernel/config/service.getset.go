@@ -22,7 +22,12 @@ func (c *Service) Get(path string) any {
 		key = strings.TrimSpace(key)
 		key = strings.ToLower(key)
 		if resultMap, ok := result.(map[string]any); ok {
-			result = resultMap[key]
+			ret, found := resultMap[key]
+			if !found {
+				return nil
+			}
+			result = ret
+
 		} else {
 			return nil
 		}

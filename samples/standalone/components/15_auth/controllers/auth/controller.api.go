@@ -11,10 +11,10 @@ import (
 const cookieKey = "auth"
 
 func (h *Controller) Register(r *gin.RouterGroup) error {
-	r.GET("/users/login", h.api_loginGet())
-	r.POST("/users/login", h.api_loginPost())
-	r.GET("/users/verify", h.api_verify())
-	r.GET("/users/logout", h.api_logout())
+	r.GET("/login", h.api_loginGet())
+	r.POST("/login", h.api_loginPost())
+	r.GET("/verify", h.api_verify())
+	r.GET("/logout", h.api_logout())
 	return nil
 }
 
@@ -85,7 +85,7 @@ func (h *Controller) api_loginGet() gin.HandlerFunc {
 	rootUrl := configService.Get("host.ingress.root").(string)
 
 	return func(ctx *gin.Context) {
-		redirectParam, err := configService.GetAsString("host.ingress.auth.authenticated.redirectParam")
+		redirectParam, err := configService.GetAsString("host.ingress.auth.authenticated.redirect_param")
 		if err != nil {
 			ctx.String(500, "Error getting redirect param: %s", err.Error())
 			return

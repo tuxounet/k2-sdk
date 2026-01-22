@@ -22,7 +22,7 @@ func NewComponent(app types.IApp) types.IAppComponent {
 		nil,
 		&ui.Dist,
 		&conf,
-
+		types.AccessPolicyPublic,
 		[]types.AppControllerCtor{
 			auth.NewController,
 		},

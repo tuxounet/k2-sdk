@@ -85,7 +85,7 @@ func (h *Controller) api_loginGet() gin.HandlerFunc {
 	rootUrl := configService.Get("host.ingress.root").(string)
 
 	return func(ctx *gin.Context) {
-		redirectParam, err := configService.GetAsString("host.ingress.auth.authenticated.redirectParam")
+		redirectParam, err := configService.GetAsString("host.ingress.auth.authenticated.redirect_param")
 		if err != nil {
 			ctx.String(500, "Error getting redirect param: %s", err.Error())
 			return

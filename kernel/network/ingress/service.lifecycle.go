@@ -5,16 +5,17 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+
 	"strings"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-
 	"github.com/tuxounet/k2-sdk/kernel/network/ingress/middlewares/cdn"
 	"github.com/tuxounet/k2-sdk/kernel/network/ingress/middlewares/docs"
 	"github.com/tuxounet/k2-sdk/kernel/network/ingress/middlewares/logger"
 	"github.com/tuxounet/k2-sdk/kernel/network/ingress/middlewares/routes"
 	"github.com/tuxounet/k2-sdk/kernel/network/ingress/middlewares/ui"
+	runtimeTypes "github.com/tuxounet/k2-sdk/types"
 )
 
 func (s *Service) Register() error {
@@ -60,7 +61,18 @@ func (s *Service) Register() error {
 		baseUrl = "/"
 	}
 
+	rootAccessPolicy, err := configService.GetAsStringOrDefault("host.ingress.auth.default_access", "public")
+	if err != nil {
+		s.GetLogger().ErrorF("Failed to get rootAccessPolicy: %s", err.Error())
+		return err
+	}
+	rootAccessPolicyTyped := runtimeTypes.AccessPolicyPublic
+	if rootAccessPolicy == "authenticated" {
+		rootAccessPolicyTyped = runtimeTypes.AccessPolicyAuthenticated
+	}
+
 	router := server.Group(baseUrl)
+	router.Use(routes.EnsureAuthLevelMiddleware(s, s.GetLogger(), rootAccessPolicyTyped, router.BasePath()))
 
 	components := app.GetComponents()
 
@@ -92,11 +104,12 @@ func (s *Service) Register() error {
 
 	for _, component := range components {
 		componentRouter := router.Group(component.GetName())
+		componentRouter.Use(routes.EnsureAuthLevelMiddleware(s, s.GetLogger(), component.GetAccessPolicy(), componentRouter.BasePath()))
 
 		controllers := component.GetControllers()
 		for _, ctrl := range controllers {
 			controllerRouter := componentRouter.Group(ctrl.GetName())
-			controllerRouter.Use(routes.EnsureAuthLevelForController(s, ctrl, controllerRouter.BasePath()))
+			controllerRouter.Use(routes.EnsureAuthLevelMiddleware(s, s.GetLogger(), ctrl.GetAccessPolicy(), controllerRouter.BasePath()))
 
 			err := ctrl.Register(controllerRouter)
 			if err != nil {

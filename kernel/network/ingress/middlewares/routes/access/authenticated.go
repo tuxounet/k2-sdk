@@ -31,12 +31,12 @@ func AllowAccessLevelAuthenticated(req *http.Request, log types.ILogger, configS
 		return false
 	}
 
-	verify_url, err := configService.GetAsString("host.ingress.auth.authenticated.verifyUrl")
+	verify_url, err := configService.GetAsString("host.ingress.auth.authenticated.verify_url")
 	if err != nil {
 		log.ErrorF("Failed to get verifyUrl: %s", err.Error())
 		return false
 	}
-	redirect_param, err := configService.GetAsString("host.ingress.auth.authenticated.redirectParam")
+	redirect_param, err := configService.GetAsString("host.ingress.auth.authenticated.redirect_param")
 	if err != nil {
 		log.ErrorF("Failed to get redirectParam: %s", err.Error())
 		return false
@@ -103,7 +103,7 @@ func RedirectAccessLevelAuthenticatedLogin(req *http.Request, log types.ILogger,
 		return
 	}
 
-	login_url, err := configService.GetAsString("host.ingress.auth.authenticated.loginUrl")
+	login_url, err := configService.GetAsString("host.ingress.auth.authenticated.login_url")
 	if err != nil {
 		log.ErrorF("Failed to get loginUrl: %s", err.Error())
 		ctx.AbortWithStatus(http.StatusUnauthorized)
@@ -117,7 +117,7 @@ func RedirectAccessLevelAuthenticatedLogin(req *http.Request, log types.ILogger,
 		return
 	}
 
-	redirect_param, err := configService.GetAsString("host.ingress.auth.authenticated.redirectParam")
+	redirect_param, err := configService.GetAsString("host.ingress.auth.authenticated.redirect_param")
 	if err != nil {
 		log.ErrorF("Failed to get redirectParam: %s", err.Error())
 		ctx.AbortWithStatus(http.StatusUnauthorized)

@@ -20,6 +20,7 @@ func NewComponent(app runtimeTypes.IApp) runtimeTypes.IAppComponent {
 		nil,
 		nil,
 		nil,
+		runtimeTypes.AccessPolicyPublic,
 		[]runtimeTypes.AppControllerCtor{
 			loadbalancer.NewController,
 			reverse_proxy.NewController,

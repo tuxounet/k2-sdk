@@ -27,16 +27,38 @@ func RegisterIngresses(service runtimeTypes.IKernelService, router *gin.RouterGr
 	return nil
 }
 
-func EnsureAuthLevelForController(service runtimeTypes.IKernelService, controller runtimeTypes.IAppController, baseRoute string) gin.HandlerFunc {
-	log := controller.GetLogger().CreateSubLogger(baseRoute)
-
-	log.Info("REGISTEING!")
+func EnsureAuthLevelMiddleware(service runtimeTypes.IKernelService, parentLog runtimeTypes.ILogger, level runtimeTypes.IAccessPolicy, baseRoute string) gin.HandlerFunc {
+	log := parentLog.CreateSubLogger("auth")
+	configService := service.GetKernel().GetService(config.ServiceKey).(*config.Service)
 
 	return func(c *gin.Context) {
-		level := controller.GetAccessPolicy()
-		log.InfoF("checking %s, %s, %s", baseRoute, c.Request.URL.Path, level)
 
-		c.Next()
+		log.TraceF("check auth %s, %s, %s", baseRoute, c.Request.URL.Path, level)
+
+		switch level {
+		case runtimeTypes.AccessPolicyPublic:
+			if access.AllowAccessLevelPublic(c.Request, log, configService) {
+				c.Next()
+				return
+			} else {
+				access.BlockAccessLevelPublic(c.Request, log, configService, c)
+				return
+			}
+
+		case runtimeTypes.AccessPolicyAuthenticated:
+			if access.AllowAccessLevelAuthenticated(c.Request, log, configService) {
+				c.Next()
+				return
+			} else {
+				access.RedirectAccessLevelAuthenticatedLogin(c.Request, log, configService, c)
+				return
+			}
+
+		default:
+			log.ErrorF("Unknown access level: %s", level)
+			c.AbortWithStatus(http.StatusNotFound)
+			return
+		}
 	}
 }
 

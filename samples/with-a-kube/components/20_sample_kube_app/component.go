@@ -20,6 +20,7 @@ func NewComponent(app types.IApp) types.IAppComponent {
 		nil,
 		&ui.Dist,
 		&conf,
+		types.AccessPolicyAuthenticated,
 		[]types.AppControllerCtor{
 			admin.NewController,
 			// database.NewController,
