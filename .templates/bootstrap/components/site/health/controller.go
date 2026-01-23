@@ -18,18 +18,18 @@ func NewController(component runtimeTypes.IAppComponent) runtimeTypes.IAppContro
 }
 
 func (h *Controller) Register(r *gin.RouterGroup) error {
-	r.GET("/health", h.api_health())
+	r.GET("/check", h.api_health())
 	return nil
 }
 
-// api_health godoc
+// api_healthCheck godoc
 // @Summary  Health check
 // @Schemes
 // @Tags system
 // @Produce json
 // @Success 200  {string} string "OK"
 // @Router /site/health [get]
-func (h *Controller) api_health() gin.HandlerFunc {
+func (h *Controller) api_healthCheck() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		ctx.JSON(200, "OK")
 	}
