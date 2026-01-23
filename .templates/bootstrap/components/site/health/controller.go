@@ -18,7 +18,7 @@ func NewController(component runtimeTypes.IAppComponent) runtimeTypes.IAppContro
 }
 
 func (h *Controller) Register(r *gin.RouterGroup) error {
-	r.GET("/check", h.api_health())
+	r.GET("/check", h.api_healthCheck())
 	return nil
 }
 
