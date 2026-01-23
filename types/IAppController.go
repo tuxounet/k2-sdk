@@ -15,6 +15,8 @@ type IAppController interface {
 	GetAccessPolicy() IAccessPolicy
 	Init() error
 	Register(r *gin.RouterGroup) error
+	GetSchedules() []IAppSchedule
+
 	Start() error
 	Stop() error
 }

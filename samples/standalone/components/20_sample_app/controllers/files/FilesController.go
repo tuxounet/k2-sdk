@@ -18,6 +18,16 @@ func NewFilesController(component types.IAppComponent) types.IAppController {
 	}
 }
 
+func (h *FilesController) Init() error {
+	h.AddSchedule("files_cleanup", "*/1 * * * * *", func(fire string) string {
+		h.GetLogger().InfoF("Files cleanup schedule fired at %s", fire)
+		// Implement cleanup logic here
+		return "done"
+	})
+
+	return nil
+}
+
 func (h *FilesController) DoIt() error {
 
 	stores := h.GetComponent().GetApp().GetKernel().GetService(stores.ServiceKey).(*stores.Service)
