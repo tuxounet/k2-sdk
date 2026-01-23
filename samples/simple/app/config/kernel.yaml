@@ -1,0 +1,27 @@
+host:
+  address: 127.0.0.1
+  ingress:
+    address: 127.0.0.1
+    port: 28080
+    root: http://localhost:28080
+    # tls:
+    #   port: 28443
+    #   cert: "etc/pki/ssl/s.sample.local.crt"
+    #   key: "etc/pki/ssl/s.sample.local.key"
+    auth:
+      default_access: "public"
+      public:
+        enabled: true
+      authenticated:
+        enabled: true
+        login_url: "/auth/users/login"
+        verify_url: "/auth/users/verify"
+        redirect_param: "redirect"
+
+  compute:
+    enabled: true
+    containers:
+      engine: docker
+      port:
+        start: 21000
+        end: 21999

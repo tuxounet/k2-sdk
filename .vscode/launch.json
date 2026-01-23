@@ -5,6 +5,19 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Debug SDK Simple Sample",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "console": "integratedTerminal",
+      "program": "${workspaceFolder}/samples/simple/main.go",
+      "cwd": "${workspaceFolder}/samples/simple",
+      "env": {
+        "K2_MESBOULES_ACTIVE": "yes",
+        "K2_greeting": "Bonjour le monde",
+      }
+    },
+    {
       "name": "Debug SDK Standalone Sample",
       "type": "go",
       "request": "launch",

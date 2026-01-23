@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ .Name }}</title>
+
+  <link rel="stylesheet" href="{{ .BasePath }}cdn/bulma@1.0.2/css/bulma.min.css" />
+</head>
+
+<body>
+  <div class="container">
+    <div class="panel">
+      <div class="panel-block">
+        <div class="level is-flex-grow-1 is-flex-direction-row">
+          <div class="level-left is-flex-grow-1 is-flex-direction-row">
+            <div class="level-item">
+              <a href="{{ .RootUrl }}">k</a>&nbsp;/&nbsp;
+            </div>
+            <div class="level-item">
+              <a href="{{ .UIBasePath }}">{{ .Name }}</a>
+            </div>
+          </div>
+
+          <div class="level-right">
+            <div class="level-item">
+              <strong>{{ .Version }}</strong>&nbsp;-&nbsp;
+              <a href="{{ .BasePath }}docs/index.html" target="_blank">
+                API
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel-block">
+        <section class="hero">
+          <div class="hero-body">
+            <p class="title">{{ .Name }}</p>
+            <p class="subtitle">
+              L'application autonome qui vérifie que tout marche bien
+            </p>
+          </div>
+        </section>
+      </div>
+      <a class="panel-block is-active" href="{{ .BasePath }}sample_app/ui/">
+        <span class="panel-icon">
+          <i>📯</i>
+        </span>
+        Sample
+      </a>
+      <a class="panel-block is-active" href="{{ .BasePath }}provision/browser/">
+        <span class="panel-icon">
+          <i>📁</i>
+        </span>
+        Browser
+      </a>
+    </div>
+  </div>
+</body>
+
+</html>
