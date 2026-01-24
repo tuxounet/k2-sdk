@@ -71,8 +71,11 @@ func (s *Service) Register() error {
 		rootAccessPolicyTyped = runtimeTypes.AccessPolicyAuthenticated
 	}
 
+	authMap := make(map[string]runtimeTypes.IAccessPolicy)
+	authMap[baseUrl] = rootAccessPolicyTyped
+
 	router := server.Group(baseUrl)
-	router.Use(routes.EnsureAuthLevelMiddleware(s, s.GetLogger(), rootAccessPolicyTyped, router.BasePath()))
+	router.Use(routes.EnsureAuthLevelMiddleware(s, s.GetLogger(), authMap, rootAccessPolicyTyped))
 
 	components := app.GetComponents()
 
@@ -84,12 +87,15 @@ func (s *Service) Register() error {
 			s.GetLogger().ErrorF("Failed to register cdn for app %s: %s", app.GetName(), err.Error())
 			return err
 		}
+		authMap[baseUrl+"cdn/"] = rootAccessPolicyTyped
 
 		err = ui.RegisterApp(app, rootUri, router)
 		if err != nil {
 			s.GetLogger().ErrorF("Failed to register ui for app %s: %s", app.GetName(), err.Error())
 			return err
 		}
+
+		authMap[baseUrl+"ui/"] = rootAccessPolicyTyped
 
 	}
 
@@ -100,16 +106,20 @@ func (s *Service) Register() error {
 			s.GetLogger().ErrorF("Failed to register docs for app %s: %s", app.GetName(), err.Error())
 			return err
 		}
+		authMap[baseUrl+"docs/"] = rootAccessPolicyTyped
+		authMap[baseUrl+"openapi.json"] = rootAccessPolicyTyped
 	}
 
 	for _, component := range components {
 		componentRouter := router.Group(component.GetName())
-		componentRouter.Use(routes.EnsureAuthLevelMiddleware(s, s.GetLogger(), component.GetAccessPolicy(), componentRouter.BasePath()))
+
+		authMap[componentRouter.BasePath()+"/"] = component.GetAccessPolicy()
 
 		controllers := component.GetControllers()
 		for _, ctrl := range controllers {
 			controllerRouter := componentRouter.Group(ctrl.GetName())
-			controllerRouter.Use(routes.EnsureAuthLevelMiddleware(s, s.GetLogger(), ctrl.GetAccessPolicy(), controllerRouter.BasePath()))
+
+			authMap[controllerRouter.BasePath()+"/"] = ctrl.GetAccessPolicy()
 
 			err := ctrl.Register(controllerRouter)
 			if err != nil {
@@ -125,6 +135,8 @@ func (s *Service) Register() error {
 				s.GetLogger().ErrorF("Failed to register docs for component %s: %s", component.GetName(), err.Error())
 				return err
 			}
+			authMap[componentRouter.BasePath()+"/docs/"] = component.GetAccessPolicy()
+			authMap[componentRouter.BasePath()+"/openapi.json"] = component.GetAccessPolicy()
 		}
 
 		componentUI := component.GetUI()
@@ -135,11 +147,15 @@ func (s *Service) Register() error {
 				return err
 			}
 
+			authMap[componentRouter.BasePath()+"/cdn/"] = component.GetAccessPolicy()
+
 			err = ui.RegisterComponent(component, rootUri, componentRouter.BasePath(), componentRouter)
 			if err != nil {
 				s.GetLogger().ErrorF("Failed to register ui for app %s: %s", app.GetName(), err.Error())
 				return err
 			}
+
+			authMap[componentRouter.BasePath()+"/ui/"] = component.GetAccessPolicy()
 
 		}
 
@@ -153,7 +169,10 @@ func (s *Service) Register() error {
 			s.GetLogger().ErrorF("Failed to register ingresses: %s", err.Error())
 			return err
 		}
+
 	}
+
+	fmt.Printf("🍆🍆 %v\n", authMap)
 
 	return nil
 }

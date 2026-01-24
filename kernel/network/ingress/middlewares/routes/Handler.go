@@ -27,15 +27,36 @@ func RegisterIngresses(service runtimeTypes.IKernelService, router *gin.RouterGr
 	return nil
 }
 
-func EnsureAuthLevelMiddleware(service runtimeTypes.IKernelService, parentLog runtimeTypes.ILogger, level runtimeTypes.IAccessPolicy, baseRoute string) gin.HandlerFunc {
+func EnsureAuthLevelMiddleware(service runtimeTypes.IKernelService, parentLog runtimeTypes.ILogger, authMap map[string]runtimeTypes.IAccessPolicy, defaultAccess runtimeTypes.IAccessPolicy) gin.HandlerFunc {
 	log := parentLog.CreateSubLogger("auth")
 	configService := service.GetKernel().GetService(config.ServiceKey).(*config.Service)
 
+	login_url, _ := configService.GetAsStringOrDefault("host.ingress.auth.authenticated.login_url", "")
+	verify_url, _ := configService.GetAsStringOrDefault("host.ingress.auth.authenticated.verify_url", "")
+
+	authMap[login_url] = runtimeTypes.AccessPolicyPublic
+	authMap[verify_url] = runtimeTypes.AccessPolicyPublic
+
 	return func(c *gin.Context) {
+		requestPath := c.Request.URL.Path
+		if requestPath == verify_url {
+			c.Next()
+			return
+		}
+		log.TraceF("check %s", requestPath)
 
-		log.TraceF("check auth %s, %s, %s", baseRoute, c.Request.URL.Path, level)
+		var matchedPolicy runtimeTypes.IAccessPolicy = ""
+		for pathPrefix, accessPolicy := range authMap {
+			if len(requestPath) >= len(pathPrefix) && requestPath[0:len(pathPrefix)] == pathPrefix {
+				matchedPolicy = accessPolicy
+			}
+		}
+		if matchedPolicy == "" {
+			matchedPolicy = defaultAccess
+		}
+		log.TraceF("matched policy %s for path %s", matchedPolicy, requestPath)
 
-		switch level {
+		switch matchedPolicy {
 		case runtimeTypes.AccessPolicyPublic:
 			if access.AllowAccessLevelPublic(c.Request, log, configService) {
 				c.Next()
@@ -55,7 +76,7 @@ func EnsureAuthLevelMiddleware(service runtimeTypes.IKernelService, parentLog ru
 			}
 
 		default:
-			log.ErrorF("Unknown access level: %s", level)
+			log.ErrorF("Unknown access level: %s", matchedPolicy)
 			c.AbortWithStatus(http.StatusNotFound)
 			return
 		}

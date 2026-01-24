@@ -6,7 +6,8 @@ import (
 	"github.com/tuxounet/k2-sdk/bases"
 
 	"github.com/tuxounet/k2-sdk/samples/simple/components/auth"
-	"github.com/tuxounet/k2-sdk/samples/simple/components/sample_app"
+	"github.com/tuxounet/k2-sdk/samples/simple/components/sample_component"
+	"github.com/tuxounet/k2-sdk/samples/simple/docs"
 
 	"github.com/tuxounet/k2-sdk/samples/simple/ui"
 
@@ -20,13 +21,13 @@ func NewApp() types.IApp {
 	return bases.NewBaseApp(
 		AppName,
 		AppVersion,
-		nil,
+		docs.SwaggerInfoSimpleApp,
 		&ui.Dist,
 		&conf,
 		[]types.AppComponentCtor{
 
 			auth.NewComponent,
-			sample_app.NewComponent,
+			sample_component.NewComponent,
 		},
 	)
 }

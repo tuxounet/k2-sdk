@@ -26,7 +26,7 @@ func (h *Controller) Register(r *gin.RouterGroup) error {
 // @Success 200  {string} string "OK"
 // @Failure 403 {object} string
 // @Failure 500 {object} string
-// @Router /verify [get]
+// @Router /auth/users/verify [get]
 func (h *Controller) api_verify() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
@@ -57,7 +57,7 @@ func (h *Controller) api_verify() gin.HandlerFunc {
 // @Success 200  {string} string "OK"
 // @Failure 403 {object} string
 // @Failure 500 {object} string
-// @Router /logout [get]
+// @Router /auth/users/logout [get]
 func (h *Controller) api_logout() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		ctx.SetCookie(cookieKey, "", -1, "/", "", false, true)
@@ -79,7 +79,7 @@ var loginPage []byte
 // @Success 200  {string} string "OK"
 // @Failure 403 {object} string
 // @Failure 500 {object} string
-// @Router /login [get]
+// @Router /auth/users/login [get]
 func (h *Controller) api_loginGet() gin.HandlerFunc {
 	configService := h.GetComponent().GetApp().GetKernel().GetService("config").(*config.Service)
 	rootUrl := configService.Get("host.ingress.root").(string)
@@ -115,7 +115,7 @@ func (h *Controller) api_loginGet() gin.HandlerFunc {
 // @Success 200  {string} string "OK"
 // @Failure 403 {object} string
 // @Failure 500 {object} string
-// @Router /login [post]
+// @Router /auth/users/login [post]
 func (h *Controller) api_loginPost() gin.HandlerFunc {
 	configService := h.GetComponent().GetApp().GetKernel().GetService("config").(*config.Service)
 	rootUrl := configService.Get("host.ingress.root").(string)

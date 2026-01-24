@@ -18,17 +18,14 @@
           <div class="level is-flex-grow-1 is-flex-direction-row">
             <div class="level-left is-flex-grow-1 is-flex-direction-row">
               <div class="level-item">
-                <a href="{{ .RootUrl }}">k</a>&nbsp;/&nbsp;
+                <a href="{{ .BasePath }}">{{ .Name }}</a>&nbsp;/
               </div>
-              <div class="level-item">
-                <a href="{{ .UIBasePath }}">{{ .Name }}</a>
-              </div>
+              <div class="level-item">Sample</div>
             </div>
 
             <div class="level-right">
               <div class="level-item">
-                <strong>{{ .Version }}</strong>&nbsp;-&nbsp;
-                <a href="{{ .RootUrl }}docs/index.html"> API </a>
+                <a href="{{ .RootUrl }}/auth/users/logout"> Déconnexion </a>
               </div>
             </div>
           </div>
@@ -37,21 +34,15 @@
           <section class="hero">
             <div class="hero-body">
               <p class="title">{{ .Name }}</p>
-              <p class="subtitle">
-                L'application autonome qui vérifie que tout marche bien
-              </p>
+              <p class="subtitle">App Component</p>
             </div>
           </section>
         </div>
-        <a
-          class="panel-block is-active"
-          href="{{ .BasePath }}sample_component/ui/"
-        >
-          <span class="panel-icon">
-            <i>📯</i>
-          </span>
-          Sample
-        </a>
+        <div class="panel-block">
+          <ul>
+            <li><a href="{{ .BasePath }}files/call">Call</a></li>
+          </ul>
+        </div>
       </div>
     </div>
   </body>

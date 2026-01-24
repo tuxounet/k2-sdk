@@ -60,7 +60,7 @@ func (h *FilesController) DoIt() error {
 
 func (h *FilesController) Register(r *gin.RouterGroup) error {
 
-	r.GET("/files/call", h.api_call())
+	r.GET("/call", h.api_call())
 	return nil
 }
 
@@ -70,7 +70,7 @@ func (h *FilesController) Register(r *gin.RouterGroup) error {
 // @Tags files
 // @Produce json
 // @Success 200  {string} string "OK"
-// @Router /files/call [get]
+// @Router /sample_component/files/call [get]
 func (h *FilesController) api_call() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		err := h.DoIt()
