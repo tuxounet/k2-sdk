@@ -172,7 +172,7 @@ func (s *Service) Register() error {
 
 	}
 
-	fmt.Printf("🍆🍆 %v\n", authMap)
+	s.GetLogger().DebugF("Auth map: %+v", authMap)
 
 	return nil
 }
