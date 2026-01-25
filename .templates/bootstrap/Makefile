@@ -1,5 +1,6 @@
 
 APP_NAME :="{{ .name }}"
+BIN_NAME := "{{ .name  | lower}}"
 GOPATH := $(shell go env GOPATH)
 GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 VERSION := $(if $(CI_COMMIT_TAG),$(CI_COMMIT_TAG),v${GIT_BRANCH})
@@ -57,7 +58,7 @@ build: prepare
 	@if [ -f ./components/Makefile ]; then \
 		$(MAKE) -C ./components build; \
 	fi
-	go build -o ./.out/${APP_NAME}-${VERSION} ./main.go
+	go build -o ./.out/${APP_NAME} ./main.go
 
 
 release: prepare	
