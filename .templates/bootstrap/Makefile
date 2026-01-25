@@ -1,6 +1,5 @@
 
 APP_NAME :="{{ .name }}"
-BIN_NAME := "{{ .name  | lower}}"
 GOPATH := $(shell go env GOPATH)
 GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 VERSION := $(if $(CI_COMMIT_TAG),$(CI_COMMIT_TAG),v${GIT_BRANCH})
