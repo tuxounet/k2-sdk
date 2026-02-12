@@ -45,22 +45,22 @@ prepare: init write-version
 		$(MAKE) -C ./components prepare; \
 	fi
 	
-run: prepare
+run: 
 	go run ./main.go
 
-bump-patch: build 
+bump-patch: prepare build 
 	echo "Bumping version patch"
 	@bash ./tools/bump-patch.sh
 
 
-build: prepare
+build:  
 	@if [ -f ./components/Makefile ]; then \
 		$(MAKE) -C ./components build; \
 	fi
 	go build -o ./.out/${APP_NAME} ./main.go
 
 
-release: prepare	
+release: prepare build	
 	if [ -f ./Makefile.inc ]; then \
 		make -f Makefile.inc release; \
 	fi
