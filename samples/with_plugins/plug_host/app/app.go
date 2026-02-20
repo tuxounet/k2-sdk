@@ -8,7 +8,7 @@ import (
 	"github.com/tuxounet/k2-sdk/types"
 )
 
-//go:embed config/*.yaml
+//go:embed config/*
 var conf embed.FS
 
 func NewApp() types.IApp {
