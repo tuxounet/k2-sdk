@@ -76,10 +76,10 @@ func NewKernelRuntime(hostedApp types.IApp, hostVersion string) *KernelRuntime {
 		config.NewService,
 		secrets.NewService,
 		compute.NewService,
-		ingress.NewService,
 		plugins.NewService,
 		app.NewService,
 		scheduler.NewService,
+		ingress.NewService,
 	}
 	serviceList := make([]types.KernelServiceContextKey, 0)
 

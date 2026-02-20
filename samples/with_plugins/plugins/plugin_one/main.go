@@ -18,8 +18,8 @@ func NewComponent(app types.IApp) types.IAppComponent {
 		"plugin_one",
 		1000,
 		nil,
-		nil,
 		&ui.Dist,
+		nil,
 		types.AccessPolicyPublic,
 		[]types.AppControllerCtor{
 			temps.NewController,
