@@ -1,19 +1,6 @@
-.PHONY: build-plugins clean-plugins
+build: 
+	$(MAKE) -C plugins build-plugins
+	$(MAKE) -C plug_host build
 
-PLUGIN_DIR := plugins
- 
-# Build all plugins as .so files
-build-plugins:
-	
-	@for dir in $(PLUGIN_DIR)/*/; do \
-		$(MAKE) -C $$dir build  		
-	done
-	@echo "All plugins built successfully"
-
-# Clean built plugins
-clean-plugins:
-	@for dir in $(PLUGIN_DIR)/*/; do \
-		$(MAKE) -C $$dir clean  		
-	done
-	@echo "All plugins cleaned successfully"
-
+run: 
+	$(MAKE) -C plug_host run

@@ -5,7 +5,6 @@ go 1.24.0
 require (
 	dario.cat/mergo v1.0.1
 	github.com/gin-gonic/gin v1.10.0
-	github.com/tetratelabs/wazero v1.11.0
 	k8s.io/apimachinery v0.33.0
 )
 

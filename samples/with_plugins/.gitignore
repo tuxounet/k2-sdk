@@ -1,2 +1,3 @@
 .data/
+.out/
 __debug_bin*
