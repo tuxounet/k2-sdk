@@ -4,5 +4,5 @@ import (
 	"embed"
 )
 
-//go:embed dist/*.so
+//go:embed dist/*
 var RegistryFS embed.FS
