@@ -63,6 +63,10 @@ func (a *BaseApp) GetComponent(name string) types.IAppComponent {
 	return nil
 }
 
+func (a *BaseApp) AddComponent(ctor types.AppComponentCtor) {
+	a.componentsCtors = append(a.componentsCtors, ctor)
+}
+
 func (a *BaseApp) GetKernel() types.IKernel {
 	return a.kernel
 }

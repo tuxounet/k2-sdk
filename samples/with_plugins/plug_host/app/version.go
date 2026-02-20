@@ -1,6 +1,6 @@
 package app
 
 const (
-	AppName    = "PlugHostApp"
-	AppVersion = "v0.10"
+    AppName    = "PlugHostApp"
+    AppVersion = "v0.11"
 )

@@ -1,0 +1,14 @@
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is the Sample api
+  license:
+    name: GPL-3.0
+    url: http://www.gnu.org/licenses/gpl-3.0.html
+  termsOfService: http://swagger.io/terms/
+  title: PlugHostApp
+  version: "0.0"
+paths: {}
+swagger: "2.0"

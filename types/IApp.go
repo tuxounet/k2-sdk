@@ -16,6 +16,7 @@ type IApp interface {
 	SetLogger(logger ILogger)
 	GetComponents() []IAppComponent
 	GetComponent(name string) IAppComponent
+	AddComponent(ctor AppComponentCtor)
 	GetKernel() IKernel
 	SetKernel(kernel IKernel)
 }

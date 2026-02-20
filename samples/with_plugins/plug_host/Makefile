@@ -15,7 +15,10 @@ write-version:
 	echo "    AppVersion = \"${VERSION}\"" >> ${VERSION_FILE}
 	echo ")" >> ${VERSION_FILE}
 
-prepare: init write-version	
+build-plugins:
+	cd .. && $(MAKE) build-plugins
+
+prepare: init write-version build-plugins
 	go install github.com/swaggo/swag/cmd/swag@v1.16.4
 	${GO_PATH}/bin/swag init --instanceName ${APP_NAME}
 	${GO_PATH}/bin/swag fmt
