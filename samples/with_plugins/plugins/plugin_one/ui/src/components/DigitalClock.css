@@ -1,0 +1,47 @@
+.digital-clock {
+  text-align: center;
+  padding: 40px;
+  background: linear-gradient(145deg, var(--clock-gradient-start), var(--clock-gradient-end));
+  border-radius: 20px;
+  box-shadow: 0 10px 30px var(--shadow-color);
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.digital-time {
+  font-size: 4rem;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  color: var(--clock-time-color);
+  text-shadow: var(--clock-time-shadow);
+  margin-bottom: 20px;
+  letter-spacing: 0.1em;
+}
+
+.digital-date {
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.digital-day {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  text-transform: capitalize;
+  font-weight: 400;
+}
+
+@media (max-width: 768px) {
+  .digital-time {
+    font-size: 3rem;
+  }
+  
+  .digital-date {
+    font-size: 1.2rem;
+  }
+  
+  .digital-day {
+    font-size: 1rem;
+  }
+}

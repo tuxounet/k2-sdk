@@ -7,6 +7,7 @@ import (
 	"github.com/tuxounet/k2-sdk/types"
 
 	"github.com/tuxounet/k2-sdk/samples/with_plugins/plugins/plugin_one/temps"
+	"github.com/tuxounet/k2-sdk/samples/with_plugins/plugins/plugin_one/ui"
 )
 
 // NewComponent is the exported symbol that the plugin host will look up
@@ -18,7 +19,7 @@ func NewComponent(app types.IApp) types.IAppComponent {
 		1000,
 		nil,
 		nil,
-		nil,
+		&ui.Dist,
 		types.AccessPolicyPublic,
 		[]types.AppControllerCtor{
 			temps.NewController,

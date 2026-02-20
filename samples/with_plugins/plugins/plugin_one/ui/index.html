@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Horloge K-Home</title>
+  </head>
+  <body>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css"
+    />
+    <style>
+      /* CSS Variables for theming */
+      :root {
+        --bg-primary: #ffffff;
+        --bg-secondary: #f5f5f5;
+        --bg-hover: #f0f0f0;
+        --text-primary: #111827;
+        --text-secondary: #666666;
+        --text-muted: #9ca3af;
+        --border-color: #e5e7eb;
+        --border-hover: #d1d5db;
+        --link-color: #3273dc;
+        --link-hover: #2366d1;
+        --toggle-track-bg: #d1d5db;
+        --toggle-thumb-bg: #ffffff;
+        --shadow-color: rgba(0, 0, 0, 0.1);
+        --clock-time-color: #2c3e50;
+        --clock-gradient-start: #ffffff;
+        --clock-gradient-end: #f5f5f5;
+        --clock-time-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      [data-theme="dark"] {
+        --bg-primary: #1a1a1a;
+        --bg-secondary: #2a2a2a;
+        --bg-hover: #333333;
+        --text-primary: #f0f0f0;
+        --text-secondary: #b0b0b0;
+        --text-muted: #808080;
+        --border-color: #404040;
+        --border-hover: #505050;
+        --link-color: #60a5fa;
+        --link-hover: #93c5fd;
+        --toggle-track-bg: #4b5563;
+        --toggle-thumb-bg: #f9fafb;
+        --shadow-color: rgba(0, 0, 0, 0.3);
+        --clock-time-color: #3b82f6;
+        --clock-gradient-start: #2a2a2a;
+        --clock-gradient-end: #1a1a1a;
+        --clock-time-shadow: 0 0 20px rgba(59, 130, 246, 0.5), 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      body {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+      }
+
+      #root {
+        flex: 1;
+      }
+
+      /* Light theme (default) */
+      .panel {
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+      }
+
+      .panel-block {
+        background-color: var(--bg-primary);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+      }
+
+      a {
+        color: var(--link-color);
+      }
+
+      a:hover {
+        color: var(--link-hover);
+      }
+
+      /* Dark theme overrides for Bulma components */
+      [data-theme="dark"] .box,
+      [data-theme="dark"] .panel,
+      [data-theme="dark"] .card {
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+      }
+
+      [data-theme="dark"] .panel-block,
+      [data-theme="dark"] .card-content {
+        background-color: var(--bg-secondary);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+      }
+
+      [data-theme="dark"] .title {
+        color: var(--text-primary);
+      }
+
+      [data-theme="dark"] .subtitle {
+        color: var(--text-secondary);
+      }
+
+      [data-theme="dark"] .button {
+        background-color: #404040;
+        color: var(--text-primary);
+        border-color: #505050;
+      }
+
+      [data-theme="dark"] .button:hover {
+        background-color: #505050;
+        border-color: #606060;
+      }
+
+      [data-theme="dark"] .button.is-primary {
+        background-color: #3273dc;
+        border-color: #3273dc;
+        color: #fff;
+      }
+
+      [data-theme="dark"] .button.is-primary:hover {
+        background-color: #2366d1;
+        border-color: #2366d1;
+      }
+
+      [data-theme="dark"] .input,
+      [data-theme="dark"] .textarea,
+      [data-theme="dark"] .select select {
+        background-color: #333;
+        color: var(--text-primary);
+        border-color: #555;
+      }
+
+      [data-theme="dark"] .input:focus,
+      [data-theme="dark"] .textarea:focus,
+      [data-theme="dark"] .select select:focus {
+        border-color: #3273dc;
+      }
+    </style>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

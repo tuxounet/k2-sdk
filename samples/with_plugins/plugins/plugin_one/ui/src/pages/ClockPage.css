@@ -1,0 +1,97 @@
+.clock-page {
+  padding: 40px 20px;
+  min-height: calc(100vh - 80px);
+}
+
+.clock-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.clock-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.clock-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  color: var(--text-primary);
+}
+
+.clock-mode-selector {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+.mode-button {
+  padding: 12px 30px;
+  font-size: 1.1rem;
+  border: 2px solid var(--link-color);
+  background: var(--bg-primary);
+  color: var(--link-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.mode-button:hover {
+  background: var(--bg-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+.mode-button.active {
+  background: var(--link-color);
+  color: var(--bg-primary);
+}
+
+.clock-display {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  padding: 40px;
+}
+
+.error-message {
+  text-align: center;
+  padding: 40px;
+  color: #e74c3c;
+  font-size: 1.2rem;
+}
+
+.loading-message {
+  text-align: center;
+  padding: 40px;
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 768px) {
+  .clock-page {
+    padding: 20px 10px;
+  }
+  
+  .clock-header h1 {
+    font-size: 2rem;
+  }
+  
+  .clock-mode-selector {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .mode-button {
+    width: 80%;
+    max-width: 300px;
+  }
+  
+  .clock-display {
+    padding: 20px;
+    min-height: 350px;
+  }
+}
