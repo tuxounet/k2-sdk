@@ -1,14 +1,11 @@
-- name: Stop embedded k8s node
-  community.docker.docker_container: #control_plane
-    name: "{{ .kubecontext }}"
-    state: stopped
+- name: list kind clusters
+  shell:
+    cmd: "../bin/kind get clusters"
+    chdir: '{{ "{{" }} run_dir {{ "}}" }}/home'
+  register: kind_clusters
 
-- name: remove embedded k8s node
-  community.docker.docker_container: #control_plane
-    name: "{{ .kubecontext }}"
-    state: absent
-
-- name: remove kubeconfig
-  file:
-    name: "{{ .kubeconfig }}"
-    state: absent
+- name: nuke kind cluster
+  shell:
+    cmd: '../bin/kind delete cluster --name {{ "{{" }} kernel.name | lower {{ "}}" }}'
+    chdir: '{{ "{{" }} run_dir {{ "}}" }}/home'
+  when: '"{{ "{{" }} kernel.name | lower {{ "}}" }}" in kind_clusters.stdout_lines'

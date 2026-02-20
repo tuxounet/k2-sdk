@@ -1,0 +1,26 @@
+- block:
+    - name: add "nginx" helm repository
+      kubernetes.core.helm_repository:
+        name: ingress-nginx
+        repo_url: https://kubernetes.github.io/ingress-nginx
+        kubeconfig: "{{ run_dir }}/home/.kube/config"
+        state: present
+
+    - name: install nginx helm chart
+      kubernetes.core.helm:
+        name: ingress-nginx
+        chart_ref: ingress-nginx/ingress-nginx
+        release_namespace: kube-system
+        kubeconfig: "{{ run_dir }}/home/.kube/config"
+        values:
+          controller:
+            kind: DaemonSet
+            nodeSelector:
+              kubernetes.io/hostname: "{{ kernel.name | lower }}-worker"
+            service:
+              type: LoadBalancer
+              enableHttp: true
+              enableHttps: true
+              targetPort:
+                http: "{{ host.compute.kubernetes.embedded.ports.http }}"
+                https: "{{ host.compute.kubernetes.embedded.ports.https }}"

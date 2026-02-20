@@ -1,0 +1,16 @@
+auth:
+  users:
+    - username: user
+      password: user123
+
+host:
+  ingress:
+    auth:
+      default_access: "public"
+      public:
+        enabled: true
+      authenticated:
+        enabled: true
+        login_url: "/auth/users/login"
+        verify_url: "/auth/users/verify"
+        redirect_param: "redirect"

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"path/filepath"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/tuxounet/k2-sdk/kernel/compute/providers/kubernetes/types"
@@ -28,6 +27,8 @@ var stopPlaybook string
 
 func (p *Provider) Render() ([]computeTypes.RunnerDefinition, error) {
 
+	p.GetLogger().DebugF("[RENDER] Rendering %s provider", ProviderKey)
+
 	definitions := p.GetDefinitions()
 
 	if len(definitions) == 0 {
@@ -37,6 +38,7 @@ func (p *Provider) Render() ([]computeTypes.RunnerDefinition, error) {
 	runners := make([]computeTypes.RunnerDefinition, 0)
 
 	if p.getIsEmbeddedEnabled() {
+		p.GetLogger().DebugF("Embedded mode is enabled for %s provider", ProviderKey)
 
 		setupScript, err := p.renderPlaybookProvider(setupPlaybook)
 		if err != nil {
@@ -58,6 +60,8 @@ func (p *Provider) Render() ([]computeTypes.RunnerDefinition, error) {
 		}
 		runners = append(runners, setupRunner)
 
+	} else {
+		p.GetLogger().DebugF("Embedded mode is disabled for %s provider", ProviderKey)
 	}
 	configService := p.getConfigService()
 
@@ -124,6 +128,7 @@ func (p *Provider) Render() ([]computeTypes.RunnerDefinition, error) {
 				ingressDef := &ingressTypes.IngressDefinition{
 					AccessPolicy: ing.AccessPolicy,
 					IngressPath:  ing.IngressPath,
+					RewritePath:  ing.RewritePath,
 					ServiceHost:  localAddress,
 					ServicePort:  localPort,
 					CustomHandler: func(_ ingressTypes.IngressDefinition) gin.HandlerFunc {
@@ -152,15 +157,14 @@ func (p *Provider) Render() ([]computeTypes.RunnerDefinition, error) {
 		runners = append(runners, newRunnerDefinition)
 	}
 
+	p.GetLogger().DebugF("[RENDER] Rendered %d runners for %s provider", len(runners), ProviderKey)
+
 	return runners, nil
 }
 
 func (p *Provider) getTemplateValues() map[string]any {
 	return map[string]any{
-		"kubecontext":  strings.ToLower(p.GetService().GetKernel().GetApp().GetName()),
 		"kubeconfig":   p.getKubeConfigValue(),
-		"kubeApiPort":  fmt.Sprintf("%d", p.getKubeApiPort()),
-		"kubeImage":    p.getKubeImage(),
 		"kubeNetworks": p.getKubeNetworks(),
 	}
 }

@@ -5,16 +5,17 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+
 	"strings"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-
 	"github.com/tuxounet/k2-sdk/kernel/network/ingress/middlewares/cdn"
 	"github.com/tuxounet/k2-sdk/kernel/network/ingress/middlewares/docs"
 	"github.com/tuxounet/k2-sdk/kernel/network/ingress/middlewares/logger"
 	"github.com/tuxounet/k2-sdk/kernel/network/ingress/middlewares/routes"
 	"github.com/tuxounet/k2-sdk/kernel/network/ingress/middlewares/ui"
+	runtimeTypes "github.com/tuxounet/k2-sdk/types"
 )
 
 func (s *Service) Register() error {
@@ -60,7 +61,21 @@ func (s *Service) Register() error {
 		baseUrl = "/"
 	}
 
+	rootAccessPolicy, err := configService.GetAsStringOrDefault("host.ingress.auth.default_access", "public")
+	if err != nil {
+		s.GetLogger().ErrorF("Failed to get rootAccessPolicy: %s", err.Error())
+		return err
+	}
+	rootAccessPolicyTyped := runtimeTypes.AccessPolicyPublic
+	if rootAccessPolicy == "authenticated" {
+		rootAccessPolicyTyped = runtimeTypes.AccessPolicyAuthenticated
+	}
+
+	authMap := make(map[string]runtimeTypes.IAccessPolicy)
+	authMap[baseUrl] = rootAccessPolicyTyped
+
 	router := server.Group(baseUrl)
+	router.Use(routes.EnsureAuthLevelMiddleware(s, s.GetLogger(), authMap, rootAccessPolicyTyped))
 
 	components := app.GetComponents()
 
@@ -72,12 +87,15 @@ func (s *Service) Register() error {
 			s.GetLogger().ErrorF("Failed to register cdn for app %s: %s", app.GetName(), err.Error())
 			return err
 		}
+		authMap[baseUrl+"cdn/"] = rootAccessPolicyTyped
 
 		err = ui.RegisterApp(app, rootUri, router)
 		if err != nil {
 			s.GetLogger().ErrorF("Failed to register ui for app %s: %s", app.GetName(), err.Error())
 			return err
 		}
+
+		authMap[baseUrl+"ui/"] = rootAccessPolicyTyped
 
 	}
 
@@ -88,14 +106,22 @@ func (s *Service) Register() error {
 			s.GetLogger().ErrorF("Failed to register docs for app %s: %s", app.GetName(), err.Error())
 			return err
 		}
+		authMap[baseUrl+"docs/"] = rootAccessPolicyTyped
+		authMap[baseUrl+"openapi.json"] = rootAccessPolicyTyped
 	}
 
 	for _, component := range components {
 		componentRouter := router.Group(component.GetName())
 
+		authMap[componentRouter.BasePath()+"/"] = component.GetAccessPolicy()
+
 		controllers := component.GetControllers()
 		for _, ctrl := range controllers {
-			err := ctrl.Register(componentRouter)
+			controllerRouter := componentRouter.Group(ctrl.GetName())
+
+			authMap[controllerRouter.BasePath()+"/"] = ctrl.GetAccessPolicy()
+
+			err := ctrl.Register(controllerRouter)
 			if err != nil {
 				s.GetLogger().ErrorF("controller %s in component %s register failed: %s", ctrl.GetName(), component.GetName(), err.Error())
 				return err
@@ -109,6 +135,8 @@ func (s *Service) Register() error {
 				s.GetLogger().ErrorF("Failed to register docs for component %s: %s", component.GetName(), err.Error())
 				return err
 			}
+			authMap[componentRouter.BasePath()+"/docs/"] = component.GetAccessPolicy()
+			authMap[componentRouter.BasePath()+"/openapi.json"] = component.GetAccessPolicy()
 		}
 
 		componentUI := component.GetUI()
@@ -119,25 +147,32 @@ func (s *Service) Register() error {
 				return err
 			}
 
+			authMap[componentRouter.BasePath()+"/cdn/"] = component.GetAccessPolicy()
+
 			err = ui.RegisterComponent(component, rootUri, componentRouter.BasePath(), componentRouter)
 			if err != nil {
 				s.GetLogger().ErrorF("Failed to register ui for app %s: %s", app.GetName(), err.Error())
 				return err
 			}
 
+			authMap[componentRouter.BasePath()+"/ui/"] = component.GetAccessPolicy()
+
 		}
 
 	}
 
-	records := s.getIngressesRecords()
-	if len(records) > 0 {
-		s.GetLogger().DebugF("Found %d ingresses", len(records))
-		err = routes.Register(s, router, records)
+	ingressRecords := s.getIngressesRecords()
+	if len(ingressRecords) > 0 {
+		s.GetLogger().DebugF("Found %d ingresses", len(ingressRecords))
+		err = routes.RegisterIngresses(s, router, ingressRecords)
 		if err != nil {
 			s.GetLogger().ErrorF("Failed to register ingresses: %s", err.Error())
 			return err
 		}
+
 	}
+
+	s.GetLogger().DebugF("Auth map: %+v", authMap)
 
 	return nil
 }

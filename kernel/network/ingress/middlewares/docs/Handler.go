@@ -44,7 +44,7 @@ func Register(service types.IKernelService, docs *swag.Spec, router *gin.RouterG
 		docs.Schemes = []string{paredUrl.Scheme}
 		docs.Host = paredUrl.Host
 		docs.BasePath = baseRoute
-		swagger := swag.GetSwagger(docs.InfoInstanceName)
+		swagger := swag.GetSwagger(docs.Title)
 		if swagger == nil {
 			log.ErrorF("Error parsing template for %s", docs.InfoInstanceName)
 			c.String(500, "Error parsing template")

@@ -8,6 +8,7 @@ import (
 	"github.com/tuxounet/k2-sdk/samples/standalone/components/10_provision/browser"
 	"github.com/tuxounet/k2-sdk/samples/standalone/components/10_provision/tls_ca"
 	"github.com/tuxounet/k2-sdk/samples/standalone/components/10_provision/tls_ingress"
+	"github.com/tuxounet/k2-sdk/samples/standalone/components/10_provision/tty"
 
 	"github.com/tuxounet/k2-sdk/types"
 )
@@ -23,11 +24,13 @@ func NewComponent(app types.IApp) types.IAppComponent {
 		nil,
 		nil,
 		&conf,
+		types.AccessPolicyAuthenticated,
 		[]types.AppControllerCtor{
 			tls_ca.NewController,
 			tls_ingress.NewController,
 			browser.NewController,
 			ansible.NewController,
+			tty.NewController,
 		},
 	)
 }

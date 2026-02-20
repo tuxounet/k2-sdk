@@ -14,6 +14,7 @@ func NewComponent(app runtimeTypes.IApp) runtimeTypes.IAppComponent {
 		nil,
 		nil,
 		nil,
+		runtimeTypes.AccessPolicyPublic,
 		[]runtimeTypes.AppControllerCtor{
 			health.NewController,
 		},

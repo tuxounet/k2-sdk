@@ -1,6 +1,8 @@
 package stores
 
 import (
+	"path/filepath"
+
 	"github.com/tuxounet/k2-sdk/kernel/storage/stores/providers"
 	"github.com/tuxounet/k2-sdk/kernel/storage/stores/types"
 )
@@ -32,7 +34,7 @@ func (s *Service) Init() error {
 	err = s.UpsertStore(&types.Store{
 		Name:    "root",
 		Backend: "local",
-		Flags: map[string]interface{}{
+		Flags: map[string]any{
 			"path": runDir,
 		},
 	})
@@ -44,7 +46,7 @@ func (s *Service) Init() error {
 	err = s.UpsertStore(&types.Store{
 		Name:    "local",
 		Backend: "local",
-		Flags: map[string]interface{}{
+		Flags: map[string]any{
 			"path": userDir,
 		},
 	})
@@ -53,5 +55,22 @@ func (s *Service) Init() error {
 		return err
 	}
 
+	rootStore, err := s.GetStore("root")
+	if err != nil {
+		s.GetLogger().ErrorF("Failed to get root store %s", err.Error())
+		return err
+	}
+
+	//cleanup temp dir
+	err = rootStore.DeleteObject("tmp")
+	if err != nil {
+		s.GetLogger().ErrorF("Failed to delete tmp directory %s", err.Error())
+		return err
+	}
+	err = rootStore.WriteObject(filepath.Join("tmp", ".keep"), []byte{})
+	if err != nil {
+		s.GetLogger().ErrorF("Failed to create tmp directory %s", err.Error())
+		return err
+	}
 	return nil
 }

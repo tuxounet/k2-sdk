@@ -15,6 +15,7 @@ type BaseAppComponent struct {
 	docs             *swag.Spec
 	ui               *embed.FS
 	config           *embed.FS
+	accessPolicy     runtimeTypes.IAccessPolicy
 	log              runtimeTypes.ILogger
 	controllersCtors []runtimeTypes.AppControllerCtor
 	controllers      []runtimeTypes.IAppController
@@ -27,6 +28,7 @@ func NewBaseAppComponent(
 	docs *swag.Spec,
 	ui *embed.FS,
 	config *embed.FS,
+	accessPolicy runtimeTypes.IAccessPolicy,
 	controllersCtors []runtimeTypes.AppControllerCtor) runtimeTypes.IAppComponent {
 
 	log := app.GetLogger().CreateSubLogger(name)
@@ -38,6 +40,7 @@ func NewBaseAppComponent(
 		log:              log,
 		docs:             docs,
 		ui:               ui,
+		accessPolicy:     accessPolicy,
 		controllersCtors: controllersCtors,
 	}
 
@@ -108,4 +111,8 @@ func (b *BaseAppComponent) Stop() error {
 
 func (b *BaseAppComponent) GetConfig() *embed.FS {
 	return b.config
+}
+
+func (b *BaseAppComponent) GetAccessPolicy() runtimeTypes.IAccessPolicy {
+	return b.accessPolicy
 }

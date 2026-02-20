@@ -14,6 +14,7 @@ type BaseAppController struct {
 	log          types.ILogger
 	config       *embed.FS
 	accessPolicy types.IAccessPolicy
+	schedules    []types.IAppSchedule
 	data         map[string]any
 }
 
@@ -28,6 +29,7 @@ func NewBaseAppController(component types.IAppComponent, name string, order int,
 		config:       config,
 		log:          log,
 		accessPolicy: access,
+		schedules:    make([]types.IAppSchedule, 0),
 		data:         make(map[string]any),
 	}
 
@@ -79,4 +81,14 @@ func (a *BaseAppController) SetData(key string, value any) {
 
 func (a *BaseAppController) GetAccessPolicy() types.IAccessPolicy {
 	return a.accessPolicy
+}
+
+func (b *BaseAppController) GetSchedules() []types.IAppSchedule {
+	return b.schedules
+}
+
+func (b *BaseAppController) AddSchedule(name string, cron string, handler types.AppScheduleHandler) {
+	schedule := NewBaseAppSchedule(name, cron, handler)
+
+	b.schedules = append(b.schedules, &schedule)
 }

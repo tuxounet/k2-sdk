@@ -1,0 +1,12 @@
+site:
+  tls:
+    paths:
+      secrets: "{{ run_dir }}/etc/pki"
+    ca:
+      domain: "f.krux"
+      pki:
+        server: "hive.f.krux"
+        port: 55022
+        path: "/srv/pki"
+        user: "krux"
+        group: "adm"

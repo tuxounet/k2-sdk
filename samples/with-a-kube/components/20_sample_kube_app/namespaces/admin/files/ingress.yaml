@@ -2,20 +2,22 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: files-ingress
-
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web
-
+    cert-manager.io/cluster-issuer: ca-issuer
 spec:
-  ingressClassName: traefik
+  ingressClassName: nginx
   rules:
-    - host: kube.k2
+    - host: localhost
       http:
         paths:
-          - path: /admin/files
+          - path: /
             pathType: Prefix
             backend:
               service:
                 name: files-service
                 port:
                   number: 80
+  tls:
+    - hosts:
+        - localhost
+      secretName: files-ingress-tls

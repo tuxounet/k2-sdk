@@ -1,0 +1,19 @@
+host:
+  address: 127.0.0.1
+  ingress:
+    address: 127.0.0.1
+    port: 8086
+    root: http://localhost:8086
+
+    auth:
+      default_access: "public"
+      public:
+        enabled: true
+      authenticated:
+        enabled: true
+        login_url: "/auth/users/login"
+        verify_url: "/auth/users/verify"
+        redirect_param: "redirect"
+
+  compute:
+    enabled: false

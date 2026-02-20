@@ -15,7 +15,7 @@ type BaseControllerContainer struct {
 
 func NewBaseControllerContainer(component runtimeTypes.IAppComponent, definition *types.ContainerDefinition, config *embed.FS) BaseControllerContainer {
 	name := definition.Name
-	base := runtimeBases.NewBaseAppController(component, name, definition.Order, config, runtimeTypes.AccessPolicyAdmin)
+	base := runtimeBases.NewBaseAppController(component, name, definition.Order, config, runtimeTypes.AccessPolicyPublic)
 	instance := BaseControllerContainer{base}
 	instance.SetData("definition", definition)
 

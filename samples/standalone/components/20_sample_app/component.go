@@ -23,6 +23,7 @@ func NewComponent(app types.IApp) types.IAppComponent {
 		nil,
 		&ui.Dist,
 		&conf,
+		types.AccessPolicyAuthenticated,
 		[]types.AppControllerCtor{
 			sample.NewSampleController,
 			sample2.NewSample2Controller,

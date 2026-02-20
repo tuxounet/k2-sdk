@@ -17,6 +17,7 @@ type ContainerDefinition struct {
 	Env        map[string]string             `json:"env"`
 	Capacities *[]ContainerCapacity          `json:"capacities"`
 	Security   *ContainerDefinitionSecurity  `json:"security"`
+	Networks   *[]string                     `json:"network,omitempty"`
 }
 
 type ContainerDefinitionSecurity struct {
@@ -27,6 +28,7 @@ type ContainerDefinitionSecurity struct {
 type ContainerDefinitionIngress struct {
 	ContainerPort int                                                      `json:"containerPort"`
 	Path          string                                                   `json:"path"`
+	RewritePath   *string                                                  `json:"rewritePath,omitempty"`
 	AccessPolicy  runtimeTypes.IAccessPolicy                               `json:"accessPolicy"`
 	CustomHandler func(def ingressTypes.IngressDefinition) gin.HandlerFunc `json:"-"`
 }
@@ -46,8 +48,9 @@ type ContainerDefinitionVolume struct {
 type ContainerDefinitionVolumeBindingType string
 
 const (
-	ContainerDefinitionVolumeBindingTypeMount   ContainerDefinitionVolumeBindingType = "mount"
-	ContainerDefinitionVolumeBindingTypeContent ContainerDefinitionVolumeBindingType = "content"
+	ContainerDefinitionVolumeBindingTypeMount     ContainerDefinitionVolumeBindingType = "mount"
+	ContainerDefinitionVolumeBindingTypeEphemeral ContainerDefinitionVolumeBindingType = "ephemeral"
+	ContainerDefinitionVolumeBindingTypeContent   ContainerDefinitionVolumeBindingType = "content"
 )
 
 type ContainerDefinitionVolumeBinding struct {

@@ -1,4 +1,3 @@
-# website::tag::1:: Deploy the training/webapp Docker Container: https://hub.docker.com/r/training/webapp/
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -14,16 +13,22 @@ spec:
         app: files-deployment
     spec:
       containers:
-        # website::tag::2:: The container runs a Python webapp on port 5000 that responds with "Hello, World!"
         - name: files-deployment
           image: filebrowser/filebrowser:latest
           ports:
             - containerPort: 80
           env:
             - name: "FB_BASEURL"
-              value: "/admin/files"
+              value: "/"
             - name: "FB_NOAUTH"
               value: "true"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
           readinessProbe:
             httpGet:
               path: /
