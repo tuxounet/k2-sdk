@@ -12,6 +12,7 @@ type IApp interface {
 	GetVersion() string
 	GetDocs() *swag.Spec
 	GetUI() *embed.FS
+	GetExternals() *embed.FS
 	GetConfig() *embed.FS
 	SetLogger(logger ILogger)
 	GetComponents() []IAppComponent

@@ -1,19 +1,19 @@
-package registry
+package plugins
 
 import (
 	"github.com/tuxounet/k2-sdk/bases"
 	"github.com/tuxounet/k2-sdk/types"
 )
 
-const ServiceKey = "plugins.registry"
+const ServiceKey = "plugins"
 
-type PluginsRegistryService struct {
+type PluginsService struct {
 	bases.BaseKernelService
 }
 
 func NewService(k types.IKernel) types.IKernelService {
 
 	base := bases.NewBaseKernelService(k, ServiceKey)
-	return &PluginsRegistryService{base}
+	return &PluginsService{base}
 
 }

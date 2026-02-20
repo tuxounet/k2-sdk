@@ -29,5 +29,6 @@ func NewApp() types.IApp {
 			auth.NewComponent,
 			sample_component.NewComponent,
 		},
+		nil,
 	)
 }

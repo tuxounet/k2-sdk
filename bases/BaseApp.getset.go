@@ -74,3 +74,7 @@ func (a *BaseApp) GetKernel() types.IKernel {
 func (a *BaseApp) SetKernel(kernel types.IKernel) {
 	a.kernel = kernel
 }
+
+func (a *BaseApp) GetExternals() *embed.FS {
+	return a.externalComponents
+}

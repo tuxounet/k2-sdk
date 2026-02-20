@@ -9,8 +9,7 @@ import (
 	"github.com/tuxounet/k2-sdk/kernel/compute"
 	"github.com/tuxounet/k2-sdk/kernel/monitoring/logging"
 	"github.com/tuxounet/k2-sdk/kernel/network/ingress"
-	"github.com/tuxounet/k2-sdk/kernel/plugins/host"
-	"github.com/tuxounet/k2-sdk/kernel/plugins/registry"
+	"github.com/tuxounet/k2-sdk/kernel/plugins"
 	"github.com/tuxounet/k2-sdk/kernel/scheduler"
 
 	"github.com/tuxounet/k2-sdk/kernel/config"
@@ -71,8 +70,6 @@ func NewKernelRuntime(hostedApp types.IApp, hostVersion string) *KernelRuntime {
 
 	servicesCreateList := [](func(types.IKernel) types.IKernelService){
 		paths.NewService,
-		registry.NewService,
-		host.NewService,
 		profile.NewService,
 		volumes.NewService,
 		stores.NewService,
@@ -80,6 +77,7 @@ func NewKernelRuntime(hostedApp types.IApp, hostVersion string) *KernelRuntime {
 		secrets.NewService,
 		compute.NewService,
 		ingress.NewService,
+		plugins.NewService,
 		app.NewService,
 		scheduler.NewService,
 	}

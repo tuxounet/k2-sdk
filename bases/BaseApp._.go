@@ -13,18 +13,19 @@ type GenericApp struct {
 }
 
 type BaseApp struct {
-	name            string
-	version         string
-	docs            *swag.Spec
-	ui              *embed.FS
-	config          *embed.FS
-	log             runtimeTypes.ILogger
-	kernel          runtimeTypes.IKernel
-	componentsCtors []runtimeTypes.AppComponentCtor
-	components      []runtimeTypes.IAppComponent
+	name               string
+	version            string
+	docs               *swag.Spec
+	ui                 *embed.FS
+	config             *embed.FS
+	log                runtimeTypes.ILogger
+	kernel             runtimeTypes.IKernel
+	componentsCtors    []runtimeTypes.AppComponentCtor
+	components         []runtimeTypes.IAppComponent
+	externalComponents *embed.FS
 }
 
-func NewBaseApp(name string, version string, docs *swag.Spec, ui *embed.FS, config *embed.FS, componentsCtors []runtimeTypes.AppComponentCtor) runtimeTypes.IApp {
+func NewBaseApp(name string, version string, docs *swag.Spec, ui *embed.FS, config *embed.FS, componentsCtors []runtimeTypes.AppComponentCtor, externalComponents *embed.FS) runtimeTypes.IApp {
 
 	name = strings.TrimSpace(name)
 	version = strings.TrimSpace(version)
@@ -42,12 +43,13 @@ func NewBaseApp(name string, version string, docs *swag.Spec, ui *embed.FS, conf
 	}
 
 	base := BaseApp{
-		name:            name,
-		version:         version,
-		docs:            docs,
-		ui:              ui,
-		config:          config,
-		componentsCtors: componentsCtors,
+		name:               name,
+		version:            version,
+		docs:               docs,
+		ui:                 ui,
+		config:             config,
+		componentsCtors:    componentsCtors,
+		externalComponents: externalComponents,
 	}
 
 	return &GenericApp{base}
