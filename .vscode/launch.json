@@ -38,6 +38,15 @@
       "console": "integratedTerminal",
       "program": "${workspaceFolder}/samples/with-a-kube/main.go",
       "cwd": "${workspaceFolder}/samples/with-a-kube"
+    },
+    {
+      "name": "Debug SDK With Plugin Host Sample",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "console": "integratedTerminal",
+      "program": "${workspaceFolder}/samples/with_plugins/plug_host/main.go",
+      "cwd": "${workspaceFolder}/samples/with_plugins/plug_host"
     }
   ]
 }
