@@ -10,6 +10,7 @@ import (
 	runtimeTypes "github.com/tuxounet/k2-sdk/types"
 	"{{ $module }}/ui"
 	"{{ $module }}/docs"
+	"{{ $module }}/registry"
 
 	{{range $i := $componentList}}
 	{{ $i }} "{{ $module }}/components/{{ $i }}"
@@ -31,6 +32,6 @@ func NewApp() runtimeTypes.IApp {
 			{{ $i }}.NewComponent,
 			{{ end }}
 		},
-		nil,
+		&registry.RegistryFS,
 	)
 }

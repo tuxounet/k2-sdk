@@ -24,5 +24,6 @@ func NewApp() runtimeTypes.IApp {
 		[]runtimeTypes.AppComponentCtor{
 			component.NewComponent,
 		},
+		nil,
 	)
 }
