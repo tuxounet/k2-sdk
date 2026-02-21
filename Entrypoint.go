@@ -12,24 +12,33 @@ var RuntimeVersion string
 
 func HostApp(app types.IApp) {
 
-	kernelRuntime := kernel.NewKernelRuntime(app, RuntimeVersion)
-	err := kernelRuntime.Init()
+	kernelRuntime := kernel.NewKernelRuntime(app, RuntimeVersion, false)
+	doRun(kernelRuntime)
+
+}
+func HostUnsecureApp(app types.IApp) {
+	kernelRuntime := kernel.NewKernelRuntime(app, RuntimeVersion, true)
+	doRun(kernelRuntime)
+
+}
+func doRun(rt *kernel.KernelRuntime) {
+	err := rt.Init()
 	if err != nil {
-		kernelRuntime.GetLogger().PanicF("kernel init failed: %s", err.Error())
+		rt.GetLogger().PanicF("kernel init failed: %s", err.Error())
 	}
 
-	err = kernelRuntime.Register()
+	err = rt.Register()
 	if err != nil {
-		kernelRuntime.GetLogger().PanicF("kernel register failed: %s", err.Error())
+		rt.GetLogger().PanicF("kernel register failed: %s", err.Error())
 	}
 
-	err = kernelRuntime.Start()
+	err = rt.Start()
 	if err != nil {
-		kernelRuntime.GetLogger().PanicF("kernel start failed: %s", err.Error())
+		rt.GetLogger().PanicF("kernel start failed: %s", err.Error())
 	}
-	err = kernelRuntime.ListenAndServe()
+	err = rt.ListenAndServe()
 	if err != nil {
-		kernelRuntime.GetLogger().PanicF("kernel listenAndServe failed: %s", err.Error())
+		rt.GetLogger().PanicF("kernel listenAndServe failed: %s", err.Error())
 	}
 
 }

@@ -29,9 +29,10 @@ type KernelRuntime struct {
 	runDir      string
 	log         types.ILogger
 	services    []types.KernelServiceContextKey
+	unsecure    bool
 }
 
-func NewKernelRuntime(hostedApp types.IApp, hostVersion string) *KernelRuntime {
+func NewKernelRuntime(hostedApp types.IApp, hostVersion string, unsecure bool) *KernelRuntime {
 
 	cwd, err := os.Getwd()
 	if err != nil {
@@ -54,6 +55,7 @@ func NewKernelRuntime(hostedApp types.IApp, hostVersion string) *KernelRuntime {
 		rootContext: rootContext,
 		app:         hostedApp,
 		runDir:      runDir,
+		unsecure:    unsecure,
 	}
 
 	//Early logging service init

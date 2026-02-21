@@ -24,26 +24,7 @@ const docTemplateSimpleApp = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/files/call": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "files"
-                ],
-                "summary": "Call",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/login": {
+        "/auth/users/login": {
             "get": {
                 "produces": [
                     "application/json"
@@ -103,7 +84,7 @@ const docTemplateSimpleApp = `{
                 }
             }
         },
-        "/logout": {
+        "/auth/users/logout": {
             "get": {
                 "produces": [
                     "application/json"
@@ -134,7 +115,7 @@ const docTemplateSimpleApp = `{
                 }
             }
         },
-        "/verify": {
+        "/auth/users/verify": {
             "get": {
                 "produces": [
                     "application/json"
@@ -158,6 +139,25 @@ const docTemplateSimpleApp = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/sample_component/files/call": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "files"
+                ],
+                "summary": "Call",
+                "responses": {
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "type": "string"
                         }

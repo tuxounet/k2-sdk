@@ -36,13 +36,20 @@ func EnsureAuthLevelMiddleware(service runtimeTypes.IKernelService, parentLog ru
 
 	authMap[login_url] = runtimeTypes.AccessPolicyPublic
 	authMap[verify_url] = runtimeTypes.AccessPolicyPublic
+	isUnsecure := service.GetKernel().IsUnsecure()
 
 	return func(c *gin.Context) {
 		requestPath := c.Request.URL.Path
+		if isUnsecure {
+			log.TraceF("UNSECURE for path %s", requestPath)
+			c.Next()
+			return
+		}
 		if requestPath == verify_url {
 			c.Next()
 			return
 		}
+
 		log.TraceF("check %s", requestPath)
 
 		var matchedPolicy runtimeTypes.IAccessPolicy = ""
@@ -86,8 +93,14 @@ func EnsureAuthLevelMiddleware(service runtimeTypes.IKernelService, parentLog ru
 func ensureAuthLevel(service runtimeTypes.IKernelService, ingress types.IngressDefinition) gin.HandlerFunc {
 	configService := service.GetKernel().GetService(config.ServiceKey).(*config.Service)
 	log := service.GetLogger().CreateSubLogger("auth")
+	isUnsecure := service.GetKernel().IsUnsecure()
 	return func(c *gin.Context) {
-
+		requestPath := c.Request.URL.Path
+		if isUnsecure {
+			log.TraceF("UNSECURE for path %s", requestPath)
+			c.Next()
+			return
+		}
 		switch ingress.AccessPolicy {
 		case runtimeTypes.AccessPolicyPublic:
 			if access.AllowAccessLevelPublic(c.Request, log, configService) {

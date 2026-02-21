@@ -2,5 +2,5 @@ package app
 
 const (
     AppName    = "SimpleApp"
-    AppVersion = "v0.10"
+    AppVersion = "v0.11"
 )

@@ -16,26 +16,7 @@
         "version": "0.0"
     },
     "paths": {
-        "/files/call": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "files"
-                ],
-                "summary": "Call",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/login": {
+        "/auth/users/login": {
             "get": {
                 "produces": [
                     "application/json"
@@ -95,7 +76,7 @@
                 }
             }
         },
-        "/logout": {
+        "/auth/users/logout": {
             "get": {
                 "produces": [
                     "application/json"
@@ -126,7 +107,7 @@
                 }
             }
         },
-        "/verify": {
+        "/auth/users/verify": {
             "get": {
                 "produces": [
                     "application/json"
@@ -150,6 +131,25 @@
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/sample_component/files/call": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "files"
+                ],
+                "summary": "Call",
+                "responses": {
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "type": "string"
                         }

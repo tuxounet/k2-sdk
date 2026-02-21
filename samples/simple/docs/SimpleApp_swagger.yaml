@@ -11,19 +11,7 @@ info:
   title: Simple
   version: "0.0"
 paths:
-  /files/call:
-    get:
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      summary: Call
-      tags:
-      - files
-  /login:
+  /auth/users/login:
     get:
       produces:
       - application/json
@@ -62,7 +50,7 @@ paths:
       summary: Call
       tags:
       - auth
-  /logout:
+  /auth/users/logout:
     get:
       produces:
       - application/json
@@ -82,7 +70,7 @@ paths:
       summary: Call
       tags:
       - auth
-  /verify:
+  /auth/users/verify:
     get:
       produces:
       - application/json
@@ -97,6 +85,18 @@ paths:
             type: string
         "500":
           description: Internal Server Error
+          schema:
+            type: string
+      summary: Call
+      tags:
+      - files
+  /sample_component/files/call:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
           schema:
             type: string
       summary: Call

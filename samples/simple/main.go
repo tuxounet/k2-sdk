@@ -16,7 +16,7 @@ import (
 // @license.name	GPL-3.0
 // @license.url	http://www.gnu.org/licenses/gpl-3.0.html
 func main() {
-	runtime.HostApp(
+	runtime.HostUnsecureApp(
 		app.NewApp(),
 	)
 }

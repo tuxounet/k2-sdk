@@ -44,3 +44,7 @@ func (g *KernelRuntime) SetService(service types.IKernelService) {
 	key := types.KernelServiceContextKey(service.GetName())
 	g.rootContext = context.WithValue(g.rootContext, key, service)
 }
+
+func (g *KernelRuntime) IsUnsecure() bool {
+	return g.unsecure
+}
