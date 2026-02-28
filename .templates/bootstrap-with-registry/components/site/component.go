@@ -1,6 +1,7 @@
 package site
 
 import (
+	"{{ .module }}/components/site/apps"
 	"{{ .module }}/components/site/health"
 	runtimeBases "{{ .sdk_module }}/bases"
 	runtimeTypes "{{ .sdk_module }}/types"
@@ -17,6 +18,7 @@ func NewComponent(app runtimeTypes.IApp) runtimeTypes.IAppComponent {
 		runtimeTypes.AccessPolicyPublic,
 		[]runtimeTypes.AppControllerCtor{
 			health.NewController,
+			apps.NewController,
 		},
 	)
 }
