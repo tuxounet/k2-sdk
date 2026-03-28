@@ -5,6 +5,7 @@ go 1.24.0
 require (
 	dario.cat/mergo v1.0.1
 	github.com/gin-gonic/gin v1.10.0
+	github.com/stretchr/testify v1.11.1
 	k8s.io/apimachinery v0.33.0
 )
 
@@ -34,6 +35,7 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/mxk/go-flowrate v0.0.0-20140419014527-cca7078d478f // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/spf13/cast v1.7.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect

@@ -12,10 +12,10 @@ init:
 run: test
 
 test: init
-	go test ./...
+	go test -cover ./...
 
 build: write-version
-	go build  -o ./.out/k2-sdk ./Entrypoint.go
+	go build  -o ./.out/k2-sdk ./entrypoint.go
 
 	
 bump-patch: build 

@@ -10,9 +10,5 @@ k2:
         branch: 0.9
         path: .templates/bootstrap/k2.template.yaml
     vars:
-      name: KNewApp
+      name: K2NewApp
       description: Une application qui vérifie que tout marche bien
-      module: my-app
-      version: v0.0.1
-      components: site
-      sdk_module: "github.com/tuxounet/k2-sdk"
