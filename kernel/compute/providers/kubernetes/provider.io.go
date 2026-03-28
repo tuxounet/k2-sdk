@@ -35,14 +35,14 @@ func (p *Provider) getIsEmbeddedEnabled() bool {
 }
 func (p *Provider) getKubeConfigValue() string {
 	defaultValue := filepath.Join(p.GetService().GetKernel().GetRunDirectory(), "home", ".kube", "config")
-	value, err := p.getConfigService().GetAsStringOrDefault("host.compute.kubernetes.kubeConfig", defaultValue)
+	value, err := p.getConfigService().GetAsStringOrDefault("host.compute.kubernetes.kubeconfig", defaultValue)
 	if err != nil {
-		p.GetLogger().WarnF("unable to get kubeConfig config value: %s, using default %s", err, defaultValue)
+		p.GetLogger().WarnF("unable to get kubeconfig config value: %s, using default %s", err, defaultValue)
 		return defaultValue
 	}
 
 	if value == "" {
-		p.GetLogger().WarnF("kubeConfig config value is empty, using default %s", defaultValue)
+		p.GetLogger().WarnF("kubeconfig config value is empty, using default %s", defaultValue)
 		return defaultValue
 	}
 
