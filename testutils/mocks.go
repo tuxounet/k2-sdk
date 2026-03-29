@@ -31,6 +31,7 @@ func (m *MockLogger) ScopeWithReturn(name string, handler func(log types.ILogger
 	return handler(m.CreateSubLogger(name))
 }
 func (m *MockLogger) GetBaseLogger() *logrus.Entry              { return logrus.NewEntry(logrus.New()) }
+func (m *MockLogger) SetLevel(level logrus.Level)               {}
 func (m *MockLogger) Trace(message string)                      {}
 func (m *MockLogger) TraceF(format string, args ...interface{}) {}
 func (m *MockLogger) Debug(message string)                      {}

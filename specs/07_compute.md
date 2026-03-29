@@ -50,8 +50,10 @@ const (
 1. **Init()** — Create platform providers, call `provider.Init()`
 2. **Register()** — Render Ansible inventory, collect runners from providers, generate 4 playbooks (provision/start/stop/teardown)
 3. **Start()** — Execute provision playbook → start playbook → call `provider.Start()`
-4. **Stop()** — Call `provider.Stop()` → execute stop playbook → teardown playbook
+4. **Stop()** — Call `provider.Stop()` → execute stop playbook
 5. **ExecVerb(verb)** — Execute a specific verb playbook (used by `HostProvisionOnly`/`HostTeardownOnly`)
+
+> **Note:** `teardown` is **never** called during normal `Stop()`. It is only executed explicitly via `HostTeardownOnly()` or `ExecVerb(teardown)`. This preserves provisioned resources across restarts.
 
 ## Checksum Cache
 
@@ -59,7 +61,7 @@ To optimize execution times, the compute service implements a checksum-based cac
 
 - **Scope**: Per-verb (provision, start, stop, teardown) — each verb's rendered playbook is checksummed independently
 - **Input**: SHA-256 of the rendered playbook YAML content + serialized configuration map. This ensures both playbook changes and config value changes trigger re-execution
-- **TTL**: 24 hours — playbooks are re-executed after 24h even without changes, to guard against infrastructure drift
+- **TTL**: Configurable via `host.compute.cache.ttl` (in minutes, default: 1440 = 24 hours) — playbooks are re-executed after TTL even without changes, to guard against infrastructure drift
 - **Cache location**: `{runDir}/etc/compute/checksums.json`
 - **Force flag**: `kernel.IsForceCompute()` bypasses the cache entirely (set via `--force-compute` CLI flag)
 
@@ -70,6 +72,17 @@ A playbook verb is **skipped** when all of these are true:
 1. A cached checksum entry exists for this verb
 2. The current checksum matches the cached checksum (no playbook or config changes)
 3. Less than 24 hours have elapsed since the last execution
+
+### Cache invalidation on lifecycle verbs
+
+When a "down" verb executes, it invalidates the cache of its counterpart "up" verb so the next cycle re-executes from scratch:
+
+| Verb executed | Cache invalidated                       | Rationale                                                            |
+| ------------- | --------------------------------------- | -------------------------------------------------------------------- |
+| `stop`        | `start`                                 | Infrastructure was stopped; `start` must re-run on next cycle        |
+| `teardown`    | `provision` + **all** (full cache nuke) | Resources were deallocated; `provision` must re-run to recreate them |
+
+This ensures that after a `stop`/`teardown`, the next `start`/`provision` always runs regardless of checksum state.
 
 ### Cache data structure
 

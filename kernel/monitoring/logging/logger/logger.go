@@ -18,11 +18,13 @@ type Logger struct {
 func NewRootLogger(ctx context.Context, name string, logFolder string, level logrus.Level) *Logger {
 	rootLogger := logrus.New()
 
-	rootLogger.SetFormatter(&logrus.TextFormatter{
-		DisableColors:   false,
-		ForceColors:     false,
-		FullTimestamp:   true,
-		TimestampFormat: "2006-01-02 15:04:05.000",
+	// Auto-detect systemd/journald: if JOURNAL_STREAM is set, timestamps are redundant
+	_, underJournald := os.LookupEnv("JOURNAL_STREAM")
+
+	rootLogger.SetFormatter(&ConsoleFormatter{
+		DisableTimestamp: underJournald,
+		TimestampFormat:  "15:04:05.000",
+		AppName:          name,
 	})
 	rootLogger.SetLevel(level)
 

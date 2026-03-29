@@ -165,5 +165,19 @@ func (s *Service) execPlaybook(verb types.RunnerVerb) error {
 		}
 	}
 
+	if verb == types.RunnerVerbStop {
+		err = s.invalidateVerbCache(types.RunnerVerbStart)
+		if err != nil {
+			s.GetLogger().WarnF("failed to invalidate start cache after stop: %s", err.Error())
+		}
+	}
+
+	if verb == types.RunnerVerbTeardown {
+		err = s.invalidateVerbCache(types.RunnerVerbProvision)
+		if err != nil {
+			s.GetLogger().WarnF("failed to invalidate provision cache after teardown: %s", err.Error())
+		}
+	}
+
 	return nil
 }

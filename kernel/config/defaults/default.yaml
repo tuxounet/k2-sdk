@@ -19,6 +19,8 @@ host:
         # redirect_param: "redirect"
   compute:
     enabled: true
+    cache:
+      ttl: 1440 # minutes (24 hours)
     containers:
       engine: podman
       port:

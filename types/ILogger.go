@@ -8,6 +8,7 @@ type ILogger interface {
 	Scope(name string, handler func(log ILogger) error) error
 	ScopeWithReturn(name string, handler func(log ILogger) (any, error)) (any, error)
 	GetBaseLogger() *logrus.Entry
+	SetLevel(level logrus.Level)
 	Trace(message string)
 	TraceF(format string, args ...interface{})
 	Debug(message string)

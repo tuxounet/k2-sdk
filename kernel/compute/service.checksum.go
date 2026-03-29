@@ -11,7 +11,15 @@ import (
 )
 
 const checksumCachePath = "etc/compute/checksums.json"
-const checksumTTL = 24 * time.Hour
+const defaultChecksumTTLMinutes = 1440 // 24 hours
+
+func (s *Service) getChecksumTTL() time.Duration {
+	ttlMinutes, err := s.getConfigService().GetAsIntOrDefault("host.compute.cache.ttl", defaultChecksumTTLMinutes)
+	if err != nil {
+		return time.Duration(defaultChecksumTTLMinutes) * time.Minute
+	}
+	return time.Duration(ttlMinutes) * time.Minute
+}
 
 func (s *Service) computePlaybookChecksum(verb types.RunnerVerb) (string, error) {
 	paths := s.getPathsService()
@@ -124,7 +132,8 @@ func (s *Service) shouldExecPlaybook(verb types.RunnerVerb, force bool) (bool, e
 	}
 
 	elapsed := time.Since(entry.ExecutedAt)
-	if elapsed > checksumTTL {
+	ttl := s.getChecksumTTL()
+	if elapsed > ttl {
 		s.GetLogger().DebugF("checksum TTL expired for %s (last run: %s ago), will execute", verb, elapsed.Round(time.Minute))
 		return true, nil
 	}
@@ -174,4 +183,20 @@ func (s *Service) nukeChecksumCache() error {
 
 	s.GetLogger().DebugF("checksum cache deleted after teardown")
 	return nil
+}
+
+func (s *Service) invalidateVerbCache(verb types.RunnerVerb) error {
+	cache, err := s.loadChecksumCache()
+	if err != nil {
+		return fmt.Errorf("failed to load checksum cache: %s", err.Error())
+	}
+
+	if _, exists := cache[string(verb)]; !exists {
+		return nil
+	}
+
+	delete(cache, string(verb))
+	s.GetLogger().DebugF("invalidated %s cache", verb)
+
+	return s.saveChecksumCache(cache)
 }

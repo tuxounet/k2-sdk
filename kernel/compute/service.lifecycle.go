@@ -185,11 +185,6 @@ func (s *Service) Stop() error {
 		return fmt.Errorf("stop phase failed: %s", err.Error())
 	}
 
-	err = s.execPlaybook(types.RunnerVerbTeardown)
-	if err != nil {
-		return fmt.Errorf("teardown phase failed: %s", err.Error())
-	}
-
 	return nil
 }
 

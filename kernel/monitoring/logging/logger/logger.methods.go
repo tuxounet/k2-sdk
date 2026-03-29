@@ -1,58 +1,51 @@
 package logger
 
+import "fmt"
+
 func (l *Logger) Trace(message string) {
-	l.log.Tracef("➡️  %s > %s", l.name, message)
+	l.log.Trace(message)
 }
 
 func (l *Logger) TraceF(format string, args ...interface{}) {
-	args = append([]interface{}{l.name}, args...)
-	l.log.Tracef("➡️  %s > "+format, args...)
+	l.log.Trace(fmt.Sprintf(format, args...))
 }
 
 func (l *Logger) Debug(message string) {
-	l.log.Debugf("▶️  %s > %s", l.name, message)
+	l.log.Debug(message)
 }
 
 func (l *Logger) DebugF(format string, args ...interface{}) {
-
-	args = append([]interface{}{l.name}, args...)
-	l.log.Debugf("▶️  %s > "+format, args...)
+	l.log.Debug(fmt.Sprintf(format, args...))
 }
 
 func (l *Logger) Info(message string) {
-	l.log.Infof("🌟 %s > %s", l.name, message)
+	l.log.Info(message)
 }
 
 func (l *Logger) InfoF(format string, args ...interface{}) {
-	args = append([]interface{}{l.name}, args...)
-	l.log.Infof("🌟 %s > "+format, args...)
-
+	l.log.Info(fmt.Sprintf(format, args...))
 }
 
 func (l *Logger) Warn(message string) {
-	l.log.Warnf("🫵  %s > %s", l.name, message)
+	l.log.Warn(message)
 }
 
 func (l *Logger) WarnF(format string, args ...interface{}) {
-	args = append([]interface{}{l.name}, args...)
-	l.log.Warnf("🫵  %s > "+format, args...)
-
+	l.log.Warn(fmt.Sprintf(format, args...))
 }
 
 func (l *Logger) Error(message string) {
-	l.log.Errorf("🛑 %s > %s", l.name, message)
+	l.log.Error(message)
 }
 
 func (l *Logger) ErrorF(format string, args ...interface{}) {
-	args = append([]interface{}{l.name}, args...)
-	l.log.Errorf("🛑 %s > "+format, args...)
+	l.log.Error(fmt.Sprintf(format, args...))
 }
 
 func (l *Logger) Panic(message string) {
-	l.log.Panicf("🔥 %s > %s", l.name, message)
+	l.log.Panic(message)
 }
 
 func (l *Logger) PanicF(format string, args ...interface{}) {
-	args = append([]interface{}{l.name}, args...)
-	l.log.Panicf("🔥 %s > "+format, args...)
+	l.log.Panic(fmt.Sprintf(format, args...))
 }

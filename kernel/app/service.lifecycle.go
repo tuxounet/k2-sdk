@@ -17,7 +17,6 @@ func (s *Service) Init() error {
 
 		compConf := component.GetConfig()
 		if compConf != nil {
-			s.GetLogger().TraceF("[INIT] init config for component %s", component.GetName())
 			err := s.getConfigService().LoadFromEmbedFS(fmt.Sprintf("%s/%s", app.GetName(), component.GetName()), "config", compConf)
 			if err != nil {
 				return fmt.Errorf("failed to get config for component %s: %s", component.GetName(), err.Error())
@@ -28,7 +27,6 @@ func (s *Service) Init() error {
 		controllers := component.GetControllers()
 
 		for _, ctrl := range controllers {
-			s.GetLogger().TraceF("[INIT] init controller %s", ctrl.GetName())
 			conf := ctrl.GetConfig()
 			if conf != nil {
 				err := s.getConfigService().LoadFromEmbedFS(fmt.Sprintf("%s/%s/%s", app.GetName(), component.GetName(), ctrl.GetName()), "config", conf)
@@ -62,7 +60,6 @@ func (s *Service) Init() error {
 	if err != nil {
 		return fmt.Errorf("failed to load env vars for host: %s", err.Error())
 	}
-	s.GetLogger().TraceF("[INIT] loaded env vars for app %s", app.GetName())
 
 	s.GetLogger().TraceF("[INIT] complete")
 	return nil
@@ -77,7 +74,6 @@ func (s *Service) Start() error {
 		controllers := component.GetControllers()
 
 		for _, ctrl := range controllers {
-			s.GetLogger().TraceF("[START] start controller %s", ctrl.GetName())
 			err := ctrl.Start()
 			if err != nil {
 				return fmt.Errorf("controller %s start failed: %w", ctrl.GetName(), err)
@@ -98,13 +94,12 @@ func (s *Service) Stop() error {
 		controllers := component.GetControllers()
 
 		for _, ctrl := range controllers {
-			s.GetLogger().TraceF("stop controller %s", ctrl.GetName())
 			err := ctrl.Stop()
 			if err != nil {
 				s.GetLogger().ErrorF("controller %s Stop failed: %s", ctrl.GetName(), err.Error())
 				return err
 			}
-			s.GetLogger().TraceF("stopped controller %s", ctrl.GetName())
+			s.GetLogger().TraceF("[STOP] stopped controller %s", ctrl.GetName())
 		}
 
 	}

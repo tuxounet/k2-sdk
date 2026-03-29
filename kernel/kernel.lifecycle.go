@@ -15,7 +15,6 @@ func (k *KernelRuntime) Init() error {
 	k.GetLogger().TraceF("[INIT]")
 
 	for _, service := range k.services {
-		k.GetLogger().TraceF("[INIT] init service %s", service)
 		err := k.GetService(service).Init()
 		if err != nil {
 			k.GetLogger().ErrorF("service %s init failed: %s", service, err.Error())
@@ -32,7 +31,6 @@ func (k *KernelRuntime) Register() error {
 	k.GetLogger().TraceF("[REGISTER]")
 
 	for _, key := range k.services {
-		k.GetLogger().TraceF("[REGISTER] registering service %s", key)
 		service := k.GetService(key)
 		err := service.Register()
 		if err != nil {
@@ -49,7 +47,6 @@ func (k *KernelRuntime) Start() error {
 	k.GetLogger().TraceF("[START]")
 
 	for _, key := range k.services {
-		k.GetLogger().TraceF("[START] start service %s", key)
 		service := k.GetService(key)
 		err := service.Start()
 		if err != nil {
@@ -67,7 +64,6 @@ func (k *KernelRuntime) Stop() error {
 	k.GetLogger().TraceF("[STOP]")
 
 	for _, key := range k.services {
-		k.GetLogger().TraceF("[STOP] stopping service %s", key)
 		service := k.GetService(key)
 		err := service.Stop()
 		if err != nil {

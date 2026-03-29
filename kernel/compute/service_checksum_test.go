@@ -280,3 +280,91 @@ func TestNukeChecksumCache(t *testing.T) {
 	require.NoError(t, err)
 	assert.Empty(t, cache)
 }
+
+func TestInvalidateVerbCache_RemovesSpecificVerb(t *testing.T) {
+	svc, tmpDir := newTestComputeService(t, true)
+	defer os.RemoveAll(tmpDir)
+
+	writeTestPlaybooks(t, svc)
+
+	// Mark both provision and start as executed
+	err := svc.markPlaybookExecuted(types.RunnerVerbProvision)
+	require.NoError(t, err)
+	err = svc.markPlaybookExecuted(types.RunnerVerbStart)
+	require.NoError(t, err)
+
+	// Verify both exist
+	cache, err := svc.loadChecksumCache()
+	require.NoError(t, err)
+	assert.Contains(t, cache, "provision")
+	assert.Contains(t, cache, "start")
+
+	// Invalidate start only
+	err = svc.invalidateVerbCache(types.RunnerVerbStart)
+	require.NoError(t, err)
+
+	// Verify start is gone but provision remains
+	cache, err = svc.loadChecksumCache()
+	require.NoError(t, err)
+	assert.Contains(t, cache, "provision")
+	assert.NotContains(t, cache, "start")
+}
+
+func TestInvalidateVerbCache_NonExistentVerbNoError(t *testing.T) {
+	svc, tmpDir := newTestComputeService(t, true)
+	defer os.RemoveAll(tmpDir)
+
+	// Invalidate a verb that was never cached — should be a no-op
+	err := svc.invalidateVerbCache(types.RunnerVerbStart)
+	require.NoError(t, err)
+}
+
+func TestInvalidateVerbCache_StopInvalidatesStart(t *testing.T) {
+	svc, tmpDir := newTestComputeService(t, true)
+	defer os.RemoveAll(tmpDir)
+
+	writeTestPlaybooks(t, svc)
+
+	// Simulate: start was previously executed and cached
+	err := svc.markPlaybookExecuted(types.RunnerVerbStart)
+	require.NoError(t, err)
+
+	// Verify start is cached (should skip)
+	should, err := svc.shouldExecPlaybook(types.RunnerVerbStart, false)
+	require.NoError(t, err)
+	assert.False(t, should, "start should be cached before stop")
+
+	// Simulate stop invalidation
+	err = svc.invalidateVerbCache(types.RunnerVerbStart)
+	require.NoError(t, err)
+
+	// Now start should need to execute again
+	should, err = svc.shouldExecPlaybook(types.RunnerVerbStart, false)
+	require.NoError(t, err)
+	assert.True(t, should, "start cache should be invalidated after stop")
+}
+
+func TestInvalidateVerbCache_TeardownInvalidatesProvision(t *testing.T) {
+	svc, tmpDir := newTestComputeService(t, true)
+	defer os.RemoveAll(tmpDir)
+
+	writeTestPlaybooks(t, svc)
+
+	// Simulate: provision was previously executed and cached
+	err := svc.markPlaybookExecuted(types.RunnerVerbProvision)
+	require.NoError(t, err)
+
+	// Verify provision is cached (should skip)
+	should, err := svc.shouldExecPlaybook(types.RunnerVerbProvision, false)
+	require.NoError(t, err)
+	assert.False(t, should, "provision should be cached before teardown")
+
+	// Simulate teardown invalidation
+	err = svc.invalidateVerbCache(types.RunnerVerbProvision)
+	require.NoError(t, err)
+
+	// Now provision should need to execute again
+	should, err = svc.shouldExecPlaybook(types.RunnerVerbProvision, false)
+	require.NoError(t, err)
+	assert.True(t, should, "provision cache should be invalidated after teardown")
+}
