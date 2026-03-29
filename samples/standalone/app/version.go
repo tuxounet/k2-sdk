@@ -1,6 +1,6 @@
 package app
 
 const (
-    AppName    = "StandaloneApp"
-    AppVersion = "v0.11"
+	AppName    = "StandaloneApp"
+	AppVersion = "v0.11"
 )

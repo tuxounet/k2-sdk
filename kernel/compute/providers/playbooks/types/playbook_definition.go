@@ -1,5 +1,7 @@
 package types
 
+import "embed"
+
 type PlaybookFileDefinition struct {
 	Content string `json:"content"`
 	Mode    string `json:"mode"`
@@ -13,4 +15,5 @@ type PlaybookDefinition struct {
 	Stop      string                            `json:"stop"`
 	Teardown  string                            `json:"teardown"`
 	Files     map[string]PlaybookFileDefinition `json:"files"`
+	RawFiles  *embed.FS
 }
