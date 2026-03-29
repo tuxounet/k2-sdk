@@ -74,12 +74,15 @@ func (p *Provider) Render() ([]computeTypes.RunnerDefinition, error) {
 func (p *Provider) renderPlaybookTasks(definition *types.PlaybookDefinition, verb computeTypes.RunnerVerb, script string) (string, error) {
 	fullPlaybookTasks := fmt.Sprintf("# [%d] Ansible Playbook %s of %s\n", definition.Order, verb, definition.Name)
 
-	if verb == computeTypes.RunnerVerbProvision && (len(definition.Files) > 0 || definition.RawFiles != nil) {
+	hasFiles := len(definition.Files) > 0 || definition.RawFiles != nil
+	if verb == computeTypes.RunnerVerbProvision && hasFiles {
 		filesTasks, err := p.renderPlaybookFilesProvision(definition)
 		if err != nil {
 			return "", err
 		}
 		fullPlaybookTasks += filesTasks
+	} else if hasFiles && script != "" {
+		fullPlaybookTasks += p.renderPlaybookFilesSetFact(definition)
 	}
 
 	fullPlaybookTasks += script
@@ -131,6 +134,21 @@ func isTextFile(path string) bool {
 	return textFileExtensions[ext]
 }
 
+func (p *Provider) renderPlaybookFilesSetFact(definition *types.PlaybookDefinition) string {
+	paths := p.getPathsService()
+	runDir := p.GetService().GetKernel().GetRunDirectory()
+	baseDir := paths.CominePath(runDir, "var", "compute", fmt.Sprintf("%d_%s", definition.Order, definition.Name))
+	filesDir := paths.CominePath(baseDir, "files")
+
+	varName := fmt.Sprintf("playbook_files_%s", p.sanitizeVarName(definition.Name))
+
+	tasks := fmt.Sprintf("- name: Set files path for %s\n", definition.Name)
+	tasks += "  set_fact:\n"
+	tasks += fmt.Sprintf("    %s: %s\n", varName, filesDir)
+
+	return tasks
+}
+
 func (p *Provider) renderPlaybookFilesProvision(definition *types.PlaybookDefinition) (string, error) {
 	paths := p.getPathsService()
 	runDir := p.GetService().GetKernel().GetRunDirectory()
@@ -138,13 +156,7 @@ func (p *Provider) renderPlaybookFilesProvision(definition *types.PlaybookDefini
 	filesDir := paths.CominePath(baseDir, "files")
 	templatesDir := paths.CominePath(baseDir, "templates")
 
-	varName := fmt.Sprintf("playbook_files_%s", p.sanitizeVarName(definition.Name))
-
-	tasks := ""
-
-	tasks += fmt.Sprintf("- name: Set files path for %s\n", definition.Name)
-	tasks += "  set_fact:\n"
-	tasks += fmt.Sprintf("    %s: %s\n", varName, filesDir)
+	tasks := p.renderPlaybookFilesSetFact(definition)
 
 	tasks += fmt.Sprintf("- name: Create files directory for %s\n", definition.Name)
 	tasks += "  file:\n"
