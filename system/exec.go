@@ -86,7 +86,7 @@ type cmdExecTail struct {
 func (c *cmdExecTail) Write(p []byte) (n int, err error) {
 	c.buffer = append(c.buffer, p...)
 	log := c.log.CreateSubLogger(c.stream)
-	log.Trace(string(p))
+	log.Debug(string(p))
 	return len(p), nil
 }
 
@@ -128,7 +128,7 @@ type cmdStartTail struct {
 
 func (c *cmdStartTail) Write(p []byte) (n int, err error) {
 	log := c.log.CreateSubLogger(c.stream)
-	log.Trace(string(p))
+	log.Debug(string(p))
 	return len(p), nil
 }
 
