@@ -12,23 +12,23 @@ import (
 )
 
 func (k *KernelRuntime) Init() error {
-	k.GetLogger().TraceF("[INIT]")
+	k.GetLogger().InfoF("[INIT] initializing...")
 
 	for _, service := range k.services {
 		err := k.GetService(service).Init()
 		if err != nil {
-			k.GetLogger().ErrorF("service %s init failed: %s", service, err.Error())
-			return err
+			k.GetLogger().ErrorF("[INIT] service %s init failed: %s", service, err.Error())
+			return fmt.Errorf("service %s init failed: %w", service, err)
 		}
 		k.GetLogger().TraceF("[INIT] inited service %s", service)
 	}
 
-	k.GetLogger().TraceF("[INIT] complete")
+	k.GetLogger().InfoF("[INIT] complete")
 	return nil
 }
 
 func (k *KernelRuntime) Register() error {
-	k.GetLogger().TraceF("[REGISTER]")
+	k.GetLogger().InfoF("[REGISTER] registering...")
 
 	for _, key := range k.services {
 		service := k.GetService(key)
@@ -39,12 +39,12 @@ func (k *KernelRuntime) Register() error {
 		k.GetLogger().TraceF("[REGISTER] registered service %s", key)
 	}
 
-	k.GetLogger().TraceF("[REGISTER] complete")
+	k.GetLogger().InfoF("[REGISTER] complete")
 	return nil
 }
 
 func (k *KernelRuntime) Start() error {
-	k.GetLogger().TraceF("[START]")
+	k.GetLogger().InfoF("[START] starting...")
 
 	for _, key := range k.services {
 		service := k.GetService(key)
@@ -56,23 +56,23 @@ func (k *KernelRuntime) Start() error {
 		k.GetLogger().TraceF("[START] started service %s", key)
 	}
 
-	k.GetLogger().TraceF("[START] complete")
+	k.GetLogger().InfoF("[START] complete")
 	return nil
 }
 
 func (k *KernelRuntime) Stop() error {
-	k.GetLogger().TraceF("[STOP]")
+	k.GetLogger().InfoF("[STOP] stopping...")
 
 	for _, key := range k.services {
 		service := k.GetService(key)
 		err := service.Stop()
 		if err != nil {
-			k.GetLogger().ErrorF("service %s Stop failed: %s", key, err.Error())
-			return err
+			k.GetLogger().ErrorF("[STOP] service %s stop failed: %s", key, err.Error())
+			return fmt.Errorf("service %s stop failed: %w", key, err)
 		}
 		k.GetLogger().TraceF("[STOP] stopped service %s", key)
 	}
-	k.GetLogger().TraceF("[STOP] complete")
+	k.GetLogger().InfoF("[STOP] complete")
 	return nil
 }
 
@@ -91,7 +91,7 @@ func (k *KernelRuntime) ListenAndServe() error {
 	k.log.InfoF("[LISTEN] Kernel Running...")
 	err := ingressHttpService.Listen()
 	if err != nil {
-		return fmt.Errorf("ingress service listen failed: %s", err.Error())
+		return fmt.Errorf("ingress service listen failed: %w", err)
 	}
 
 	<-signalChan

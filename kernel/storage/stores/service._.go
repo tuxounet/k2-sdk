@@ -1,6 +1,8 @@
 package stores
 
 import (
+	"fmt"
+
 	runtimeBases "github.com/tuxounet/k2-sdk/bases"
 
 	storesTypes "github.com/tuxounet/k2-sdk/kernel/storage/stores/types"
@@ -47,14 +49,14 @@ func (c *Service) GetStore(name string) (*storesTypes.Store, error) {
 	if found != nil {
 		backends, err := c.GetBackends()
 		if err != nil {
-			c.GetLogger().ErrorF("Failed to get backends %s", err.Error())
-			return nil, err
+			c.GetLogger().ErrorF("failed to get backends for store %s: %s", name, err.Error())
+			return nil, fmt.Errorf("storage: failed to get backends for store %s: %w", name, err)
 		}
 
 		err = found.ResolveBackend(backends)
 		if err != nil {
-			c.GetLogger().ErrorF("Failed to resolve backend %s", err.Error())
-			return nil, err
+			c.GetLogger().ErrorF("failed to resolve backend for store %s: %s", name, err.Error())
+			return nil, fmt.Errorf("storage: failed to resolve backend for store %s: %w", name, err)
 		}
 		return found, nil
 	}

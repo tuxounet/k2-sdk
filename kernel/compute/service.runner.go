@@ -29,7 +29,7 @@ func (s *Service) renderProvisionRunners() error {
 
 	err := s.renderPlaybook(verb, tasks)
 	if err != nil {
-		return fmt.Errorf("failed to render %s playbook : %s", verb, err.Error())
+		return fmt.Errorf("failed to render %s playbook: %w", verb, err)
 	}
 
 	return nil
@@ -50,7 +50,7 @@ func (s *Service) renderStartRunners() error {
 
 	err := s.renderPlaybook(verb, tasks)
 	if err != nil {
-		return fmt.Errorf("failed to render %s playbook : %s", verb, err.Error())
+		return fmt.Errorf("failed to render %s playbook: %w", verb, err)
 	}
 
 	return nil
@@ -70,7 +70,7 @@ func (s *Service) renderStopRunners() error {
 
 	err := s.renderPlaybook(verb, tasks)
 	if err != nil {
-		return fmt.Errorf("failed to render %s playbook : %s", verb, err.Error())
+		return fmt.Errorf("failed to render %s playbook: %w", verb, err)
 	}
 
 	return nil
@@ -91,7 +91,7 @@ func (s *Service) renderTeardownRunners() error {
 
 	err := s.renderPlaybook(verb, tasks)
 	if err != nil {
-		return fmt.Errorf("failed to render %s playbook : %s", verb, err.Error())
+		return fmt.Errorf("failed to render %s playbook: %w", verb, err)
 	}
 	return nil
 }
@@ -117,12 +117,12 @@ func (s *Service) renderPlaybook(verb types.RunnerVerb, tasks string) error {
 	targetPlaybookFileName := paths.CominePath("etc", "compute", fmt.Sprintf("%s.yaml", verb))
 	rootStore, err := s.getRootStore()
 	if err != nil {
-		return fmt.Errorf("failed to retrieve root store : %s", err.Error())
+		return fmt.Errorf("failed to retrieve root store: %w", err)
 
 	}
 	err = rootStore.WriteObject(targetPlaybookFileName, []byte(playbook))
 	if err != nil {
-		return fmt.Errorf("failed to wrte %s playbook : %s", verb, err.Error())
+		return fmt.Errorf("failed to write %s playbook: %w", verb, err)
 
 	}
 	return nil
@@ -135,10 +135,16 @@ func (s *Service) execPlaybook(verb types.RunnerVerb) error {
 
 	shouldExec, err := s.shouldExecPlaybook(verb, force)
 	if err != nil {
-		return fmt.Errorf("failed to check playbook cache for %s: %s", verb, err.Error())
+		return fmt.Errorf("failed to check playbook cache for %s: %w", verb, err)
 	}
 	if !shouldExec {
 		return nil
+	}
+
+	// Invalidate cache immediately before execution starts
+	err = s.invalidateVerbCache(verb)
+	if err != nil {
+		s.GetLogger().WarnF("failed to invalidate %s cache before execution: %s", verb, err.Error())
 	}
 
 	paths := s.getPathsService()
@@ -150,7 +156,7 @@ func (s *Service) execPlaybook(verb types.RunnerVerb) error {
 
 	_, err = system.OsExecAndTailToLog(cmdCall)
 	if err != nil {
-		return fmt.Errorf("failed to exec %s: %s", verb, err.Error())
+		return fmt.Errorf("failed to exec %s playbook: %w", verb, err)
 	}
 
 	err = s.markPlaybookExecuted(verb)

@@ -33,11 +33,11 @@ func HostProvisionOnly(app types.IApp) {
 
 	err := kernelRuntime.Init()
 	if err != nil {
-		kernelRuntime.GetLogger().PanicF("kernel init failed: %s", err.Error())
+		kernelRuntime.GetLogger().PanicF("[provision-only] kernel init failed: %s", err.Error())
 	}
 	err = kernelRuntime.Register()
 	if err != nil {
-		kernelRuntime.GetLogger().PanicF("kernel register failed: %s", err.Error())
+		kernelRuntime.GetLogger().PanicF("[provision-only] kernel register failed: %s", err.Error())
 	}
 
 	doProvisionOnly(kernelRuntime)
@@ -49,11 +49,11 @@ func HostTeardownOnly(app types.IApp) {
 
 	err := kernelRuntime.Init()
 	if err != nil {
-		kernelRuntime.GetLogger().PanicF("kernel init failed: %s", err.Error())
+		kernelRuntime.GetLogger().PanicF("[teardown-only] kernel init failed: %s", err.Error())
 	}
 	err = kernelRuntime.Register()
 	if err != nil {
-		kernelRuntime.GetLogger().PanicF("kernel register failed: %s", err.Error())
+		kernelRuntime.GetLogger().PanicF("[teardown-only] kernel register failed: %s", err.Error())
 	}
 
 	doTeardownOnly(kernelRuntime)
@@ -80,12 +80,12 @@ func hasFlag(flag string) bool {
 func doRun(rt *kernel.KernelRuntime) {
 	err := rt.Init()
 	if err != nil {
-		rt.GetLogger().PanicF("kernel init failed: %s", err.Error())
+		rt.GetLogger().PanicF("[run] kernel init failed: %s", err.Error())
 	}
 
 	err = rt.Register()
 	if err != nil {
-		rt.GetLogger().PanicF("kernel register failed: %s", err.Error())
+		rt.GetLogger().PanicF("[run] kernel register failed: %s", err.Error())
 	}
 
 	if hasFlag("--provision-only") {
@@ -100,11 +100,11 @@ func doRun(rt *kernel.KernelRuntime) {
 
 	err = rt.Start()
 	if err != nil {
-		rt.GetLogger().PanicF("kernel start failed: %s", err.Error())
+		rt.GetLogger().PanicF("[run] kernel start failed: %s", err.Error())
 	}
 	err = rt.ListenAndServe()
 	if err != nil {
-		rt.GetLogger().PanicF("kernel listenAndServe failed: %s", err.Error())
+		rt.GetLogger().PanicF("[run] kernel listenAndServe failed: %s", err.Error())
 	}
 
 }
@@ -114,7 +114,7 @@ func doProvisionOnly(rt *kernel.KernelRuntime) {
 
 	err := computeService.ExecVerb(computeTypes.RunnerVerbProvision)
 	if err != nil {
-		rt.GetLogger().PanicF("provision failed: %s", err.Error())
+		rt.GetLogger().PanicF("[provision-only] provision verb failed: %s", err.Error())
 	}
 
 	rt.GetLogger().InfoF("provision completed successfully")
@@ -130,7 +130,7 @@ func doTeardownOnly(rt *kernel.KernelRuntime) {
 
 	err = computeService.ExecVerb(computeTypes.RunnerVerbTeardown)
 	if err != nil {
-		rt.GetLogger().PanicF("teardown failed: %s", err.Error())
+		rt.GetLogger().PanicF("[teardown-only] teardown verb failed: %s", err.Error())
 	}
 
 	rt.GetLogger().InfoF("teardown completed successfully")

@@ -2,6 +2,7 @@ package logger
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/tuxounet/k2-sdk/kernel/monitoring/logging/logger/hooks"
@@ -63,8 +64,8 @@ func (l *Logger) Scope(name string, handler func(log types.ILogger) error) error
 	err := handler(log)
 	if err != nil {
 
-		log.ErrorF("FAULTED: %s", name, err.Error())
-		return err
+		log.ErrorF("scope %s faulted: %s", name, err.Error())
+		return fmt.Errorf("scope %s: %w", name, err)
 	}
 
 	log.TraceF("END")
@@ -81,8 +82,8 @@ func (l *Logger) ScopeWithReturn(name string, handler func(log types.ILogger) (a
 	ret, err := handler(log)
 	if err != nil {
 
-		log.ErrorF("FAULTED: %s", name, err.Error())
-		return nil, err
+		log.ErrorF("scope %s faulted: %s", name, err.Error())
+		return nil, fmt.Errorf("scope %s: %w", name, err)
 	}
 
 	log.TraceF("END")

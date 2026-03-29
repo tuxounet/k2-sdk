@@ -98,7 +98,9 @@ func TestLogger_Scope_Error(t *testing.T) {
 		return errors.New("test error")
 	})
 	assert.Error(t, err)
-	assert.Equal(t, "test error", err.Error())
+	assert.Contains(t, err.Error(), "test error")
+	assert.Contains(t, err.Error(), "scope scoped")
+	assert.ErrorIs(t, err, errors.Unwrap(err))
 }
 
 func TestLogger_ScopeWithReturn_Success(t *testing.T) {

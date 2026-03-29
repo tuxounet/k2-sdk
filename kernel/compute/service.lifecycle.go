@@ -13,7 +13,7 @@ import (
 func (s *Service) Init() error {
 	enabled, err := s.isEnabled()
 	if err != nil {
-		return fmt.Errorf("unable to check compute service enabled status: %s", err.Error())
+		return fmt.Errorf("unable to check compute service enabled status: %w", err)
 	}
 	if !enabled {
 		s.GetLogger().DebugF("compute service is disabled")
@@ -30,12 +30,13 @@ func (s *Service) Init() error {
 	for _, p := range providers {
 		err := p.Init()
 		if err != nil {
-			s.GetLogger().ErrorF("[INIT] nuke failed: %s", err)
-			return err
+			s.GetLogger().ErrorF("[INIT] provider %s init failed: %s", p.GetName(), err.Error())
+			return fmt.Errorf("provider %s init failed: %w", p.GetName(), err)
 		}
 	}
 
 	s.setProviders(providers)
+	s.GetLogger().InfoF("[INIT] compute service initialized (%d providers)", len(providers))
 
 	return nil
 }
@@ -43,17 +44,17 @@ func (s *Service) Init() error {
 func (s *Service) Register() error {
 	err := s.nukeInventory()
 	if err != nil {
-		s.GetLogger().ErrorF("nuke inventory failed: %s", err)
-		return err
+		s.GetLogger().ErrorF("[REGISTER] nuke inventory failed: %s", err)
+		return fmt.Errorf("nuke inventory failed: %w", err)
 	}
 	err = s.renderInventory()
 	if err != nil {
-		return fmt.Errorf("failed to render inventory: %s ", err.Error())
+		return fmt.Errorf("failed to render inventory: %w", err)
 	}
 
 	enabled, err := s.isEnabled()
 	if err != nil {
-		return fmt.Errorf("unable to check compute service enabled status: %s", err.Error())
+		return fmt.Errorf("unable to check compute service enabled status: %w", err)
 	}
 	if !enabled {
 		s.GetLogger().DebugF("compute service is disabled")
@@ -64,7 +65,7 @@ func (s *Service) Register() error {
 
 	err = s.resetRunners()
 	if err != nil {
-		return fmt.Errorf("unable ot reset runners collection : %s", err.Error())
+		return fmt.Errorf("unable to reset runners collection: %w", err)
 	}
 
 	allRunners := make([]types.RunnerDefinition, 0)
@@ -72,8 +73,8 @@ func (s *Service) Register() error {
 		runners, err := p.Render()
 
 		if err != nil {
-			s.GetLogger().ErrorF("provider %s render failed: %s", p.GetName(), err)
-			return err
+			s.GetLogger().ErrorF("[REGISTER] provider %s render failed: %s", p.GetName(), err)
+			return fmt.Errorf("provider %s render failed: %w", p.GetName(), err)
 		}
 		allRunners = append(allRunners, runners...)
 	}
@@ -88,29 +89,29 @@ func (s *Service) Register() error {
 
 		err = provider.Setup()
 		if err != nil {
-			s.GetLogger().ErrorF("provider %s setup failed: %s", provider.GetName(), err)
-			return err
+			s.GetLogger().ErrorF("[REGISTER] provider %s setup failed: %s", provider.GetName(), err)
+			return fmt.Errorf("provider %s setup failed: %w", provider.GetName(), err)
 		}
 	}
 
 	err = s.renderProvisionRunners()
 	if err != nil {
-		return fmt.Errorf("failed to render provision playbook from rendered runners: %s ", err.Error())
+		return fmt.Errorf("failed to render provision playbook: %w", err)
 	}
 	err = s.renderStartRunners()
 	if err != nil {
-		return fmt.Errorf("failed to render start playbook from rendered runners: %s ", err.Error())
+		return fmt.Errorf("failed to render start playbook: %w", err)
 	}
 	err = s.renderStopRunners()
 	if err != nil {
-		return fmt.Errorf("failed to render stop playbook from rendered runners: %s ", err.Error())
+		return fmt.Errorf("failed to render stop playbook: %w", err)
 	}
 	err = s.renderTeardownRunners()
 	if err != nil {
-		return fmt.Errorf("failed to render teardown playbook from rendered runners: %s ", err.Error())
+		return fmt.Errorf("failed to render teardown playbook: %w", err)
 	}
 
-	s.GetLogger().TraceF("end register")
+	s.GetLogger().InfoF("[REGISTER] compute registered (%d runners)", len(allRunners))
 
 	return nil
 }
@@ -118,7 +119,7 @@ func (s *Service) Register() error {
 func (s *Service) Start() error {
 	enabled, err := s.isEnabled()
 	if err != nil {
-		return fmt.Errorf("unable to check compute service enabled status: %s", err.Error())
+		return fmt.Errorf("unable to check compute service enabled status: %w", err)
 	}
 	if !enabled {
 		s.GetLogger().DebugF("compute service is disabled")
@@ -133,12 +134,12 @@ func (s *Service) Start() error {
 
 	err = s.execPlaybook(types.RunnerVerbProvision)
 	if err != nil {
-		return fmt.Errorf("provision phase failed: %s", err.Error())
+		return fmt.Errorf("compute provision phase failed: %w", err)
 	}
 
 	err = s.execPlaybook(types.RunnerVerbStart)
 	if err != nil {
-		return fmt.Errorf("start phase failed: %s", err.Error())
+		return fmt.Errorf("compute start phase failed: %w", err)
 	}
 
 	requiredProviders := s.getRequiredProviders()
@@ -146,10 +147,12 @@ func (s *Service) Start() error {
 
 		err = provider.Start()
 		if err != nil {
-			s.GetLogger().ErrorF("provider %s setup failed: %s", provider.GetName(), err)
-			return err
+			s.GetLogger().ErrorF("[START] provider %s start failed: %s", provider.GetName(), err)
+			return fmt.Errorf("provider %s start failed: %w", provider.GetName(), err)
 		}
 	}
+
+	s.GetLogger().InfoF("[START] compute started")
 
 	return nil
 }
@@ -157,7 +160,7 @@ func (s *Service) Start() error {
 func (s *Service) Stop() error {
 	enabled, err := s.isEnabled()
 	if err != nil {
-		return fmt.Errorf("unable to check compute service enabled status: %s", err.Error())
+		return fmt.Errorf("unable to check compute service enabled status: %w", err)
 	}
 	if !enabled {
 		s.GetLogger().DebugF("compute service is disabled")
@@ -168,8 +171,8 @@ func (s *Service) Stop() error {
 	for _, provider := range requiredProviders {
 		err = provider.Stop()
 		if err != nil {
-			s.GetLogger().ErrorF("provider %s setup failed: %s", provider.GetName(), err)
-			return err
+			s.GetLogger().ErrorF("[STOP] provider %s stop failed: %s", provider.GetName(), err)
+			return fmt.Errorf("provider %s stop failed: %w", provider.GetName(), err)
 		}
 	}
 
@@ -182,7 +185,7 @@ func (s *Service) Stop() error {
 	s.GetLogger().TraceF("begin stop")
 	err = s.execPlaybook(types.RunnerVerbStop)
 	if err != nil {
-		return fmt.Errorf("stop phase failed: %s", err.Error())
+		return fmt.Errorf("compute stop phase failed: %w", err)
 	}
 
 	return nil
@@ -221,7 +224,7 @@ func (s *Service) getRequiredProviders() []types.IBasePlateformProvider {
 func (s *Service) ExecVerb(verb types.RunnerVerb) error {
 	enabled, err := s.isEnabled()
 	if err != nil {
-		return fmt.Errorf("unable to check compute service enabled status: %s", err.Error())
+		return fmt.Errorf("unable to check compute service enabled status: %w", err)
 	}
 	if !enabled {
 		s.GetLogger().DebugF("compute service is disabled")

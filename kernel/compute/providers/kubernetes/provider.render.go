@@ -99,30 +99,30 @@ func (p *Provider) Render() ([]computeTypes.RunnerDefinition, error) {
 				if ing.ServiceNamespace == "" {
 					ing.ServiceNamespace, err = configService.GetAsStringOrDefault("host.compute.kubernetes.ingress.serviceNamespace", "kube-system")
 					if err != nil {
-						return nil, fmt.Errorf("failed to get ingress service namespace: %s", err)
+						return nil, fmt.Errorf("failed to get ingress service namespace: %w", err)
 					}
 				}
 				if ing.ServiceName == "" {
 					ing.ServiceName, err = configService.GetAsStringOrDefault("host.compute.kubernetes.ingress.serviceName", "traefik")
 					if err != nil {
-						return nil, fmt.Errorf("failed to get ingress service name: %s", err)
+						return nil, fmt.Errorf("failed to get ingress service name: %w", err)
 					}
 				}
 				if ing.ServicePort == 0 {
 					ing.ServicePort, err = configService.GetAsIntOrDefault("host.compute.kubernetes.ingress.servicePort", 8000)
 					if err != nil {
-						return nil, fmt.Errorf("failed to get ingress service port: %s", err)
+						return nil, fmt.Errorf("failed to get ingress service port: %w", err)
 					}
 				}
 
 				localPort, err := p.allocateIngressPort(ing.IngressPath, ing.ServiceNamespace, ing.ServiceName, ing.ServicePort)
 				if err != nil {
-					return nil, fmt.Errorf("failed to allocate local port: %s", err)
+					return nil, fmt.Errorf("failed to allocate local port: %w", err)
 				}
 
 				customHandler, err := p.getIngressHandler(localPort)
 				if err != nil {
-					return nil, fmt.Errorf("failed to get ingress handler: %s", err)
+					return nil, fmt.Errorf("failed to get ingress handler: %w", err)
 				}
 
 				ingressDef := &ingressTypes.IngressDefinition{
@@ -138,7 +138,7 @@ func (p *Provider) Render() ([]computeTypes.RunnerDefinition, error) {
 
 				err = ingressRegistar(ingressDef)
 				if err != nil {
-					return nil, fmt.Errorf("failed to get ingress port: %s", err)
+					return nil, fmt.Errorf("failed to get ingress port: %w", err)
 				}
 			}
 
@@ -148,7 +148,7 @@ func (p *Provider) Render() ([]computeTypes.RunnerDefinition, error) {
 			for _, port := range definition.Ports {
 				err := p.allocateLocalPort(port.LocalPort, port.ServiceNamespace, port.ServiceName, port.ServicePort)
 				if err != nil {
-					return nil, fmt.Errorf("failed to allocate local port: %s", err)
+					return nil, fmt.Errorf("failed to allocate local port: %w", err)
 				}
 
 			}
@@ -176,7 +176,7 @@ func (p *Provider) renderPlaybookProvider(script string) (string, error) {
 
 	untemplated, err := system.UnTemplateWithGoTemplate(script, values)
 	if err != nil {
-		return "", fmt.Errorf("failed to untemplate script: %s", err)
+		return "", fmt.Errorf("failed to untemplate script: %w", err)
 	}
 	fullPlaybookProvider += untemplated
 
@@ -191,13 +191,13 @@ func (p *Provider) renderPlaybookTasks(definition *types.NamespaceDefinition, sc
 
 	entries, err := walkTemplates(definition.Templates)
 	if err != nil {
-		return "", fmt.Errorf("failed to walk templates: %s", err)
+		return "", fmt.Errorf("failed to walk templates: %w", err)
 	}
 	values["templates"] = entries
 
 	untemplated, err := system.UnTemplateWithGoTemplate(script, values)
 	if err != nil {
-		return "", fmt.Errorf("failed to untemplate script: %s", err)
+		return "", fmt.Errorf("failed to untemplate script: %w", err)
 	}
 	fullPlaybookTasks += untemplated
 
@@ -228,7 +228,7 @@ func walkTemplates(fs *embed.FS) (map[string]any, error) {
 				}
 				tpl, err := system.LoadYamlFromString[any](string(content))
 				if err != nil {
-					return fmt.Errorf("failed to load yaml from string: %s", err)
+					return fmt.Errorf("failed to load yaml from string: %w", err)
 				}
 
 				templates[filepath.Join(dir, fullPath)] = tpl
@@ -238,7 +238,7 @@ func walkTemplates(fs *embed.FS) (map[string]any, error) {
 	}
 
 	if err := readDirRecursive("."); err != nil {
-		return nil, fmt.Errorf("failed to read templates: %s", err)
+		return nil, fmt.Errorf("failed to read templates: %w", err)
 	}
 
 	return templates, nil
@@ -282,7 +282,7 @@ func (p *Provider) allocateIngressPort(ingressPath string, serviceNamespace stri
 
 	err = p.getPortsForwardsStore().SetValue(allRecords)
 	if err != nil {
-		p.GetLogger().ErrorF("Failed to write portmaps: %s", err)
+		p.GetLogger().ErrorF("Failed to write portmaps: %w", err)
 		return -1, err
 	}
 
@@ -320,7 +320,7 @@ func (p *Provider) allocateLocalPort(localPort int, serviceNamespace string, ser
 
 	err = p.getPortsForwardsStore().SetValue(allRecords)
 	if err != nil {
-		p.GetLogger().ErrorF("Failed to write portmaps: %s", err)
+		p.GetLogger().ErrorF("Failed to write portmaps: %w", err)
 		return err
 	}
 
@@ -356,7 +356,7 @@ func (p *Provider) getIngressHandler(localPort int) (gin.HandlerFunc, error) {
 				if !forwarder.IsReady() {
 					err = forwarder.Mount()
 					if err != nil {
-						p.GetLogger().ErrorF("Failed to mount forwarder: %s", err)
+						p.GetLogger().ErrorF("Failed to mount forwarder: %w", err)
 						c.Status(http.StatusBadGateway)
 						return
 					}
@@ -364,7 +364,7 @@ func (p *Provider) getIngressHandler(localPort int) (gin.HandlerFunc, error) {
 
 				err = forwarder.ForwardRequest(c)
 				if err != nil {
-					p.GetLogger().ErrorF("Failed to forward request: %s", err)
+					p.GetLogger().ErrorF("Failed to forward request: %w", err)
 					c.Status(500)
 					return
 				}

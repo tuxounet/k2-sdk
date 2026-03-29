@@ -69,7 +69,7 @@ func NewKernelRuntime(hostedApp types.IApp, hostVersion string, unsecure bool) *
 		panic(err)
 	}
 	kernel.log = loggingService.GetRootLogger()
-	kernel.log.TraceF("[BOOT] %s %s created", kernel.hostName, kernel.hostVersion)
+	kernel.log.InfoF("[BOOT] %s %s", kernel.hostName, kernel.hostVersion)
 
 	servicesCreateList := [](func(types.IKernel) types.IKernelService){
 		paths.NewService,
@@ -97,6 +97,6 @@ func NewKernelRuntime(hostedApp types.IApp, hostVersion string, unsecure bool) *
 		}
 	}
 	kernel.services = serviceList
-	kernel.log.TraceF("[BOOT] complete")
+	kernel.log.InfoF("[BOOT] kernel ready (%d services)", len(serviceList))
 	return kernel
 }

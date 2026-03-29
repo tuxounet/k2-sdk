@@ -1,6 +1,7 @@
 package profile
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/tuxounet/k2-sdk/kernel/profile/bases"
@@ -19,12 +20,12 @@ func (c *ProfileService) Init() error {
 
 			err = c.writeProfile(profile)
 			if err != nil {
-				c.GetLogger().ErrorF("Failed to write profile: %s", err.Error())
-				return err
+				c.GetLogger().ErrorF("failed to write initial profile: %s", err.Error())
+				return fmt.Errorf("profile: failed to write initial profile: %w", err)
 			}
 		} else {
-			c.GetLogger().ErrorF("Failed to read profile: %s", err.Error())
-			return err
+			c.GetLogger().ErrorF("failed to read profile: %s", err.Error())
+			return fmt.Errorf("profile: failed to read profile: %w", err)
 		}
 	}
 
@@ -33,8 +34,8 @@ func (c *ProfileService) Init() error {
 
 	err = c.writeProfile(profile)
 	if err != nil {
-		c.GetLogger().ErrorF("Failed to write profile: %s", err.Error())
-		return err
+		c.GetLogger().ErrorF("failed to write profile: %s", err.Error())
+		return fmt.Errorf("profile: failed to write profile: %w", err)
 	}
 
 	return nil

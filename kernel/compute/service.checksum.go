@@ -27,18 +27,18 @@ func (s *Service) computePlaybookChecksum(verb types.RunnerVerb) (string, error)
 
 	rootStore, err := s.getRootStore()
 	if err != nil {
-		return "", fmt.Errorf("failed to get root store: %s", err.Error())
+		return "", fmt.Errorf("failed to get root store: %w", err)
 	}
 
 	playbookContent, err := rootStore.ReadObject(playbookPath)
 	if err != nil {
-		return "", fmt.Errorf("failed to read playbook %s: %s", verb, err.Error())
+		return "", fmt.Errorf("failed to read playbook %s: %w", verb, err)
 	}
 
 	configMap := s.getConfigService().GetCurrent()
 	configBytes, err := json.Marshal(configMap)
 	if err != nil {
-		return "", fmt.Errorf("failed to serialize config: %s", err.Error())
+		return "", fmt.Errorf("failed to serialize config: %w", err)
 	}
 
 	hasher := sha256.New()
@@ -52,12 +52,12 @@ func (s *Service) computePlaybookChecksum(verb types.RunnerVerb) (string, error)
 func (s *Service) loadChecksumCache() (types.ChecksumCache, error) {
 	rootStore, err := s.getRootStore()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get root store: %s", err.Error())
+		return nil, fmt.Errorf("failed to get root store: %w", err)
 	}
 
 	exists, err := rootStore.Exists(checksumCachePath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to check checksum cache existence: %s", err.Error())
+		return nil, fmt.Errorf("failed to check checksum cache existence: %w", err)
 	}
 	if !exists {
 		return make(types.ChecksumCache), nil
@@ -65,7 +65,7 @@ func (s *Service) loadChecksumCache() (types.ChecksumCache, error) {
 
 	data, err := rootStore.ReadObject(checksumCachePath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read checksum cache: %s", err.Error())
+		return nil, fmt.Errorf("failed to read checksum cache: %w", err)
 	}
 
 	var cache types.ChecksumCache
@@ -81,17 +81,17 @@ func (s *Service) loadChecksumCache() (types.ChecksumCache, error) {
 func (s *Service) saveChecksumCache(cache types.ChecksumCache) error {
 	rootStore, err := s.getRootStore()
 	if err != nil {
-		return fmt.Errorf("failed to get root store: %s", err.Error())
+		return fmt.Errorf("failed to get root store: %w", err)
 	}
 
 	data, err := json.Marshal(cache)
 	if err != nil {
-		return fmt.Errorf("failed to serialize checksum cache: %s", err.Error())
+		return fmt.Errorf("failed to serialize checksum cache: %w", err)
 	}
 
 	err = rootStore.WriteObject(checksumCachePath, data)
 	if err != nil {
-		return fmt.Errorf("failed to write checksum cache: %s", err.Error())
+		return fmt.Errorf("failed to write checksum cache: %w", err)
 	}
 
 	return nil
@@ -145,7 +145,7 @@ func (s *Service) shouldExecPlaybook(verb types.RunnerVerb, force bool) (bool, e
 func (s *Service) markPlaybookExecuted(verb types.RunnerVerb) error {
 	currentChecksum, err := s.computePlaybookChecksum(verb)
 	if err != nil {
-		return fmt.Errorf("failed to compute checksum for %s: %s", verb, err.Error())
+		return fmt.Errorf("failed to compute checksum for %s: %w", verb, err)
 	}
 
 	cache, err := s.loadChecksumCache()
@@ -165,12 +165,12 @@ func (s *Service) markPlaybookExecuted(verb types.RunnerVerb) error {
 func (s *Service) nukeChecksumCache() error {
 	rootStore, err := s.getRootStore()
 	if err != nil {
-		return fmt.Errorf("failed to get root store: %s", err.Error())
+		return fmt.Errorf("failed to get root store: %w", err)
 	}
 
 	exists, err := rootStore.Exists(checksumCachePath)
 	if err != nil {
-		return fmt.Errorf("failed to check checksum cache existence: %s", err.Error())
+		return fmt.Errorf("failed to check checksum cache existence: %w", err)
 	}
 	if !exists {
 		return nil
@@ -178,7 +178,7 @@ func (s *Service) nukeChecksumCache() error {
 
 	err = rootStore.DeleteObject(checksumCachePath)
 	if err != nil {
-		return fmt.Errorf("failed to delete checksum cache: %s", err.Error())
+		return fmt.Errorf("failed to delete checksum cache: %w", err)
 	}
 
 	s.GetLogger().DebugF("checksum cache deleted after teardown")
@@ -188,7 +188,7 @@ func (s *Service) nukeChecksumCache() error {
 func (s *Service) invalidateVerbCache(verb types.RunnerVerb) error {
 	cache, err := s.loadChecksumCache()
 	if err != nil {
-		return fmt.Errorf("failed to load checksum cache: %s", err.Error())
+		return fmt.Errorf("failed to load checksum cache: %w", err)
 	}
 
 	if _, exists := cache[string(verb)]; !exists {

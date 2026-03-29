@@ -181,7 +181,7 @@ func (p *Provider) renderPlaybookFilesProvision(definition *types.PlaybookDefini
 			return nil
 		})
 		if err != nil {
-			return "", fmt.Errorf("failed to walk embedded files for %s: %s", definition.Name, err.Error())
+			return "", fmt.Errorf("failed to walk embedded files for %s: %w", definition.Name, err)
 		}
 	}
 
@@ -288,7 +288,7 @@ func (p *Provider) renderPlaybookFilesProvision(definition *types.PlaybookDefini
 			return nil
 		})
 		if err != nil {
-			return "", fmt.Errorf("failed to process embedded files for %s: %s", definition.Name, err.Error())
+			return "", fmt.Errorf("failed to process embedded files for %s: %w", definition.Name, err)
 		}
 	}
 

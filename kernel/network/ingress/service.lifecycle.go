@@ -43,14 +43,14 @@ func (s *Service) Register() error {
 
 	rootUrl, err := configService.GetAsString("host.ingress.root")
 	if err != nil {
-		s.GetLogger().ErrorF("Failed to get rootUrl: %s", err.Error())
-		return err
+		s.GetLogger().ErrorF("[REGISTER] failed to get rootUrl: %s", err.Error())
+		return fmt.Errorf("ingress: failed to get rootUrl config: %w", err)
 	}
 
 	rootUri, err := url.Parse(rootUrl)
 	if err != nil {
-		s.GetLogger().ErrorF("Failed to parse rootUrl: %s", err.Error())
-		return err
+		s.GetLogger().ErrorF("[REGISTER] failed to parse rootUrl %s: %s", rootUrl, err.Error())
+		return fmt.Errorf("ingress: failed to parse rootUrl %s: %w", rootUrl, err)
 	}
 
 	kernel := s.GetKernel()
@@ -63,8 +63,8 @@ func (s *Service) Register() error {
 
 	rootAccessPolicy, err := configService.GetAsStringOrDefault("host.ingress.auth.default_access", "public")
 	if err != nil {
-		s.GetLogger().ErrorF("Failed to get rootAccessPolicy: %s", err.Error())
-		return err
+		s.GetLogger().ErrorF("[REGISTER] failed to get rootAccessPolicy: %s", err.Error())
+		return fmt.Errorf("ingress: failed to get rootAccessPolicy: %w", err)
 	}
 	rootAccessPolicyTyped := runtimeTypes.AccessPolicyPublic
 	if rootAccessPolicy == "authenticated" {
@@ -84,8 +84,8 @@ func (s *Service) Register() error {
 	if appUi != nil {
 		err := cdn.Register(s, router)
 		if err != nil {
-			s.GetLogger().ErrorF("Failed to register cdn for app %s: %s", app.GetName(), err.Error())
-			return err
+			s.GetLogger().ErrorF("[REGISTER] failed to register cdn for app %s: %s", app.GetName(), err.Error())
+			return fmt.Errorf("ingress: failed to register cdn for app %s: %w", app.GetName(), err)
 		}
 		authMap[baseUrl+"cdn/"] = rootAccessPolicyTyped
 
@@ -123,8 +123,8 @@ func (s *Service) Register() error {
 
 			err := ctrl.Register(controllerRouter)
 			if err != nil {
-				s.GetLogger().ErrorF("controller %s in component %s register failed: %s", ctrl.GetName(), component.GetName(), err.Error())
-				return err
+				s.GetLogger().ErrorF("[REGISTER] controller %s in component %s register failed: %s", ctrl.GetName(), component.GetName(), err.Error())
+				return fmt.Errorf("ingress: controller %s in component %s register failed: %w", ctrl.GetName(), component.GetName(), err)
 			}
 		}
 
@@ -132,8 +132,8 @@ func (s *Service) Register() error {
 		if componentDocs != nil {
 			err := docs.Register(s, componentDocs, componentRouter)
 			if err != nil {
-				s.GetLogger().ErrorF("Failed to register docs for component %s: %s", component.GetName(), err.Error())
-				return err
+				s.GetLogger().ErrorF("[REGISTER] failed to register docs for component %s: %s", component.GetName(), err.Error())
+				return fmt.Errorf("ingress: failed to register docs for component %s: %w", component.GetName(), err)
 			}
 			authMap[componentRouter.BasePath()+"/docs/"] = component.GetAccessPolicy()
 			authMap[componentRouter.BasePath()+"/openapi.json"] = component.GetAccessPolicy()
@@ -143,16 +143,16 @@ func (s *Service) Register() error {
 		if componentUI != nil {
 			err := cdn.Register(s, componentRouter)
 			if err != nil {
-				s.GetLogger().ErrorF("Failed to register cdn for app %s: %s", app.GetName(), err.Error())
-				return err
+				s.GetLogger().ErrorF("[REGISTER] failed to register cdn for component %s: %s", component.GetName(), err.Error())
+				return fmt.Errorf("ingress: failed to register cdn for component %s: %w", component.GetName(), err)
 			}
 
 			authMap[componentRouter.BasePath()+"/cdn/"] = component.GetAccessPolicy()
 
 			err = ui.RegisterComponent(component, rootUri, componentRouter.BasePath(), componentRouter)
 			if err != nil {
-				s.GetLogger().ErrorF("Failed to register ui for app %s: %s", app.GetName(), err.Error())
-				return err
+				s.GetLogger().ErrorF("[REGISTER] failed to register ui for component %s: %s", component.GetName(), err.Error())
+				return fmt.Errorf("ingress: failed to register ui for component %s: %w", component.GetName(), err)
 			}
 
 			authMap[componentRouter.BasePath()+"/ui/"] = component.GetAccessPolicy()
@@ -166,8 +166,8 @@ func (s *Service) Register() error {
 		s.GetLogger().DebugF("Found %d ingresses", len(ingressRecords))
 		err = routes.RegisterIngresses(s, router, ingressRecords)
 		if err != nil {
-			s.GetLogger().ErrorF("Failed to register ingresses: %s", err.Error())
-			return err
+			s.GetLogger().ErrorF("[REGISTER] failed to register ingresses: %s", err.Error())
+			return fmt.Errorf("ingress: failed to register ingresses: %w", err)
 		}
 
 	}
@@ -206,14 +206,14 @@ func (s *Service) Listen() error {
 
 		listenSSLPort, err := configService.GetAsInt("host.ingress.tls.port")
 		if err != nil {
-			log.ErrorF("Failed to get listenSSLPort: %s", err.Error())
-			return err
+			log.ErrorF("[LISTEN] failed to get TLS port from config: %s", err.Error())
+			return fmt.Errorf("ingress: failed to get TLS port: %w", err)
 		}
 
 		certFile, err := s.getConfigService().GetAsString("host.ingress.tls.cert")
 		if err != nil {
-			log.ErrorF("Failed to get certFile: %s", err.Error())
-			return err
+			log.ErrorF("[LISTEN] failed to get TLS cert path from config: %s", err.Error())
+			return fmt.Errorf("ingress: failed to get TLS cert path: %w", err)
 		}
 		paths := s.getPathsService()
 		runDir := s.GetKernel().GetRunDirectory()
@@ -223,8 +223,8 @@ func (s *Service) Listen() error {
 
 		keyFile, err := s.getConfigService().GetAsString("host.ingress.tls.key")
 		if err != nil {
-			log.ErrorF("Failed to get keyFile: %s", err.Error())
-			return err
+			log.ErrorF("[LISTEN] failed to get TLS key path from config: %s", err.Error())
+			return fmt.Errorf("ingress: failed to get TLS key path: %w", err)
 		}
 		if !strings.HasPrefix(keyFile, "/") {
 			keyFile = paths.CominePath(runDir, keyFile)
@@ -243,26 +243,26 @@ func (s *Service) Listen() error {
 			log.DebugF("Redirecting HTTP to HTTPS on %s", fmt.Sprintf("%s:%d", hostAddr, hostPort))
 			err := redirectServer.ListenAndServe()
 			if err != nil && err != http.ErrServerClosed {
-				log.PanicF("Failed to start redirect server: %s", err.Error())
+				log.PanicF("failed to start HTTP->HTTPS redirect server on %s:%d: %s", hostAddr, hostPort, err.Error())
 			}
 		}()
 
 		go func() {
-			log.DebugF("Listening on %s", rootUrl)
+			log.InfoF("Listening on %s", rootUrl)
 			err = server.RunTLS(fmt.Sprintf("%s:%d", hostAddr, listenSSLPort), certFile, keyFile)
 			if err != nil && err != http.ErrServerClosed {
-				log.PanicF("Failed to start server: %s", err.Error())
+				log.PanicF("failed to start TLS server on %s:%d: %s", hostAddr, listenSSLPort, err.Error())
 			}
 		}()
 
 	} else {
 		//HTTP Only listen
 		go func() {
-			log.DebugF("Listening on %s", rootUrl)
+			log.InfoF("Listening on %s", rootUrl)
 			err := server.Run(fmt.Sprintf("%s:%d", hostAddr, hostPort))
 
 			if err != nil && err != http.ErrServerClosed {
-				log.PanicF("Failed to start server: %s", err.Error())
+				log.PanicF("failed to start HTTP server on %s:%d: %s", hostAddr, hostPort, err.Error())
 			}
 		}()
 	}
