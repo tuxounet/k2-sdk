@@ -23,4 +23,27 @@
     wait_timeout: 60
 {{ end }}
 
+{{ range $key, $value := .templates }}
+{{- $kind := index $value "kind" -}}
+{{- if or (eq $kind "Deployment") (eq $kind "StatefulSet") (eq $kind "DaemonSet") -}}
+{{- $meta := index $value "metadata" -}}
+{{- $name := index $meta "name" -}}
+- name: "rollout restart {{ $kind }}/{{ $name }} in {{ $namespace }}"
+  kubernetes.core.k8s:
+    kubeconfig: "{{ $kubeconfig }}"
+    namespace: "{{ $namespace }}"
+    api_version: apps/v1
+    kind: "{{ $kind }}"
+    name: "{{ $name }}"
+    state: present
+    merge_type: strategic-merge
+    definition:
+      spec:
+        template:
+          metadata:
+            annotations:
+              kubectl.kubernetes.io/restartedAt: "{{ "{{" }} now(utc=true) {{ "}}" }}"
+{{ end -}}
+{{ end }}
+
 
