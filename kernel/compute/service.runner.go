@@ -131,6 +131,16 @@ func (s *Service) renderPlaybook(verb types.RunnerVerb, tasks string) error {
 
 func (s *Service) execPlaybook(verb types.RunnerVerb) error {
 
+	force := s.GetKernel().IsForceCompute()
+
+	shouldExec, err := s.shouldExecPlaybook(verb, force)
+	if err != nil {
+		return fmt.Errorf("failed to check playbook cache for %s: %s", verb, err.Error())
+	}
+	if !shouldExec {
+		return nil
+	}
+
 	paths := s.getPathsService()
 	playbookPath := paths.CominePath("etc", "compute", fmt.Sprintf("%s.yaml", verb))
 	inventoryPath := paths.CominePath("etc", "compute", "inventory")
@@ -138,9 +148,21 @@ func (s *Service) execPlaybook(verb types.RunnerVerb) error {
 	cmdCall := system.NewCmdCall(s.GetLogger(), "ansible-playbook", "-i", inventoryPath, playbookPath, "--extra-vars", fmt.Sprintf("run_dir=%s", s.GetKernel().GetRunDirectory()))
 	cmdCall.Cwd = &cwd
 
-	_, err := system.OsExecAndTailToLog(cmdCall)
+	_, err = system.OsExecAndTailToLog(cmdCall)
 	if err != nil {
 		return fmt.Errorf("failed to exec %s: %s", verb, err.Error())
+	}
+
+	err = s.markPlaybookExecuted(verb)
+	if err != nil {
+		s.GetLogger().WarnF("failed to update checksum cache for %s: %s", verb, err.Error())
+	}
+
+	if verb == types.RunnerVerbTeardown {
+		err = s.nukeChecksumCache()
+		if err != nil {
+			s.GetLogger().WarnF("failed to delete checksum cache after teardown: %s", err.Error())
+		}
 	}
 
 	return nil

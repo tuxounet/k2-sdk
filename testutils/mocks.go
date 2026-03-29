@@ -69,6 +69,7 @@ func NewMockKernel(name, version string) *MockKernel {
 
 func (m *MockKernel) GetLogger() types.ILogger        { return m.log }
 func (m *MockKernel) IsUnsecure() bool                { return m.unsecure }
+func (m *MockKernel) IsForceCompute() bool            { return false }
 func (m *MockKernel) GetApp() types.IApp              { return m.app }
 func (m *MockKernel) GetRunDirectory() string         { return m.runDir }
 func (m *MockKernel) GetRootContext() context.Context { return m.rootContext }

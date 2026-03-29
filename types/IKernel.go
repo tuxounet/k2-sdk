@@ -7,6 +7,7 @@ import (
 type IKernel interface {
 	ILoggable
 	IsUnsecure() bool
+	IsForceCompute() bool
 	GetApp() IApp
 	GetRunDirectory() string
 	GetRootContext() context.Context

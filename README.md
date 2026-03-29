@@ -32,10 +32,22 @@ Application
 
 ## Entry Points
 
-| Function                 | Mode            | Description                              |
-| ------------------------ | --------------- | ---------------------------------------- |
-| `k.HostApp(app)`         | Secure (TLS)    | Hosts the application with HTTPS support |
-| `k.HostUnsecureApp(app)` | Unsecure (HTTP) | Hosts the application without TLS        |
+| Function                   | Mode            | Description                                  |
+| -------------------------- | --------------- | -------------------------------------------- |
+| `k.HostApp(app)`           | Secure (TLS)    | Hosts the application with HTTPS support     |
+| `k.HostUnsecureApp(app)`   | Unsecure (HTTP) | Hosts the application without TLS            |
+| `k.HostProvisionOnly(app)` | Provision       | Runs only the provision playbook, then exits |
+| `k.HostTeardownOnly(app)`  | Teardown        | Runs stop + teardown playbooks, then exits   |
+
+### CLI Flags
+
+These flags are parsed from `os.Args` by `HostApp` and `HostUnsecureApp`:
+
+| Flag               | Description                                                 |
+| ------------------ | ----------------------------------------------------------- |
+| `--force-compute`  | Bypass the checksum cache, force execution of all playbooks |
+| `--provision-only` | Run only the provision playbook, then exit (no HTTP server) |
+| `--teardown-only`  | Run stop + teardown playbooks, then exit (no HTTP server)   |
 
 ## Boot Sequence
 
@@ -243,6 +255,35 @@ The compute service manages infrastructure through platform providers:
 | `playbooks`  | Ansible playbook execution      |
 
 Enabled via config key `host.compute.enabled`.
+
+### Checksum Cache
+
+To optimize execution times, the compute service caches a SHA-256 checksum per verb (provision, start, stop, teardown). A playbook is **skipped** when:
+
+1. A cached checksum entry exists for this verb
+2. The current checksum matches (no playbook or config changes)
+3. Less than 24 hours since last execution
+
+Cache is stored at `{runDir}/etc/compute/checksums.json`.
+
+Use `--force-compute` to bypass the cache.
+
+### Selective Execution
+
+Run specific lifecycle phases without starting the full application:
+
+```sh
+# Provision only (create infrastructure)
+go run ./main.go --provision-only
+
+# Teardown only (stop + destroy infrastructure)
+go run ./main.go --teardown-only
+
+# Force re-execution of all playbooks
+go run ./main.go --force-compute
+```
+
+Or via Makefile targets: `make provision`, `make teardown`, `make force-run`.
 
 ## Plugins
 

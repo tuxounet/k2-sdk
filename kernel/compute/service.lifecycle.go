@@ -222,3 +222,22 @@ func (s *Service) getRequiredProviders() []types.IBasePlateformProvider {
 	}
 	return requiredProviders
 }
+
+func (s *Service) ExecVerb(verb types.RunnerVerb) error {
+	enabled, err := s.isEnabled()
+	if err != nil {
+		return fmt.Errorf("unable to check compute service enabled status: %s", err.Error())
+	}
+	if !enabled {
+		s.GetLogger().DebugF("compute service is disabled")
+		return nil
+	}
+
+	runners := s.getRunners()
+	if len(runners) == 0 {
+		s.GetLogger().DebugF("no runners found")
+		return nil
+	}
+
+	return s.execPlaybook(verb)
+}

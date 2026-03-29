@@ -25,6 +25,21 @@ run: prepare
 	go run \
 		-ldflags="-X 'app.AppVersion=${VERSION}' -X 'app.AppName=${APP_NAME}'" \
 		./main.go
+
+force-run: prepare
+	go run \
+		-ldflags="-X 'app.AppVersion=${VERSION}' -X 'app.AppName=${APP_NAME}'" \
+		./main.go --force-compute
+
+provision: prepare
+	go run \
+		-ldflags="-X 'app.AppVersion=${VERSION}' -X 'app.AppName=${APP_NAME}'" \
+		./main.go --provision-only
+
+teardown: prepare
+	go run \
+		-ldflags="-X 'app.AppVersion=${VERSION}' -X 'app.AppName=${APP_NAME}'" \
+		./main.go --teardown-only
 		
 ROOT_DIR := $(shell pwd)
 enter: 

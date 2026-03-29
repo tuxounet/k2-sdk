@@ -48,3 +48,11 @@ func (g *KernelRuntime) SetService(service types.IKernelService) {
 func (g *KernelRuntime) IsUnsecure() bool {
 	return g.unsecure
 }
+
+func (g *KernelRuntime) IsForceCompute() bool {
+	return g.forceCompute
+}
+
+func (g *KernelRuntime) SetForceCompute(force bool) {
+	g.forceCompute = force
+}

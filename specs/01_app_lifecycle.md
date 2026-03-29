@@ -6,12 +6,24 @@ The k2-sdk provides a host runtime for Go applications. An application goes thro
 
 ## Entry Points
 
-Two entry points are available in the root package `k`:
+Six entry points are available in the root package `k`:
 
-| Function                    | Mode            | Description                              |
-| --------------------------- | --------------- | ---------------------------------------- |
-| `HostApp(app IApp)`         | Secure (TLS)    | Hosts the application with HTTPS support |
-| `HostUnsecureApp(app IApp)` | Unsecure (HTTP) | Hosts the application without TLS        |
+| Function                      | Mode            | Description                                  |
+| ----------------------------- | --------------- | -------------------------------------------- |
+| `HostApp(app IApp)`           | Secure (TLS)    | Hosts the application with HTTPS support     |
+| `HostUnsecureApp(app IApp)`   | Unsecure (HTTP) | Hosts the application without TLS            |
+| `HostProvisionOnly(app IApp)` | Provision       | Runs only the provision playbook, then exits |
+| `HostTeardownOnly(app IApp)`  | Teardown        | Runs stop + teardown playbooks, then exits   |
+
+### CLI Flags
+
+| Flag               | Description                                                 |
+| ------------------ | ----------------------------------------------------------- |
+| `--force-compute`  | Bypass the checksum cache, force execution of all playbooks |
+| `--provision-only` | Run only the provision playbook, then exit (no HTTP server) |
+| `--teardown-only`  | Run stop + teardown playbooks, then exit (no HTTP server)   |
+
+These flags are parsed from `os.Args` by `HostApp` and `HostUnsecureApp`.
 
 ## Boot Sequence
 

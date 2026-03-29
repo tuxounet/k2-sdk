@@ -22,14 +22,15 @@ import (
 )
 
 type KernelRuntime struct {
-	hostName    string
-	hostVersion string
-	rootContext context.Context
-	app         types.IApp
-	runDir      string
-	log         types.ILogger
-	services    []types.KernelServiceContextKey
-	unsecure    bool
+	hostName     string
+	hostVersion  string
+	rootContext  context.Context
+	app          types.IApp
+	runDir       string
+	log          types.ILogger
+	services     []types.KernelServiceContextKey
+	unsecure     bool
+	forceCompute bool
 }
 
 func NewKernelRuntime(hostedApp types.IApp, hostVersion string, unsecure bool) *KernelRuntime {
