@@ -28,10 +28,12 @@
 {{- if or (eq $kind "Deployment") (eq $kind "StatefulSet") (eq $kind "DaemonSet") -}}
 {{- $meta := index $value "metadata" -}}
 {{- $name := index $meta "name" -}}
-- name: "rollout restart {{ $kind }}/{{ $name }} in {{ $namespace }}"
+{{- $metaNs := index $meta "namespace" -}}
+{{- $restartNs := default $namespace $metaNs -}}
+- name: "rollout restart {{ $kind }}/{{ $name }} in {{ $restartNs }}"
   kubernetes.core.k8s:
     kubeconfig: "{{ $kubeconfig }}"
-    namespace: "{{ $namespace }}"
+    namespace: "{{ $restartNs }}"
     api_version: apps/v1
     kind: "{{ $kind }}"
     name: "{{ $name }}"
