@@ -1,5 +1,6 @@
 {{ $kubeconfig := .kubeconfig }}
 {{ $namespace := .namespace }}
+{{ $wait_timeout := .wait_timeout }}
 
 
 - name: "Create a k8s namespace {{ $namespace }}"
@@ -10,7 +11,7 @@
     api_version: v1
     kind: Namespace
     wait: true
-    wait_timeout: 60
+    wait_timeout: {{ $wait_timeout }}
     
 {{ range $key, $value := .templates }}
 - name: "apply kube manifest {{ $key }}"
@@ -20,7 +21,7 @@
     namespace: "{{ $namespace }}"
     definition: {{ toRawJson  $value }}
     wait: true
-    wait_timeout: 60
+    wait_timeout: {{ $wait_timeout }}
 {{ end }}
 
 {{ range $key, $value := .templates }}

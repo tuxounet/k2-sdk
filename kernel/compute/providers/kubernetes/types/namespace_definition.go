@@ -7,11 +7,12 @@ import (
 )
 
 type NamespaceDefinition struct {
-	Name      string                  `json:"name"`
-	Order     int                     `json:"order"`
-	Templates *embed.FS               `json:"templates"`
-	Ingresses []NamespaceIngress      `json:"ingresses"`
-	Ports     []NamespacePortForwards `json:"ports"`
+	Name        string                  `json:"name"`
+	Order       int                     `json:"order"`
+	Templates   *embed.FS               `json:"templates"`
+	Ingresses   []NamespaceIngress      `json:"ingresses"`
+	Ports       []NamespacePortForwards `json:"ports"`
+	WaitTimeout int                     `json:"waitTimeout"`
 }
 
 type NamespaceIngress struct {

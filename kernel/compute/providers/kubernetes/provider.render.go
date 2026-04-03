@@ -188,6 +188,11 @@ func (p *Provider) renderPlaybookTasks(definition *types.NamespaceDefinition, sc
 
 	values := p.getTemplateValues()
 	values["namespace"] = definition.Name
+	waitTimeout := definition.WaitTimeout
+	if waitTimeout <= 0 {
+		waitTimeout = 60
+	}
+	values["wait_timeout"] = waitTimeout
 
 	entries, err := walkTemplates(definition.Templates)
 	if err != nil {
