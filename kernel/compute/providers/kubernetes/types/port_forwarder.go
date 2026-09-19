@@ -3,11 +3,11 @@ package types
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -22,6 +22,7 @@ import (
 )
 
 type PortForwarder struct {
+	mu          sync.Mutex
 	Record      PortsForwardRecord
 	mounting    bool
 	mounted     bool
@@ -73,7 +74,9 @@ func (p *PortForwarder) ForwardRequest(c *gin.Context) error {
 	// Create a reverse proxy targeting the locally forwarded port
 	targetURL, err := url.Parse(fmt.Sprintf("http://%s:%d", p.hostAddress, p.Record.LocalPort))
 	if err != nil {
-		log.Fatalf("Failed to parse target URL: %v", err)
+		p.log.ErrorF("Failed to parse target URL: %v", err)
+		c.Status(http.StatusInternalServerError)
+		return fmt.Errorf("invalid proxy target: %w", err)
 	}
 	proxy := httputil.NewSingleHostReverseProxy(targetURL)
 
@@ -95,6 +98,10 @@ func (p *PortForwarder) Mount() error {
 	if p.mounting {
 		return fmt.Errorf("port forwarder is already mounting")
 	}
+
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
 	p.mounting = true
 	p.log.DebugF("Mounting port forwarder for %s:%d", p.Record.ServiceName, p.Record.ServicePort)
 
@@ -167,7 +174,7 @@ func (p *PortForwarder) Mount() error {
 		return fmt.Errorf("failed to create round tripper: %v", err)
 	}
 
-	dialer := spdy.NewDialer(upgrader, &http.Client{Transport: transport}, "POST", req.URL())
+	dialer := spdy.NewDialer(upgrader, &http.Client{Transport: transport, Timeout: 30 * time.Second}, "POST", req.URL())
 
 	// Format: localPort:remotePort (e.g., "8080:80")
 	ports := []string{fmt.Sprintf("%d:%d", p.Record.LocalPort, p.Record.ServicePort)}
@@ -199,7 +206,10 @@ func (p *PortForwarder) Mount() error {
 		p.mounted = true
 		p.mounting = false
 	case <-time.After(10 * time.Second):
-		close(stopChan)
+		select {
+		case p.stopchan <- struct{}{}:
+		default:
+		}
 		p.mounted = false
 		p.mounting = false
 		return fmt.Errorf("timeout waiting for port-forward to be ready")
@@ -209,6 +219,8 @@ func (p *PortForwarder) Mount() error {
 }
 
 func (p *PortForwarder) Stop() error {
+	p.mu.Lock()
+	defer p.mu.Unlock()
 
 	if p.stopchan != nil {
 		close(p.stopchan)

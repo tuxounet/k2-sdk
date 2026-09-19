@@ -1,12 +1,13 @@
 package ingress
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
-
 	"strings"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -202,7 +203,7 @@ func (s *Service) Listen() error {
 
 	enableTls := configService.Has("host.ingress.tls.port")
 	if enableTls {
-		//SSL Mode
+		// SSL Mode
 
 		listenSSLPort, err := configService.GetAsInt("host.ingress.tls.port")
 		if err != nil {
@@ -230,16 +231,21 @@ func (s *Service) Listen() error {
 			keyFile = paths.CominePath(runDir, keyFile)
 		}
 
-		go func() {
-			// Create a new HTTP server that redirects to HTTPS
-			redirectServer := &http.Server{
-				Addr: fmt.Sprintf("%s:%d", hostAddr, hostPort),
-				Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					target := fmt.Sprintf("%s%s", rootUrl, r.URL.RequestURI())
-					http.Redirect(w, r, target, http.StatusMovedPermanently)
-				}),
-			}
+		// HTTP→HTTPS redirect server with timeouts
+		redirectServer := &http.Server{
+			Addr: fmt.Sprintf("%s:%d", hostAddr, hostPort),
+			Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				target := fmt.Sprintf("%s%s", rootUrl, r.URL.RequestURI())
+				http.Redirect(w, r, target, http.StatusMovedPermanently)
+			}),
+			ReadTimeout:       30 * time.Second,
+			ReadHeaderTimeout: 10 * time.Second,
+			WriteTimeout:      60 * time.Second,
+			IdleTimeout:       120 * time.Second,
+		}
+		s.setRedirectServer(redirectServer)
 
+		go func() {
 			log.DebugF("Redirecting HTTP to HTTPS on %s", fmt.Sprintf("%s:%d", hostAddr, hostPort))
 			err := redirectServer.ListenAndServe()
 			if err != nil && err != http.ErrServerClosed {
@@ -247,19 +253,40 @@ func (s *Service) Listen() error {
 			}
 		}()
 
+		// Main TLS server with explicit http.Server and timeouts
+		httpServer := &http.Server{
+			Addr:              fmt.Sprintf("%s:%d", hostAddr, listenSSLPort),
+			Handler:           server,
+			ReadTimeout:       30 * time.Second,
+			ReadHeaderTimeout: 10 * time.Second,
+			WriteTimeout:      60 * time.Second,
+			IdleTimeout:       120 * time.Second,
+		}
+		s.setHTTPServer(httpServer)
+
 		go func() {
 			log.InfoF("Listening on %s", rootUrl)
-			err = server.RunTLS(fmt.Sprintf("%s:%d", hostAddr, listenSSLPort), certFile, keyFile)
+			err = httpServer.ListenAndServeTLS(certFile, keyFile)
 			if err != nil && err != http.ErrServerClosed {
 				log.PanicF("failed to start TLS server on %s:%d: %s", hostAddr, listenSSLPort, err.Error())
 			}
 		}()
 
 	} else {
-		//HTTP Only listen
+		// HTTP Only listen with explicit http.Server and timeouts
+		httpServer := &http.Server{
+			Addr:              fmt.Sprintf("%s:%d", hostAddr, hostPort),
+			Handler:           server,
+			ReadTimeout:       30 * time.Second,
+			ReadHeaderTimeout: 10 * time.Second,
+			WriteTimeout:      60 * time.Second,
+			IdleTimeout:       120 * time.Second,
+		}
+		s.setHTTPServer(httpServer)
+
 		go func() {
 			log.InfoF("Listening on %s", rootUrl)
-			err := server.Run(fmt.Sprintf("%s:%d", hostAddr, hostPort))
+			err := httpServer.ListenAndServe()
 
 			if err != nil && err != http.ErrServerClosed {
 				log.PanicF("failed to start HTTP server on %s:%d: %s", hostAddr, hostPort, err.Error())
@@ -274,9 +301,45 @@ func (s *Service) Listen() error {
 func (s *Service) Stop() error {
 
 	log := s.GetLogger()
-	server := s.GetServer()
-	if server == nil {
-		log.Panic("No server found")
+
+	httpServer := s.getHTTPServer()
+	redirectServer := s.getRedirectServer()
+
+	if httpServer == nil && redirectServer == nil {
+		// No servers were started (e.g. tests that call Register() but not Listen())
+		log.Info("No HTTP servers to stop")
+		return nil
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	if httpServer != nil {
+		log.Info("Shutting down HTTP server...")
+		if err := httpServer.Shutdown(ctx); err != nil {
+			if errors.Is(err, context.DeadlineExceeded) {
+				log.Warn("HTTP server shutdown timed out, forcing close")
+				httpServer.Close()
+			} else if !errors.Is(err, http.ErrServerClosed) {
+				log.ErrorF("Error shutting down HTTP server: %s", err.Error())
+			}
+		} else {
+			log.Info("HTTP server stopped")
+		}
+	}
+
+	if redirectServer != nil {
+		log.Info("Shutting down redirect server...")
+		if err := redirectServer.Shutdown(ctx); err != nil {
+			if errors.Is(err, context.DeadlineExceeded) {
+				log.Warn("Redirect server shutdown timed out, forcing close")
+				redirectServer.Close()
+			} else if !errors.Is(err, http.ErrServerClosed) {
+				log.ErrorF("Error shutting down redirect server: %s", err.Error())
+			}
+		} else {
+			log.Info("Redirect server stopped")
+		}
 	}
 
 	log.Info("Server stopped")
