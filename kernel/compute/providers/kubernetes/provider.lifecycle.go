@@ -20,6 +20,12 @@ func (p *Provider) Init() error {
 func (p *Provider) Start() error {
 	p.GetLogger().TraceF("[START] Starting %s provider", ProviderKey)
 
+	// Verify kubectl is available before attempting any port-forward
+	if err := p.checkKubectl(); err != nil {
+		p.GetLogger().ErrorF("kubectl not available: %v", err)
+		return err
+	}
+
 	forwards, err := p.getPortsForwardsStore().GetValue()
 	if err != nil {
 		p.GetLogger().ErrorF("Failed to get ports forwards store: %s", err)

@@ -1,24 +1,19 @@
 package types
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"os"
+	"os/exec"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	runtimeTypes "github.com/tuxounet/k2-sdk/types"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/tools/portforward"
-	"k8s.io/client-go/transport/spdy"
 )
 
 type PortForwarder struct {
@@ -27,10 +22,10 @@ type PortForwarder struct {
 	mounting    bool
 	mounted     bool
 	kubeConfig  string
-	portForward *portforward.PortForwarder
-	stopchan    chan struct{}
 	hostAddress string
 	log         runtimeTypes.ILogger
+	cmd         *exec.Cmd
+	cancel      context.CancelFunc
 }
 
 func NewPortForwarder(record PortsForwardRecord, kubeConfig string, parentLog runtimeTypes.ILogger, hostAddress string) *PortForwarder {
@@ -80,11 +75,27 @@ func (p *PortForwarder) ForwardRequest(c *gin.Context) error {
 	}
 	proxy := httputil.NewSingleHostReverseProxy(targetURL)
 
+	proxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, err error) {
+		if err != http.ErrAbortHandler {
+			p.log.ErrorF("proxy error: %v", err)
+		}
+	}
+
 	proxy.Director = func(r *http.Request) {
 		r.URL.Scheme = targetURL.Scheme
 		r.URL.Host = targetURL.Host
 		r.Host = "kube.k2"
 	}
+
+	// Recover from http.ErrAbortHandler panics during SSE/long-polling
+	defer func() {
+		if err := recover(); err != nil {
+			if err != http.ErrAbortHandler {
+				panic(err)
+			}
+		}
+	}()
+
 	proxy.ServeHTTP(c.Writer, c.Request)
 
 	return nil
@@ -103,116 +114,88 @@ func (p *PortForwarder) Mount() error {
 	defer p.mu.Unlock()
 
 	p.mounting = true
-	p.log.DebugF("Mounting port forwarder for %s:%d", p.Record.ServiceName, p.Record.ServicePort)
+	p.log.DebugF("Mounting port forwarder for %s/%s:%d -> localhost:%d",
+		p.Record.ServiceNamespace, p.Record.ServiceName,
+		p.Record.ServicePort, p.Record.LocalPort)
 
-	// Build the configuration from kubeconfig
-	config, err := clientcmd.BuildConfigFromFlags("", p.kubeConfig)
+	ctx, cancel := context.WithCancel(context.Background())
+
+	args := []string{
+		"port-forward",
+		fmt.Sprintf("service/%s", p.Record.ServiceName),
+		fmt.Sprintf("%d:%d", p.Record.LocalPort, p.Record.ServicePort),
+		"-n", p.Record.ServiceNamespace,
+	}
+	if p.kubeConfig != "" {
+		args = append(args, "--kubeconfig", p.kubeConfig)
+	}
+
+	cmd := exec.CommandContext(ctx, "kubectl", args...)
+
+	stdout, err := cmd.StdoutPipe()
 	if err != nil {
+		cancel()
 		p.mounting = false
-		return fmt.Errorf("failed to build kubeconfig: %v", err)
+		return fmt.Errorf("failed to get stdout pipe: %w", err)
 	}
-
-	// Create a Kubernetes clientset
-	clientset, err := kubernetes.NewForConfig(config)
+	stderr, err := cmd.StderrPipe()
 	if err != nil {
+		cancel()
 		p.mounting = false
-		return fmt.Errorf("failed to create clientset: %v", err)
-
+		return fmt.Errorf("failed to get stderr pipe: %w", err)
 	}
 
-	// Retrieve the service to obtain its label selector
-	svc, err := clientset.CoreV1().Services(p.Record.ServiceNamespace).Get(context.TODO(), p.Record.ServiceName, metav1.GetOptions{})
-	if err != nil {
+	if err := cmd.Start(); err != nil {
+		cancel()
 		p.mounting = false
-		return fmt.Errorf("failed to get service: %v", err)
-	}
-	// List pods matching the service's selector
-	selector := labels.Set(svc.Spec.Selector)
-	listOpts := metav1.ListOptions{
-		LabelSelector: selector.AsSelector().String(),
-	}
-	podList, err := clientset.CoreV1().Pods(p.Record.ServiceNamespace).List(context.TODO(), listOpts)
-	if err != nil {
-		p.mounting = false
-		return fmt.Errorf("failed to list pods: %v", err)
-	}
-	if len(podList.Items) == 0 {
-		p.mounting = false
-		return fmt.Errorf("no pods found for service: %q", p.Record.ServiceName)
+		return fmt.Errorf("failed to start kubectl port-forward: %w", err)
 	}
 
-	// Choose the first running pod
-	var podName string
-	for _, pod := range podList.Items {
-		if pod.Status.Phase == corev1.PodRunning {
-			podName = pod.Name
-			break
-		}
-	}
-	if podName == "" {
-
-		p.mounting = false
-		return fmt.Errorf("no running pod found for service: %q", p.Record.ServiceName)
-	}
-	p.log.DebugF("Selected pod %q for port-forwarding", podName)
-
-	// Setup port-forwarding using client-go's tools
-	stopChan := make(chan struct{}, 1)
-	readyChan := make(chan struct{})
-
-	// Build the request URL for port-forwarding to the pod
-	req := clientset.CoreV1().RESTClient().Post().
-		Resource("pods").
-		Namespace(p.Record.ServiceNamespace).
-		Name(podName).
-		SubResource("portforward")
-
-	transport, upgrader, err := spdy.RoundTripperFor(config)
-	if err != nil {
-
-		p.mounting = false
-		return fmt.Errorf("failed to create round tripper: %v", err)
-	}
-
-	dialer := spdy.NewDialer(upgrader, &http.Client{Transport: transport, Timeout: 30 * time.Second}, "POST", req.URL())
-
-	// Format: localPort:remotePort (e.g., "8080:80")
-	ports := []string{fmt.Sprintf("%d:%d", p.Record.LocalPort, p.Record.ServicePort)}
-
-	pf, err := portforward.New(dialer, ports, stopChan, readyChan, os.Stdout, os.Stderr)
-	if err != nil {
-
-		p.mounting = false
-		return fmt.Errorf("failed to create port forwarder: %v", err)
-	}
-
-	p.portForward = pf
-	p.stopchan = stopChan
-
-	// Start the port-forwarding in a goroutine
+	// Detect errors from stderr
+	errCh := make(chan error, 1)
 	go func() {
-
-		if err := pf.ForwardPorts(); err != nil {
-			p.log.ErrorF("port forwarding failed: %v", err)
-			p.mounting = false
-			return
+		scanner := bufio.NewScanner(stderr)
+		for scanner.Scan() {
+			line := scanner.Text()
+			p.log.DebugF("kubectl stderr: %s", line)
+			if strings.Contains(strings.ToLower(line), "error") {
+				errCh <- fmt.Errorf("kubectl: %s", line)
+				return
+			}
 		}
 	}()
 
-	// Wait until port-forwarding is ready (or timeout after 10 seconds)
+	// Wait for "Forwarding from" on stdout to know port-forward is ready
+	readyCh := make(chan struct{})
+	go func() {
+		scanner := bufio.NewScanner(stdout)
+		for scanner.Scan() {
+			line := scanner.Text()
+			p.log.DebugF("kubectl: %s", line)
+			if strings.Contains(line, "Forwarding from") {
+				close(readyCh)
+			}
+		}
+	}()
+
+	// Wait for ready signal, error, or timeout
 	select {
-	case <-readyChan:
-		p.log.InfoF("port forwarding established: %s:%d -> pod:%d\n", p.hostAddress, p.Record.LocalPort, p.Record.ServicePort)
+	case <-readyCh:
+		p.log.InfoF("port forwarding established: %s:%d -> %s/%s:%d",
+			p.hostAddress, p.Record.LocalPort,
+			p.Record.ServiceNamespace, p.Record.ServiceName, p.Record.ServicePort)
 		p.mounted = true
 		p.mounting = false
-	case <-time.After(10 * time.Second):
-		select {
-		case p.stopchan <- struct{}{}:
-		default:
-		}
-		p.mounted = false
+		p.cmd = cmd
+		p.cancel = cancel
+	case err := <-errCh:
+		cancel()
 		p.mounting = false
-		return fmt.Errorf("timeout waiting for port-forward to be ready")
+		return fmt.Errorf("kubectl port-forward failed: %w", err)
+	case <-time.After(30 * time.Second):
+		cancel()
+		p.mounting = false
+		return fmt.Errorf("timeout waiting for kubectl port-forward to be ready")
 	}
 
 	return nil
@@ -222,16 +205,27 @@ func (p *PortForwarder) Stop() error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	if p.stopchan != nil {
-		close(p.stopchan)
-		p.stopchan = nil
+	if p.cancel != nil {
+		p.cancel()
+		p.cancel = nil
 	}
-	if p.portForward != nil {
-		p.portForward.Close()
-		p.portForward = nil
+	if p.cmd != nil && p.cmd.Process != nil {
+		// Give kubectl a chance to exit cleanly, then force kill
+		done := make(chan error, 1)
+		go func() {
+			done <- p.cmd.Wait()
+		}()
+		select {
+		case <-done:
+		case <-time.After(5 * time.Second):
+			p.cmd.Process.Kill()
+		}
+		p.cmd = nil
 	}
 	p.mounted = false
 	p.mounting = false
-	p.log.DebugF("port forwarding stopped: %s:%d -> pod:%d\n", p.hostAddress, p.Record.LocalPort, p.Record.ServicePort)
+	p.log.DebugF("port forwarding stopped: %s:%d -> %s/%s:%d",
+		p.hostAddress, p.Record.LocalPort,
+		p.Record.ServiceNamespace, p.Record.ServiceName, p.Record.ServicePort)
 	return nil
 }

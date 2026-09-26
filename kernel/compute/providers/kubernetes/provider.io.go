@@ -1,7 +1,9 @@
 package kubernetes
 
 import (
+	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/tuxounet/k2-sdk/kernel/compute/providers/kubernetes/types"
 	"github.com/tuxounet/k2-sdk/kernel/config"
@@ -104,4 +106,30 @@ func (s *Provider) getForwarders() []*types.PortForwarder {
 
 func (s *Provider) setForwarders(forwarders []*types.PortForwarder) {
 	s.SetData("forwarders", forwarders)
+}
+
+func (p *Provider) checkKubectl() error {
+	kubectlPath, err := exec.LookPath("kubectl")
+	if err != nil {
+		return err
+	}
+	p.GetLogger().InfoF("kubectl found at %s", kubectlPath)
+
+	// Check that we can at least parse version output
+	cmd := exec.Command("kubectl", "version", "--client", "--output", "yaml")
+	output, err := cmd.Output()
+	if err != nil {
+		p.GetLogger().WarnF("unable to get kubectl version: %v", err)
+	} else {
+		// Extract client version line for logging
+		for _, line := range strings.Split(string(output), "\n") {
+			trimmed := strings.TrimSpace(line)
+			if strings.HasPrefix(trimmed, "gitVersion:") {
+				p.GetLogger().InfoF("kubectl version: %s", strings.TrimPrefix(trimmed, "gitVersion: "))
+				break
+			}
+		}
+	}
+
+	return nil
 }
