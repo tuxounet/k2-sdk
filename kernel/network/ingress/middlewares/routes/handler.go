@@ -3,6 +3,7 @@ package routes
 import (
 	_ "embed"
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -144,6 +145,14 @@ func performProxyRequest(ingress types.IngressDefinition) gin.HandlerFunc {
 
 		proxy := httputil.NewSingleHostReverseProxy(remote)
 
+		proxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, err error) {
+			// ErrAbortHandler is normal for SSE/long-polling disconnections — log nothing
+			// For other errors, log them
+			if err != http.ErrAbortHandler {
+				log.Printf("proxy error: %v", err)
+			}
+		}
+
 		queryPath := ctx.Request.URL.Path
 		if ingress.RewritePath != nil {
 			queryPath = *ingress.RewritePath + ctx.Param("proxyPath")
@@ -165,6 +174,18 @@ func performProxyRequest(ingress types.IngressDefinition) gin.HandlerFunc {
 			req.Header.Set("X-Forwarded-For", ctx.Request.RemoteAddr)
 
 		}
+
+		// Recover from http.ErrAbortHandler panics caused by client disconnections
+		// during SSE/long-polling. Let other panics propagate to gin's recovery.
+		defer func() {
+			if err := recover(); err != nil {
+				if err == http.ErrAbortHandler {
+					// client disconnected — this is normal, suppress silently
+					return
+				}
+				panic(err)
+			}
+		}()
 
 		proxy.ServeHTTP(ctx.Writer, ctx.Request)
 
