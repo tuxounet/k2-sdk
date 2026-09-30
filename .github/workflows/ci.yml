@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - '0.**'
+  pull_request:
+    branches:
+      - main
+      - '0.**'
+
+jobs:
+  test:
+    name: Go ${{ matrix.go-version }} — Test & Build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        go-version:
+          - '1.24'
+          - 'stable'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Go ${{ matrix.go-version }}
+        uses: actions/setup-go@v6
+        with:
+          go-version: ${{ matrix.go-version }}
+          cache: true
+
+      - name: Vet
+        run: go vet $(go list ./... | grep -v /samples/)
+
+      - name: Test with coverage
+        run: go test -cover -race -count=1 $(go list ./... | grep -v /samples/)
+
+      - name: Build
+        run: go build -o /dev/null ./entrypoint.go
+
+  summary:
+    name: ✅ CI Summary
+    needs: test
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: All checks passed
+        if: needs.test.result == 'success'
+        run: echo "✅ All tests and build passed"
+
+      - name: Some checks failed
+        if: needs.test.result != 'success'
+        run: |
+          echo "❌ Some checks failed"
+          exit 1
