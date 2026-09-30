@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/tuxounet/k2-sdk/kernel/config"
@@ -54,11 +55,7 @@ func EnsureAuthLevelMiddleware(service runtimeTypes.IKernelService, parentLog ru
 		log.TraceF("check %s", requestPath)
 
 		var matchedPolicy runtimeTypes.IAccessPolicy = ""
-		for pathPrefix, accessPolicy := range authMap {
-			if len(requestPath) >= len(pathPrefix) && requestPath[0:len(pathPrefix)] == pathPrefix {
-				matchedPolicy = accessPolicy
-			}
-		}
+		matchedPolicy = matchLongestPrefix(requestPath, authMap)
 		if matchedPolicy == "" {
 			matchedPolicy = defaultAccess
 		}
@@ -129,6 +126,32 @@ func ensureAuthLevel(service runtimeTypes.IKernelService, ingress types.IngressD
 
 	}
 
+}
+
+// matchLongestPrefix finds the most specific (longest) matching path prefix
+// in the authMap and returns its access policy. If no prefix matches, returns
+// an empty string. This guarantees deterministic behavior regardless of the
+// authMap iteration order (which is randomized in Go).
+func matchLongestPrefix(requestPath string, authMap map[string]runtimeTypes.IAccessPolicy) runtimeTypes.IAccessPolicy {
+	var matchedPolicy runtimeTypes.IAccessPolicy = ""
+	longestMatch := 0
+	requestLen := len(requestPath)
+	for pathPrefix, accessPolicy := range authMap {
+		prefixLen := len(pathPrefix)
+		// Standard prefix match: request starts with the prefix
+		standardMatch := requestLen >= prefixLen && requestPath[:prefixLen] == pathPrefix
+		// Suffix match: request + "/" equals a trailing-slash prefix (e.g. request "/api/hello"
+		// matches the prefix "/api/hello/" which was registered by a controller)
+		suffixMatch := requestLen+1 == prefixLen && strings.HasSuffix(pathPrefix, "/") &&
+			requestPath+"/" == pathPrefix
+		if standardMatch || suffixMatch {
+			if prefixLen > longestMatch {
+				matchedPolicy = accessPolicy
+				longestMatch = prefixLen
+			}
+		}
+	}
+	return matchedPolicy
 }
 
 func performProxyRequest(ingress types.IngressDefinition) gin.HandlerFunc {
